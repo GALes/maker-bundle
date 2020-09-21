@@ -1,0 +1,5 @@
+El comando <info>%command.name%</info> genera el CRUD Controller con los templates para la entidad seleccionada.
+
+<info>php %command.full_name% BlogPost</info>
+
+Si falta el argumento, el comando pedirá el nombre de la Entidad interactivamente.

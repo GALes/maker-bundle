@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services
+        http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+<!--        <service id="GALes\MakerBundle\GALesMaker"/>-->
+        <service id="maker.file_manager" class="Symfony\Bundle\MakerBundle\FileManager">
+            <argument type="service" id="filesystem" />
+            <argument type="service" id="maker.autoloader_util" />
+            <argument type="service" id="maker.file_link_formatter" />
+            <argument>%kernel.project_dir%</argument>
+            <argument>%twig.default_path%</argument>
+        </service>
+
+        <service id="gales.maker.gales_maker" class="GALes\MakerBundle\GALesMaker" public="true"/>
+        <service id="GALes\MakerBundle\GALesMaker" alias="gales.maker.gales_maker" public="false"/>
+
+
+
+        <service id="gales.maker.command.make_crud_command" class="GALes\MakerBundle\Command\MakeCrudCommand">
+            <argument type="service" id="gesof_maker.crud_helper" />
+            <argument type="collection"  key="$roleHierarchy">%security.role_hierarchy.roles%</argument>
+            <tag name="console.command" />
+        </service>
+
+        <service id="maker.generator" class="GALes\MakerBundle\Service\Generator">
+            <argument type="service" id="maker.file_manager" />
+            <argument /> <!-- root namespace -->
+        </service>
+
+    </services>
+</container>
