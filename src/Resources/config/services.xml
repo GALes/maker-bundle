@@ -5,7 +5,6 @@
         http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
-<!--        <service id="GALes\MakerBundle\GALesMaker"/>-->
         <service id="maker.file_manager" class="Symfony\Bundle\MakerBundle\FileManager">
             <argument type="service" id="filesystem" />
             <argument type="service" id="maker.autoloader_util" />
@@ -17,17 +16,20 @@
         <service id="gales.maker.gales_maker" class="GALes\MakerBundle\GALesMaker" public="true"/>
         <service id="GALes\MakerBundle\GALesMaker" alias="gales.maker.gales_maker" public="false"/>
 
-
-
-        <service id="gales.maker.command.make_crud_command" class="GALes\MakerBundle\Command\MakeCrudCommand">
-            <argument type="service" id="gesof_maker.crud_helper" />
-            <argument type="collection"  key="$roleHierarchy">%security.role_hierarchy.roles%</argument>
-            <tag name="console.command" />
+        <service id="gales.maker.make_crud" class="GALes\MakerBundle\Maker\MakeCrud">
+            <argument type="service" id="maker.doctrine_helper" />
+            <argument type="service" id="maker.renderer.form_type_renderer" />
+            <argument type="service" id="kernel" />
+            <tag name="maker.command" />
         </service>
 
-        <service id="maker.generator" class="GALes\MakerBundle\Service\Generator">
+        <service id="gales.maker.make_entity" class="GALes\MakerBundle\Maker\MakeEntity">
             <argument type="service" id="maker.file_manager" />
-            <argument /> <!-- root namespace -->
+            <argument type="service" id="maker.doctrine_helper" />
+            <argument>%kernel.project_dir%</argument>
+            <argument type="service" id="maker.generator" />
+            <argument type="service" id="maker.entity_class_generator" />
+            <tag name="maker.command" />
         </service>
 
     </services>
