@@ -1,11 +1,27 @@
-<?= $helper->getHeadPrintCode('Edit '.$entity_class_name) ?>
+<?= $helper->getHeadPrintCode('Edición de ' . $entity_class_name) ?>
 
 {% block body %}
-    <h1>Edit <?= $entity_class_name ?></h1>
+<div class="row mt-5">
+<?php include 'others/flash_messages.tpl.php' ?>
+    <div class="col-lg-12">
+        <h4>Edici&oacute;n de <?= $entity_twig_var_singular ?> <span class="fa fa-pencil" aria-hidden="true"></span> </h4>
+    </div>
+</div>
 
-    {{ include('<?= $route_name ?>/_form.html.twig', {'button_label': 'Update'}) }}
+<div class="">
+    {{ form_start(form) }}
 
-    <a href="{{ path('<?= $route_name ?>_index') }}">back to list</a>
+    {{ form_widget(form) }}
+    <p>
+        <button type="submit" class="btn btn-primary">
+            <span class="fa fa-check" aria-hidden="true"></span> Guardar
+        </button>
+    </p>
+    {{ form_end(form) }}
 
-    {{ include('<?= $route_name ?>/_delete_form.html.twig') }}
+    <hr/>
+
+    {% set hide_edit, hide_delete, hide_new = true, false, false %}
+<?php include 'others/record_actions.tpl.php' ?>
+</div>
 {% endblock %}

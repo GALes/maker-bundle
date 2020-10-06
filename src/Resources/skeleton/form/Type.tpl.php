@@ -21,11 +21,11 @@ class <?= $class_name ?> extends AbstractType
     {
         $builder
 <?php foreach ($form_fields as $form_field => $typeOptions): ?>
-<?php if (null === $typeOptions['type'] && !$typeOptions['options_code']): ?>
+<?php if ( !( isset($typeOptions['metadata']['id']) && $typeOptions['metadata']['id'] ) && null === $typeOptions['type'] && !$typeOptions['options_code'] ): ?>
             ->add('<?= $form_field ?>')
 <?php elseif (null !== $typeOptions['type'] && !$typeOptions['options_code']): ?>
             ->add('<?= $form_field ?>', <?= $typeOptions['type'] ?>::class)
-<?php else: ?>
+<?php elseif ( !( isset($typeOptions['metadata']['id']) && $typeOptions['metadata']['id'] ) ): ?>
             ->add('<?= $form_field ?>', <?= $typeOptions['type'] ? ($typeOptions['type'].'::class') : 'null' ?>, [
 <?= $typeOptions['options_code']."\n" ?>
             ])

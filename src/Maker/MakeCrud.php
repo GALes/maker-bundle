@@ -14,6 +14,9 @@ namespace GALes\MakerBundle\Maker;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\Common\Inflector\Inflector as LegacyInflector;
 use Doctrine\Inflector\InflectorFactory;
+use GALes\MakerBundle\Doctrine\EntityDetails;
+use GALes\MakerBundle\Helper\GeneratorTwigHelper;
+use GALes\MakerBundle\Renderer\FormFilterTypeRenderer;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
@@ -21,7 +24,7 @@ use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Maker\AbstractMaker;
-use Symfony\Bundle\MakerBundle\Renderer\FormTypeRenderer;
+use GALes\MakerBundle\Renderer\FormTypeRenderer;
 use Symfony\Bundle\MakerBundle\Str;
 use Symfony\Bundle\MakerBundle\Validator;
 use Symfony\Bundle\TwigBundle\TwigBundle;
@@ -48,11 +51,15 @@ final class MakeCrud extends AbstractMaker
 
     private $appKernel;
 
-    public function __construct(DoctrineHelper $doctrineHelper, FormTypeRenderer $formTypeRenderer, Kernel $appKernel)
+    private $generatorTwigHelper;
+
+    public function __construct(DoctrineHelper $doctrineHelper, FormTypeRenderer $formTypeRenderer, Kernel $appKernel, GeneratorTwigHelper $generatorTwigHelper)
     {
         $this->doctrineHelper = $doctrineHelper;
         $this->formTypeRenderer = $formTypeRenderer;
+//        $this->formFilterTypeRenderer = $formFilterTypeRenderer;
         $this->appKernel = $appKernel;
+        $this->generatorTwigHelper = $generatorTwigHelper;
 
         if (class_exists(InflectorFactory::class)) {
             $this->inflector = InflectorFactory::create()->build();
@@ -102,7 +109,9 @@ final class MakeCrud extends AbstractMaker
             'Entity\\'
         );
 
-        $entityDoctrineDetails = $this->doctrineHelper->createDoctrineDetails($entityClassDetails->getFullName());
+        $entityDoctrineDetails = new EntityDetails($this->doctrineHelper->getMetadata($entityClassDetails->getFullName()));
+//        $entityDoctrineDetails = $this->doctrineHelper->createDoctrineDetails($entityClassDetails->getFullName());
+//        dump($entityDoctrineDetails);
 
         $repositoryVars = [];
 
@@ -114,9 +123,9 @@ final class MakeCrud extends AbstractMaker
             );
 
             $repositoryVars = [
-                'repository_full_class_name' => $repositoryClassDetails->getFullName(),
-                'repository_class_name' => $repositoryClassDetails->getShortName(),
-                'repository_var' => lcfirst($this->singularize($repositoryClassDetails->getShortName())),
+                'repository_full_class_name'    => $repositoryClassDetails->getFullName(),
+                'repository_class_name'         => $repositoryClassDetails->getShortName(),
+                'repository_var'                => lcfirst($this->singularize($repositoryClassDetails->getShortName())),
             ];
         }
 
@@ -132,6 +141,11 @@ final class MakeCrud extends AbstractMaker
                 $entityClassDetails->getRelativeNameWithoutSuffix().($iter ?: '').'Type',
                 'Form\\',
                 'Type'
+            );
+            $formFilterClassDetails = $generator->createClassNameDetails(
+                $entityClassDetails->getRelativeNameWithoutSuffix().($iter ?: '').'FilterType',
+                'Form\\',
+                'FilterType'
             );
             ++$iter;
         } while (class_exists($formClassDetails->getFullName()));
@@ -151,60 +165,81 @@ final class MakeCrud extends AbstractMaker
             $controllerClassDetails->getFullName(),
             $templatesBasePath . 'crud/controller/Controller.tpl.php',
             array_merge([
-                    'entity_full_class_name' => $entityClassDetails->getFullName(),
-                    'entity_class_name' => $entityClassDetails->getShortName(),
-                    'form_full_class_name' => $formClassDetails->getFullName(),
-                    'form_class_name' => $formClassDetails->getShortName(),
-                    'route_path' => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
-                    'route_name' => $routeName,
-                    'templates_path' => $templatesPath,
-                    'entity_var_plural' => $entityVarPlural,
-                    'entity_twig_var_plural' => $entityTwigVarPlural,
-                    'entity_var_singular' => $entityVarSingular,
-                    'entity_twig_var_singular' => $entityTwigVarSingular,
-                    'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
+                    'entity_full_class_name'        => $entityClassDetails->getFullName(),
+                    'entity_class_name'             => $entityClassDetails->getShortName(),
+                    'form_full_class_name'          => $formClassDetails->getFullName(),
+                    'form_class_name'               => $formClassDetails->getShortName(),
+                    'form_filter_full_class_name'   => $formFilterClassDetails->getFullName(),
+                    'form_filter_class_name'        => $formFilterClassDetails->getShortName(),
+                    'route_path'                    => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
+                    'route_name'                    => $routeName,
+                    'templates_path'                => $templatesPath,
+                    'entity_var_plural'             => $entityVarPlural,
+                    'entity_twig_var_plural'        => $entityTwigVarPlural,
+                    'entity_var_singular'           => $entityVarSingular,
+                    'entity_twig_var_singular'      => $entityTwigVarSingular,
+                    'entity_identifier'             => $entityDoctrineDetails->getIdentifier(),
                 ],
                 $repositoryVars
             )
         );
-
+        
+//        dump($entityDoctrineDetails->getFormFields());
         $this->formTypeRenderer->render(
             $formClassDetails,
             $entityDoctrineDetails->getFormFields(),
-            $entityClassDetails
+            $entityClassDetails,
+            [],
+            [],
+            $templatesBasePath . 'form/Type.tpl.php'
+        );
+        $this->formTypeRenderer->render(
+            $formFilterClassDetails,
+            $entityDoctrineDetails->getFormFields(),
+            $entityClassDetails,
+            [],
+            [],
+            $templatesBasePath . 'form/FilterType.tpl.php'
         );
 
         $templates = [
             '_delete_form' => [
-                'route_name' => $routeName,
-                'entity_twig_var_singular' => $entityTwigVarSingular,
-                'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
+                'route_name'                => $routeName,
+                'entity_twig_var_singular'  => $entityTwigVarSingular,
+                'entity_identifier'         => $entityDoctrineDetails->getIdentifier(),
+                'custom_helper'             => $this->generatorTwigHelper,
             ],
             '_form' => [],
             'edit' => [
-                'entity_class_name' => $entityClassDetails->getShortName(),
-                'entity_twig_var_singular' => $entityTwigVarSingular,
-                'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
-                'route_name' => $routeName,
+                'entity_class_name'         => $entityClassDetails->getShortName(),
+                'entity_twig_var_singular'  => $entityTwigVarSingular,
+                'entity_identifier'         => $entityDoctrineDetails->getIdentifier(),
+                'route_name'                => $routeName,
+                'custom_helper'             => $this->generatorTwigHelper
             ],
             'index' => [
-                'entity_class_name' => $entityClassDetails->getShortName(),
-                'entity_twig_var_plural' => $entityTwigVarPlural,
-                'entity_twig_var_singular' => $entityTwigVarSingular,
-                'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
-                'entity_fields' => $entityDoctrineDetails->getDisplayFields(),
-                'route_name' => $routeName,
+                'entity_class_name'         => $entityClassDetails->getShortName(),
+                'entity_twig_var_plural'    => $entityTwigVarPlural,
+                'entity_twig_var_singular'  => $entityTwigVarSingular,
+                'entity_identifier'         => $entityDoctrineDetails->getIdentifier(),
+                'entity_fields'             => $entityDoctrineDetails->getDisplayFields(),
+                'route_name'                => $routeName,
+                'custom_helper'             => $this->generatorTwigHelper
             ],
             'new' => [
-                'entity_class_name' => $entityClassDetails->getShortName(),
-                'route_name' => $routeName,
+                'entity_class_name'         => $entityClassDetails->getShortName(),
+                'entity_twig_var_singular'  => $entityTwigVarSingular,
+                'entity_identifier'         => $entityDoctrineDetails->getIdentifier(),
+                'route_name'                => $routeName,
+                'custom_helper'             => $this->generatorTwigHelper
             ],
             'show' => [
-                'entity_class_name' => $entityClassDetails->getShortName(),
-                'entity_twig_var_singular' => $entityTwigVarSingular,
-                'entity_identifier' => $entityDoctrineDetails->getIdentifier(),
-                'entity_fields' => $entityDoctrineDetails->getDisplayFields(),
-                'route_name' => $routeName,
+                'entity_class_name'         => $entityClassDetails->getShortName(),
+                'entity_twig_var_singular'  => $entityTwigVarSingular,
+                'entity_identifier'         => $entityDoctrineDetails->getIdentifier(),
+                'entity_fields'             => $entityDoctrineDetails->getDisplayFields(),
+                'route_name'                => $routeName,
+                'custom_helper'             => $this->generatorTwigHelper
             ],
         ];
         foreach ($templates as $template => $variables) {

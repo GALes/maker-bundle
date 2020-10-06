@@ -1,22 +1,31 @@
 <?= $helper->getHeadPrintCode($entity_class_name) ?>
 
 {% block body %}
-    <h1><?= $entity_class_name ?></h1>
 
-    <table class="table">
-        <tbody>
+<div class="row mt-5">
+<?php include 'others/flash_messages.tpl.php' ?>
+    <div class="col-lg-12">
+        <h4>Visualizaci&oacute;n de <?= $entity_twig_var_singular ?> <span class="fa fa-eye" aria-hidden="true"></span>  </h4>
+    </div>
+</div>
+
+<div class="row">
+
 <?php foreach ($entity_fields as $field): ?>
-            <tr>
-                <th><?= ucfirst($field['fieldName']) ?></th>
-                <td>{{ <?= $helper->getEntityFieldPrintCode($entity_twig_var_singular, $field) ?> }}</td>
-            </tr>
+    <div class="col-md-6">
+        <p><strong><?= ucfirst($field['fieldName']) ?></strong></p>
+        <p>
+            {{ <?= $helper->getEntityFieldPrintCode($entity_twig_var_singular, $field) ?> }}
+        </p>
+
+    </div>
 <?php endforeach; ?>
-        </tbody>
-    </table>
 
-    <a href="{{ path('<?= $route_name ?>_index') }}">back to list</a>
+</div>
 
-    <a href="{{ path('<?= $route_name ?>_edit', {'<?= $entity_identifier ?>': <?= $entity_twig_var_singular ?>.<?= $entity_identifier ?>}) }}">edit</a>
+<hr/>
 
-    {{ include('<?= $route_name ?>/_delete_form.html.twig') }}
+{% set hide_edit, hide_delete, hide_new= false, false, false %}
+<?php include 'others/record_actions.tpl.php' ?>
+
 {% endblock %}
