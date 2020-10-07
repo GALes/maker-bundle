@@ -1,4 +1,4 @@
-<?= $custom_helper->getHeadPrintCode('Listado de ' . Symfony\Bundle\MakerBundle\Str::asHumanWords($entity_class_name) ); ?>
+<?= $custom_helper->getHeadPrintCode('Listado de ' . $custom_helper->asHumanWords($entity_class_name) ); ?>
 
 {% block body %}
 
@@ -6,7 +6,7 @@
 <div class="row mt-5">
 <?php include 'others/flash_messages.tpl.php' ?>
     <div class="col-lg-12">
-        <h4>Listado de <?= Symfony\Bundle\MakerBundle\Str::asHumanWords($entity_class_name) ?></h4>
+        <h4>Listado de <?= $custom_helper->asHumanWords($entity_class_name) ?></h4>
     </div>
 
 <?php include 'others/multi_search_header.tpl.php' ?>
@@ -32,7 +32,7 @@
 
                 {% import "macros/th_sortable.html.twig" as macros %}
 <?php foreach ($entity_fields as $field): ?>
-                    <th>{{macros.th_sortable('<?= $field['fieldName'] ?>', app.request.get('pcg_sort_col'), app.request.get('pcg_sort_order') , '<?= $route_name ?>_index', '<?= ucfirst(Symfony\Bundle\MakerBundle\Str::asHumanWords($field['fieldName'])) ?>')}}</th>
+                    <th>{{macros.th_sortable('<?= $field['fieldName'] ?>', app.request.get('pcg_sort_col'), app.request.get('pcg_sort_order') , '<?= $route_name ?>_index', '<?= ucfirst($custom_helper->asHumanWords($field['fieldName'])) ?>')}}</th>
 <?php endforeach; ?>
                     <th width = "130px">Acciones</th>
                 </tr>

@@ -92,4 +92,9 @@ HTML;
 
         return "<a href=\"{{ '$path'|file_link($line) }}\">$text</a>";
     }
+
+    public function asHumanWords(string $variableName): string
+    {
+        return Str::asHumanWords($variableName);
+    }
 }
