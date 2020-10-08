@@ -20,3 +20,9 @@ composer require gales/maker-bundle:*@dev
 Luego hacer un:
 
 composer dump-autoload
+
+Agregar en la configuracion de Twig que use Bootstrap 4 Form Theme
+
+# config/packages/twig.yaml
+twig:
+    form_themes: ['bootstrap_4_layout.html.twig']
