@@ -19,4 +19,4 @@ composer require gales/maker-bundle:*@dev
 
 Luego hacer un:
 
-composer update
+composer dump-autoload
