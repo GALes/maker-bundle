@@ -1,4 +1,4 @@
-<?= $custom_helper->getHeadPrintCode($custom_helper->asHumanWords($entity_class_name) ) ?>
+<?= $custom_helper->getHeadPrintCode($custom_helper->asHumanWords($entity_class_name), '@GALesMaker/base.html.twig' ) ?>
 
 {% block body %}
 
@@ -13,7 +13,7 @@
 
 <?php foreach ($entity_fields as $field): ?>
     <div class="col-md-6">
-        <p><strong><?= ucfirst($field['fieldName']) ?></strong></p>
+        <p><strong><?= $custom_helper->asHumanWords(ucfirst($field['fieldName'])) ?></strong></p>
         <p>
             {{ <?= $custom_helper->getEntityFieldPrintCode($entity_twig_var_singular, $field) ?> }}
         </p>

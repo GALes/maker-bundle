@@ -35,7 +35,7 @@
     <!-- END FILTERING -->
 
     <div class="col-md-3">
-        <a class="btn btn-primary h3 pull-right" href="{{ path('solicitud_empresa_new') }}" style="margin-bottom:10px">
+        <a class="btn btn-primary h3 pull-right" href="{{ path('<?= $route_name ?>_new') }}" style="margin-bottom:10px">
             <span class="fa fa-plus" aria-hidden="true"></span> Nuevo
         </a>
     </div>

@@ -67,9 +67,17 @@ final class GeneratorTwigHelper
         return $printCode;
     }
 
-    public function getHeadPrintCode( $title, $baseTemplate = 'base.html.twig' ): string
+    public function getHeadPrintCode( $title, $baseTemplate = null ): string
     {
-        if ($this->fileManager->fileExists($this->fileManager->getPathForTemplate($baseTemplate))) {
+        if ($baseTemplate === null && $this->fileManager->fileExists($this->fileManager->getPathForTemplate('base.html.twig'))) {
+            return <<<TWIG
+{% extends 'base.html.twig' %}
+
+{% block title %}$title{% endblock %}
+
+TWIG;
+        }
+        else if ( is_string($baseTemplate) && trim($baseTemplate) != '' ) {
             return <<<TWIG
 {% extends '$baseTemplate' %}
 

@@ -1,4 +1,4 @@
-<?= $custom_helper->getHeadPrintCode('Alta de ' . $custom_helper->asHumanWords($entity_class_name) ) ?>
+<?= $custom_helper->getHeadPrintCode('Alta de ' . $custom_helper->asHumanWords($entity_class_name), '@GALesMaker/base.html.twig' ) ?>
 
 
 {% block body %}

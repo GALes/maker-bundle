@@ -1,6 +1,6 @@
 {
     "name": "gales/maker-bundle",
-    "description": "Generador de ABMs basado en Petkopara Crud Generator",
+    "description": "Generador de ABMs basado en Petkopara Crud Generator reutilizando código del Maker Bundle de Symfony",
     "type": "symfony-bundle",
     "license": "MIT",
     "authors": [
@@ -10,7 +10,11 @@
         }
     ],
     "require": {
-        "php": "^7.1.3"
+        "php": "^7.1.3",
+        "symfony/maker-bundle": "^1.21",
+        "lexik/form-filter-bundle": "^6.0",
+        "mprod-petkopara/multi-search-bundle": "^2.0",
+        "pagerfanta/pagerfanta": "^2.4"
     },
     "autoload": {
         "psr-4": {

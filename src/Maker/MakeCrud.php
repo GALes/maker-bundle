@@ -53,13 +53,17 @@ final class MakeCrud extends AbstractMaker
 
     private $generatorTwigHelper;
 
-    public function __construct(DoctrineHelper $doctrineHelper, FormTypeRenderer $formTypeRenderer, Kernel $appKernel, GeneratorTwigHelper $generatorTwigHelper)
+
+    protected $availableRoles = array();
+
+    public function __construct(DoctrineHelper $doctrineHelper, FormTypeRenderer $formTypeRenderer, Kernel $appKernel, GeneratorTwigHelper $generatorTwigHelper, $roleHierarchy)
     {
         $this->doctrineHelper = $doctrineHelper;
         $this->formTypeRenderer = $formTypeRenderer;
-//        $this->formFilterTypeRenderer = $formFilterTypeRenderer;
         $this->appKernel = $appKernel;
         $this->generatorTwigHelper = $generatorTwigHelper;
+        
+        $this->availableRoles = $this->extractAvailableRoles($roleHierarchy);
 
         if (class_exists(InflectorFactory::class)) {
             $this->inflector = InflectorFactory::create()->build();
@@ -314,5 +318,28 @@ final class MakeCrud extends AbstractMaker
         }
 
         return LegacyInflector::singularize($word);
+    }
+
+    /**
+     * Extract unique roles from role hierarchy
+     *
+     * @param type $roleHierarchy
+     * @return array
+     */
+    protected function extractAvailableRoles($roleHierarchy)
+    {
+        // always add this roles first
+        $availableRoles = array(
+            'ROLE_USER',
+            'ROLE_ADMIN'
+        );
+
+        array_walk_recursive($roleHierarchy, function($role) use (&$availableRoles) {
+            if (array_search($role, $availableRoles) === FALSE) {
+                $availableRoles[] = $role;
+            }
+        });
+
+        return $availableRoles;
     }
 }

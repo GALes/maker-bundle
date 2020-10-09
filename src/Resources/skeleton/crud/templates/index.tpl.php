@@ -1,4 +1,4 @@
-<?= $custom_helper->getHeadPrintCode('Listado de ' . $custom_helper->asHumanWords($entity_class_name) ); ?>
+<?= $custom_helper->getHeadPrintCode('Listado de ' . $custom_helper->asHumanWords($entity_class_name), '@GALesMaker/base.html.twig' ); ?>
 
 {% block body %}
 
@@ -30,7 +30,7 @@
                 <tr>
                     <th width="20px"><input type="checkbox" class="check-all" onclick="toggleAll(this)"></th>
 
-                {% import "macros/th_sortable.html.twig" as macros %}
+                {% import "@GALesMaker/macros/th_sortable.html.twig" as macros %}
 <?php foreach ($entity_fields as $field): ?>
                     <th>{{macros.th_sortable('<?= $field['fieldName'] ?>', app.request.get('pcg_sort_col'), app.request.get('pcg_sort_order') , '<?= $route_name ?>_index', '<?= ucfirst($custom_helper->asHumanWords($field['fieldName'])) ?>')}}</th>
 <?php endforeach; ?>

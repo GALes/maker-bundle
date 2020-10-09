@@ -1,4 +1,4 @@
-<?= $custom_helper->getHeadPrintCode('Edición de ' . $custom_helper->asHumanWords($entity_class_name) ) ?>
+<?= $custom_helper->getHeadPrintCode('Edición de ' . $custom_helper->asHumanWords($entity_class_name), '@GALesMaker/base.html.twig' ) ?>
 
 {% block body %}
 <div class="row mt-5">

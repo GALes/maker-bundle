@@ -21,15 +21,7 @@
             <argument type="service" id="gales.maker.renderer.form_type_renderer" />
             <argument type="service" id="kernel" />
             <argument type="service" id="gales.maker.generator_twig_helper" />
-            <tag name="maker.command" />
-        </service>
-
-        <service id="gales.maker.make_entity" class="GALes\MakerBundle\Maker\MakeEntity">
-            <argument type="service" id="maker.file_manager" />
-            <argument type="service" id="maker.doctrine_helper" />
-            <argument>%kernel.project_dir%</argument>
-            <argument type="service" id="maker.generator" />
-            <argument type="service" id="maker.entity_class_generator" />
+            <argument type="collection">%security.role_hierarchy.roles%</argument>
             <tag name="maker.command" />
         </service>
 
