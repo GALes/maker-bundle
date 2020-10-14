@@ -23,7 +23,7 @@ Agregar al composer.json del proyecto los siguientes repositorios:
         },
         {
             "type": "path",
-            "url": "../gales-make-bundle"
+            "url": "../bundles/make-bundle"
         }
     ],
     
