@@ -53,6 +53,9 @@
     </nav>
 
 
+    {#      Permite obtener el nombre de la ruta para marcar como activa la opcion de menu      #}
+    {% set route_name = app.request.attributes.get('_route') %}
+    {#    {{ dump(route_name) }}#}
     {#    Navbar del menu #}
     {% block app_menu %}
         <nav class="navbar navbar-expand-lg navbar-dark navbar-menu">
@@ -72,7 +75,7 @@
                                 <a class="nav-link" href="{{ path('admin_inicio') }}">Inicio</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ path('solicitudempresa', {'filter_action': 'reset'}) }}">Solicitudes de Empresas</a>
+{#                                <a class="nav-link" href="{{ path('solicitudempresa', {'filter_action': 'reset'}) }}">Solicitudes de Empresas</a>#}
                             </li>
                             {% if is_granted("ROLE_ADMIN") %}
                             <li class="nav-item dropdown">
@@ -80,8 +83,8 @@
                                     Administraci&oacute;n
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="{{ path('atributoconfiguracion', {'filter_action': 'reset'}) }}">Par&aacute;metros de aplicaci&oacute;n</a>
-                                    <a class="dropdown-item" href="{{ path('user', {'filter_action': 'reset'}) }}">Usuarios de aplicaci&oacute;n</a>
+{#                                    <a class="dropdown-item" href="{{ path('atributoconfiguracion', {'filter_action': 'reset'}) }}">Par&aacute;metros de aplicaci&oacute;n</a>#}
+{#                                    <a class="dropdown-item" href="{{ path('user', {'filter_action': 'reset'}) }}">Usuarios de aplicaci&oacute;n</a>#}
                                 </div>
                             </li>
                             {% endif %}

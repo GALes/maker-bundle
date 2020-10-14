@@ -72,7 +72,7 @@ final class MakeCrud extends AbstractMaker
 
     public static function getCommandName(): string
     {
-        return 'make:gales:crud';
+        return 'gales:make:crud';
     }
 
     /**

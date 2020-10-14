@@ -17,6 +17,8 @@ use <?= $className ?>;
 
 class <?= $class_name ?> extends AbstractType
 {
+<?php   /* TODO: a los campos numericos se les debe agregar 'grouping' => true para evitar que el punto sea tomado como separador decimal */ ?>
+/* TODO: a los campos numericos se les debe agregar 'grouping' => true para evitar que el punto sea tomado como separador decimal */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder

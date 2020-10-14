@@ -55,6 +55,11 @@ body {
     font-weight: 700;
 }
 
+.navbar.navbar-menu .nav-item .active {
+    background: whitesmoke;
+    color: #0875bc;
+}
+
 .dropdown-menu {
     background: #0875bc;
     padding: 2px;
