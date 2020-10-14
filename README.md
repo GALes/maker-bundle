@@ -7,7 +7,7 @@ Designed to bring the functionality of PetkoparaCrudGeneratorBundle, but reusing
 <b>It's still a work in progress but fully functional with the limitations of not being so configurable yet.
 It requires a folk of petkopara/multi-search-bundle allowing the use of it on Symfony 4 / 5</b>
 
-##Pasos para desarrollo y pruebas locales
+## Pasos para desarrollo y pruebas locales
 Clonar el repositorio del bundle fuera del proyecto al que se quiera agregar, ej estando dentro de la raiz del proyecto:
 
     mkdir ../bundles
