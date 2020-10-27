@@ -7,6 +7,23 @@ Designed to bring back the functionality of PetkoparaCrudGeneratorBundle, but re
 <b>It's still a work in progress but fully functional with the limitations of not being so configurable yet.
 It requires dev-master branch of petkopara/multi-search-bundle allowing the use of it on Symfony 4 / 5</b>
 
+
+## Pasos para la instalación
+Agregar referencia al repositorio con las configuraciones para que tome codigo en estado en desarrollo
+
+    "repositories":[
+        {
+            "type": "vcs",
+            "url": "https://github.com/GALes/maker-bundle.git"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+
+Agregar con composer el Bundles:
+
+    composer require gales/maker-bundle:*@dev
+
 ## Pasos para desarrollo y pruebas locales
 Clonar el repositorio del bundle fuera del proyecto al que se quiera agregar, ej estando dentro de la raiz del proyecto:
 
