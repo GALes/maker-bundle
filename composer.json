@@ -6,14 +6,16 @@
     "authors": [
         {
             "name": "German Lescano",
-            "email": "galescano@santafe.gov.ar"
+            "email": "galdolescano@gmail.com"
         }
     ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
         "php": "^7.1.3",
         "symfony/maker-bundle": "^1.21",
         "lexik/form-filter-bundle": "^6.0",
-        "mprod-petkopara/multi-search-bundle": "^2.0",
+        "gales-petkopara/multi-search-bundle": "^2.0",
         "pagerfanta/pagerfanta": "^2.4"
     },
     "autoload": {

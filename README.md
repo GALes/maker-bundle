@@ -2,7 +2,7 @@
 
 Symfony4 / 5 CRUD generator bundle with pagination, filtering, Twitter bootstrap v4.4.1 markup and many other features. It's Simple to use (TODO: and fully customizable).
 
-Designed to bring the functionality of PetkoparaCrudGeneratorBundle, but reusing the logic from Symfony's Maker Bundle.
+Designed to bring back the functionality of PetkoparaCrudGeneratorBundle, but reusing the logic from Symfony's Maker Bundle.
 
 <b>It's still a work in progress but fully functional with the limitations of not being so configurable yet.
 It requires dev-master branch of petkopara/multi-search-bundle allowing the use of it on Symfony 4 / 5</b>
