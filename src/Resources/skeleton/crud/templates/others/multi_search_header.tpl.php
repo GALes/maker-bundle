@@ -17,15 +17,15 @@
         <form action={{ path('<?= $route_name ?>_index') }} method="get" >
 
         <div class="input-group mb-3">
-            {{ form_widget(filterForm.search, { 'attr': {'class': 'form-control'} }) }}
+            {{ form_widget(filterForm.search, { 'attr': {'class': 'form-control', 'method': 'get'} }) }}
             {{ form_rest(filterForm) }}
             <div class="input-group-append">
-                <a class="btn btn-info" href={{ path('<?= $route_name ?>_index', {'filter_action': 'reset'}) }}>
-                <span class="fa fa-remove" aria-hidden="true"></span>
-                </a>
+                <button class="btn btn-info"  type="submit" name="filter_action" value="reset">
+                    <span class="fa fa-remove" aria-hidden="true"></span>
+                </button>
             </div>
             <div class="input-group-append">
-                <button class="btn btn-primary" type="submit">
+                <button class="btn btn-primary" type="submit" name="filter_action" value="filter">
                     <span class="fa fa-search"></span>
                 </button>
             </div>

@@ -3,6 +3,7 @@
      */
     public function index(Request $request)
     {
+        $isValid = true;
         $em = $this->getDoctrine()->getManager();
         /** @var QueryBuilder $queryBuilder */
         $queryBuilder = $em->getRepository(<?=$entity_class_name ?>::class)->createQueryBuilder('zzz');
@@ -17,6 +18,11 @@
 
         $totalOfRecordsString = $this->getTotalOfRecordsString($queryBuilder, $request);
 
+        if (count($<?=$entity_var_plural; ?>) <= 0) {
+            $this->get('session')->getFlashBag()->add('success', "No se han encontrado registros con los criterios dados" );
+            $isValid = false;
+        }
+    
         return $this->render('<?= $templates_path ?>/index.html.twig', [
             '<?= $entity_twig_var_plural ?>' => $<?=$entity_var_plural ?>,
             'pagerHtml' => $pagerHtml,
@@ -33,26 +39,35 @@
     {
         $session = $request->getSession();
         $filterForm = $this->createForm(<?= $form_filter_class_name ?>::class);
-        
-        // Bind values from the request
-        $filterForm->handleRequest($request);
-        
+
         //Reset Filters
         if ($request->get('filter_action') == 'reset') {
             $request->query->remove('filter_action');
             $session->remove('filterUrl');
         }
         else {
-            if ($filterForm->isSubmitted() && $filterForm->isValid()) {
-                $filterUrl = $request->query->all();
-                $session->set('filterUrl', $filterUrl);
-                // Build the query from the given form object
-                $this->multiSearchBuilderService->searchForm( $queryBuilder, $filterForm->get('search'));
+            // Filter action
+            if ($request->get('filter_action') == 'filter' || $request->get('filter_action') == 'generarExcel') {
+                // Bind values from the request
+                $filterForm->handleRequest($request);
+                $session->remove('filterUrl');
+
+                // Si se presiono el boton de busqueda del filtro
+                if ($filterForm->isSubmitted() && $filterForm->isValid()) {
+                    // Build the query from the given form object
+                    $this->multiSearchBuilderService->searchForm($queryBuilder, $filterForm->get('search'));
+
+                    // Save filter to session
+                    $filterUrl = $request->query->all();
+                    $session->set('filterUrl', $filterUrl);
+                }
             }
+            // Si entra por paginacion o por ordenamiento de columna
             else if ( $request->get('pcg_page') || $request->get('pcg_sort_col') || $request->get('pcg_sort_order') ) {
                 $filterUrl = $request->query->all();
                 $session->set('filterUrl', $filterUrl);
             }
+            // Sino si solo se abre la url base y se tienen filtros en session, los restituye y renderiza nuevamente
             else if ($session->has('filterUrl')) {
                 $filterUrl = $session->get('filterUrl');
                 $session->remove('filterUrl');
