@@ -14,14 +14,19 @@
 
     <!-- FILTERING -->
     <div class="col-md-6">
-        <form action={{ path('<?= $route_name ?>_index') }} method="get" >
+        <form action={{ path('<?= $route_name ?>_index') }} method="get" id="filters" >
 
         <div class="input-group mb-3">
-            {{ form_widget(filterForm.search, { 'attr': {'class': 'form-control', 'method': 'get'} }) }}
+            {{ form_widget(filterForm.search, { 'attr': {'class': 'form-control'} }) }}
             {{ form_rest(filterForm) }}
             <div class="input-group-append">
                 <button class="btn btn-info"  type="submit" name="filter_action" value="reset">
                     <span class="fa fa-remove" aria-hidden="true"></span>
+                </button>
+            </div>
+            <div class="input-group-append">
+                <button class="btn btn-secondary" type="submit" name="filter_action" id="button-export" value="exportXlsx">
+                    <span class="fa fa-download" aria-hidden="true"></span>
                 </button>
             </div>
             <div class="input-group-append">

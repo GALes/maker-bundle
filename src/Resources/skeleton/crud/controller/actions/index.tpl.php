@@ -1,20 +1,21 @@
     /**
      * @Route("/", name="<?= $route_name ?>_index", methods={"GET"})
      */
-    public function index(Request $request)
+    public function index(Request $request, <?= $entity_class_name ?>ExportService $<?= $entity_var_singular ?>ExportService)
     {
         $isValid = true;
         $em = $this->getDoctrine()->getManager();
         /** @var QueryBuilder $queryBuilder */
-        $queryBuilder = $em->getRepository(<?=$entity_class_name ?>::class)->createQueryBuilder('zzz');
+        $queryBuilder = $em->getRepository(<?= $entity_class_name ?>::class)->createQueryBuilder('zzz');
 
         $filter_response = $this->filter($queryBuilder, $request);
         if ($filter_response instanceof RedirectResponse) {
             return $filter_response;
         }
         list($filterForm, $queryBuilder) = $filter_response;
+        $querryExport = $queryBuilder->getQuery();
 
-        list($<?=$entity_var_plural; ?>, $pagerHtml) = $this->paginator($queryBuilder, $request);
+        list($<?= $entity_var_plural; ?>, $pagerHtml) = $this->paginator($queryBuilder, $request);
 
         $totalOfRecordsString = $this->getTotalOfRecordsString($queryBuilder, $request);
 
@@ -22,13 +23,19 @@
             $this->get('session')->getFlashBag()->add('success', "No se han encontrado registros con los criterios dados" );
             $isValid = false;
         }
-    
-        return $this->render('<?= $templates_path ?>/index.html.twig', [
-            '<?= $entity_twig_var_plural ?>' => $<?=$entity_var_plural ?>,
-            'pagerHtml' => $pagerHtml,
-            'filterForm' => $filterForm->createView(),
-            'totalOfRecordsString' => $totalOfRecordsString,
-        ]);
+
+        if ($isValid == true && $request->get('filter_action') == 'exportXlsx') {
+            $<?=$entity_var_plural; ?> = $querryExport->getResult();
+            return $<?= $entity_var_singular ?>ExportService->exportXlsx($<?=$entity_var_plural; ?>);
+        }
+        else {
+            return $this->render('<?= $templates_path ?>/index.html.twig', [
+                '<?= $entity_twig_var_plural ?>' => $<?=$entity_var_plural ?>,
+                'pagerHtml' => $pagerHtml,
+                'filterForm' => $filterForm->createView(),
+                'totalOfRecordsString' => $totalOfRecordsString,
+            ]);
+        }
     }
 
     /**
@@ -47,10 +54,17 @@
         }
         else {
             // Filter action
-            if ($request->get('filter_action') == 'filter' || $request->get('filter_action') == 'generarExcel') {
+            if ($request->get('filter_action') == 'filter' || $request->get('filter_action') == 'exportXlsx') {
                 // Bind values from the request
                 $filterForm->handleRequest($request);
                 $session->remove('filterUrl');
+
+                // Quito la accion de exportación para no guardarla en session
+                $exportXlsx = false;
+                if ( $request->get('filter_action') == 'exportXlsx' ) {
+                    $request->query->set('filter_action', 'filter');
+                    $exportXlsx = true;
+                }
 
                 // Si se presiono el boton de busqueda del filtro
                 if ($filterForm->isSubmitted() && $filterForm->isValid()) {
@@ -60,6 +74,11 @@
                     // Save filter to session
                     $filterUrl = $request->query->all();
                     $session->set('filterUrl', $filterUrl);
+
+                    // Restituyo la acción para generar el excel en el index
+                    if ($exportXlsx) {
+                        $request->query->set('filter_action', 'exportXlsx');
+                    }
                 }
             }
             // Si entra por paginacion o por ordenamiento de columna

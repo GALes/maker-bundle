@@ -85,4 +85,32 @@
 
 {% endblock %}
 
+{% block javascripts %}
+{{ parent() }}
+
+<script>
+    $(function() {
+
+        $('#filters :input').change(function () {
+            $('#button-export').attr('data-status','disabled');
+        });
+
+        $('#button-export').click('', function () {
+            if ( $('#button-export').attr('data-status') == 'disabled' ) {
+                $('#alert-container').append(
+                    `<div class="alert alert-danger">
+                            Los filtros cambiaron, debe buscar primero antes de exportar
+                        </div>`
+                );
+                return false;
+            }
+            else {
+                return true;
+            }
+        });
+    });
+</script>
+
+{% endblock %}
+
 

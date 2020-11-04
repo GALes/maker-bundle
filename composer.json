@@ -16,7 +16,8 @@
         "symfony/maker-bundle": "^1.21",
         "lexik/form-filter-bundle": "^6.0",
         "gales-petkopara/multi-search-bundle": "^2.0",
-        "pagerfanta/pagerfanta": "^2.4"
+        "pagerfanta/pagerfanta": "^2.4",
+        "yectep/phpspreadsheet-bundle": "^1"
     },
     "autoload": {
         "psr-4": {

@@ -16,6 +16,7 @@ use Doctrine\Common\Inflector\Inflector as LegacyInflector;
 use Doctrine\Inflector\InflectorFactory;
 use GALes\MakerBundle\Doctrine\EntityDetails;
 use GALes\MakerBundle\Helper\GeneratorTwigHelper;
+use GALes\MakerBundle\Renderer\ExportServiceRenderer;
 use GALes\MakerBundle\Renderer\FormFilterTypeRenderer;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
@@ -47,23 +48,31 @@ final class MakeCrud extends AbstractMaker
 
     private $formTypeRenderer;
 
+    private $exportServiceRenderer;
+
     private $inflector;
 
     private $appKernel;
 
     private $generatorTwigHelper;
-
-
+    
     protected $availableRoles = array();
 
-    public function __construct(DoctrineHelper $doctrineHelper, FormTypeRenderer $formTypeRenderer, Kernel $appKernel, GeneratorTwigHelper $generatorTwigHelper, $roleHierarchy)
+    public function __construct(
+        DoctrineHelper          $doctrineHelper, 
+        FormTypeRenderer        $formTypeRenderer, 
+        ExportServiceRenderer   $exportServiceRenderer,
+        Kernel                  $appKernel, 
+        GeneratorTwigHelper     $generatorTwigHelper, 
+        $roleHierarchy)
     {
-        $this->doctrineHelper = $doctrineHelper;
-        $this->formTypeRenderer = $formTypeRenderer;
-        $this->appKernel = $appKernel;
-        $this->generatorTwigHelper = $generatorTwigHelper;
+        $this->doctrineHelper           = $doctrineHelper;
+        $this->formTypeRenderer         = $formTypeRenderer;
+        $this->exportServiceRenderer    = $exportServiceRenderer;
+        $this->appKernel                = $appKernel;
+        $this->generatorTwigHelper      = $generatorTwigHelper;
         
-        $this->availableRoles = $this->extractAvailableRoles($roleHierarchy);
+        $this->availableRoles           = $this->extractAvailableRoles($roleHierarchy);
 
         if (class_exists(InflectorFactory::class)) {
             $this->inflector = InflectorFactory::create()->build();
@@ -116,6 +125,8 @@ final class MakeCrud extends AbstractMaker
         $entityDoctrineDetails = new EntityDetails($this->doctrineHelper->getMetadata($entityClassDetails->getFullName()));
 //        $entityDoctrineDetails = $this->doctrineHelper->createDoctrineDetails($entityClassDetails->getFullName());
 //        dump($entityDoctrineDetails);
+        
+//        dd($entityDoctrineDetails->getFormFields());
 
         $repositoryVars = [];
 
@@ -137,6 +148,12 @@ final class MakeCrud extends AbstractMaker
             $entityClassDetails->getRelativeNameWithoutSuffix().'Controller',
             'Controller\\',
             'Controller'
+        );
+
+        $exportServiceClassDetails = $generator->createClassNameDetails(
+            $entityClassDetails->getRelativeNameWithoutSuffix().'ExportService',
+            'Service\\',
+            'Service'
         );
 
         $iter = 0;
@@ -165,24 +182,38 @@ final class MakeCrud extends AbstractMaker
 
         $templatesBasePath = $this->appKernel->getProjectDir() . '/vendor/gales/maker-bundle/src/Resources/skeleton/';
 
+        $this->exportServiceRenderer->generateClass(
+            $exportServiceClassDetails->getFullName(),
+            $templatesBasePath . 'service/ExportService.tpl.php',
+            [
+                'entity_class_name'             => $entityClassDetails->getShortName(),
+                'entity_full_class_name'        => $entityClassDetails->getFullName(),
+                'entity_var_plural'             => $entityVarPlural,
+                'entity_var_singular'           => $entityVarSingular,
+                'entity_fields'                 => $entityDoctrineDetails->getFormFields(),
+                'custom_helper'                 => $this->generatorTwigHelper,
+            ]
+        );
+
         $generator->generateController(
             $controllerClassDetails->getFullName(),
             $templatesBasePath . 'crud/controller/Controller.tpl.php',
             array_merge([
-                    'entity_full_class_name'        => $entityClassDetails->getFullName(),
-                    'entity_class_name'             => $entityClassDetails->getShortName(),
-                    'form_full_class_name'          => $formClassDetails->getFullName(),
-                    'form_class_name'               => $formClassDetails->getShortName(),
-                    'form_filter_full_class_name'   => $formFilterClassDetails->getFullName(),
-                    'form_filter_class_name'        => $formFilterClassDetails->getShortName(),
-                    'route_path'                    => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
-                    'route_name'                    => $routeName,
-                    'templates_path'                => $templatesPath,
-                    'entity_var_plural'             => $entityVarPlural,
-                    'entity_twig_var_plural'        => $entityTwigVarPlural,
-                    'entity_var_singular'           => $entityVarSingular,
-                    'entity_twig_var_singular'      => $entityTwigVarSingular,
-                    'entity_identifier'             => $entityDoctrineDetails->getIdentifier(),
+                    'entity_full_class_name'            => $entityClassDetails->getFullName(),
+                    'entity_class_name'                 => $entityClassDetails->getShortName(),
+                    'form_full_class_name'              => $formClassDetails->getFullName(),
+                    'form_class_name'                   => $formClassDetails->getShortName(),
+                    'form_filter_full_class_name'       => $formFilterClassDetails->getFullName(),
+                    'form_filter_class_name'            => $formFilterClassDetails->getShortName(),
+                    'route_path'                        => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
+                    'route_name'                        => $routeName,
+                    'templates_path'                    => $templatesPath,
+                    'entity_var_plural'                 => $entityVarPlural,
+                    'entity_twig_var_plural'            => $entityTwigVarPlural,
+                    'entity_var_singular'               => $entityVarSingular,
+                    'entity_twig_var_singular'          => $entityTwigVarSingular,
+                    'entity_identifier'                 => $entityDoctrineDetails->getIdentifier(),
+                    'export_service_full_class_name'    => $exportServiceClassDetails->getFullName(),
                 ],
                 $repositoryVars
             )
