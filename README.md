@@ -63,13 +63,13 @@ Ejecutar el comando
 
 Luego seleccionar la Entidad a la cual generar el ABM. Archivos que se generan
 
-    created: src/Service/<entity_name>ExportService.php
-    created: src/Controller/<entity_name>Controller.php
-    created: src/Form/<entity_name>Type.php
-    created: src/Form/<entity_name>FilterType.php
-    created: templates/<entity_name>/_delete_form.html.twig
-    created: templates/<entity_name>/_form.html.twig
-    created: templates/<entity_name>/edit.html.twig
-    created: templates/<entity_name>/index.html.twig
-    created: templates/<entity_name>/new.html.twig
-    created: templates/<entity_name>/show.html.twig
+    created: src/Service/<entity_name>ExportService.php (Exportacion del listado en formato Xlsx)
+    created: src/Controller/<entity_name>Controller.php (Controlador con la logica del ABM)
+    created: src/Form/<entity_name>Type.php (Formulario para el alta/edicion de la entidad)
+    created: src/Form/<entity_name>FilterType.php (Filtro rapido del listado)
+    created: templates/<entity_name>/_delete_form.html.twig (No se usa, probablemente se elimine en nuevas versiones)
+    created: templates/<entity_name>/_form.html.twig (No se usa, probablemente se elimine en nuevas versiones)
+    created: templates/<entity_name>/edit.html.twig (Vista de edicion de la entidad)
+    created: templates/<entity_name>/index.html.twig  (Vista para el listado de entidades)
+    created: templates/<entity_name>/new.html.twig  (Vista de creacion de nueva entidad)
+    created: templates/<entity_name>/show.html.twig (Vista de visualizacion de los datos de la entidad)
