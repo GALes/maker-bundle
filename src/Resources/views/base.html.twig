@@ -150,7 +150,17 @@
             integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4"
             crossorigin="anonymous"></script>
     <script src="{{ asset('bundles/galesmaker/js/bootstrap.js') }}"></script>
+    <script src="{{ asset('bundles/galesmaker/js/bs-custom-file-input.min.js') }}"></script>
     <script src="{{ asset('bundles/galesmaker/js/petkopara-crud-generator.js') }}"></script>
+
+    <script>
+
+        $(function () {
+            /* Mostrar los nombres de los archivos en los campos de adjuntos */
+            bsCustomFileInput.init();
+        })
+
+    </script>
 
 {% endblock %}
 

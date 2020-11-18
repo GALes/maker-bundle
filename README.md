@@ -55,3 +55,21 @@ Agregar en la configuracion de Twig que use Bootstrap 4 Form Theme
     # config/packages/twig.yaml
     twig:
         form_themes: ['bootstrap_4_layout.html.twig']
+        
+## Uso
+Ejecutar el comando 
+
+    php bin/console gales:make:crud
+
+Luego seleccionar la Entidad a la cual generar el ABM. Archivos que se generan
+
+    created: src/Service/<entity_name>ExportService.php
+    created: src/Controller/<entity_name>Controller.php
+    created: src/Form/<entity_name>Type.php
+    created: src/Form/<entity_name>FilterType.php
+    created: templates/<entity_name>/_delete_form.html.twig
+    created: templates/<entity_name>/_form.html.twig
+    created: templates/<entity_name>/edit.html.twig
+    created: templates/<entity_name>/index.html.twig
+    created: templates/<entity_name>/new.html.twig
+    created: templates/<entity_name>/show.html.twig
