@@ -55,7 +55,7 @@ class <?= $class_name ?>
 
         $response = $this->phpExcelFactory->createStreamedResponse($spreadsheet, 'Xlsx');
 
-        foreach ($iterableResult as $clave => $row) {
+        foreach ($iterableResult as $key => $row) {
             /** @var <?= $entity_class_name; ?> $<?= $entity_var_singular ?> */
             $<?= $entity_var_singular ?> = $row[0];
             $rowNumber = $key + 2; // Los datos comienzan desde la fila 2
