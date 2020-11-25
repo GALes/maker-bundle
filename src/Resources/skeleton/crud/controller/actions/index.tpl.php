@@ -25,8 +25,8 @@
         }
 
         if ($isValid == true && $request->get('filter_action') == 'exportXlsx') {
-            $<?=$entity_var_plural; ?> = $querryExport->getResult();
-            return $<?= $entity_var_singular ?>ExportService->exportXlsx($<?=$entity_var_plural; ?>);
+            $iterableResult = $querryExport->iterate();
+            return $<?= $entity_var_singular ?>ExportService->exportXlsx($iterableResult);
         }
         else {
             return $this->render('<?= $templates_path ?>/index.html.twig', [

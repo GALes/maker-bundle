@@ -3,8 +3,9 @@
 namespace <?= $namespace ?>;
 
 use <?= $entity_full_class_name ?>;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Internal\Hydration\IterableResult;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Yectep\PhpSpreadsheetBundle\Factory;
 
@@ -17,16 +18,22 @@ class <?= $class_name ?>
      * @var Factory
      */
     private $phpExcelFactory;
+    /**
+    * @var EntityManagerInterface
+    */
+    private $em;
 
-    public function __construct(Factory $phpExcelFactory)
+    public function __construct(Factory $phpExcelFactory, EntityManagerInterface $em)
     {
         $this->phpExcelFactory = $phpExcelFactory;
+        $this->em = $em;
     }
 
-    public function exportXlsx($<?= $entity_var_plural ?>)
+    public function exportXlsx(IterableResult $iterableResult)
     {
         ini_set('memory_limit', -1);
         ini_set('max_execution_time', 600);
+        ini_set('X-Accel-Buffering', 'no');
 
         $actualDate = new \DateTime('now');
 
@@ -46,22 +53,22 @@ class <?= $class_name ?>
 <?php endforeach; ?>
         ;
 
-        /**
-         * @var integer $key
-         * @var <?= $entity_class_name; ?> $<?= $entity_var_singular ?>
-         */
-        foreach ($<?= $entity_var_plural ?> as $key => $<?= $entity_var_singular ?>) {
-            $row = $key + 2; // Los datos comienzan desde la fila 2
+        $response = $this->phpExcelFactory->createStreamedResponse($spreadsheet, 'Xlsx');
+
+        foreach ($iterableResult as $clave => $row) {
+            /** @var <?= $entity_class_name; ?> $<?= $entity_var_singular ?> */
+            $<?= $entity_var_singular ?> = $row[0];
+            $rowNumber = $key + 2; // Los datos comienzan desde la fila 2
             $sheet
 <?php $columna = 'A'; ?>
 <?php foreach ($entity_fields as $field): ?>
-                ->setCellValue("<?= $columna ?>$row", $<?= $entity_var_singular ?>->get<?= ucfirst($field['metadata']['fieldName']); ?>())
+                ->setCellValue("<?= $columna ?>$rowNumber", $<?= $entity_var_singular ?>->get<?= ucfirst($field['metadata']['fieldName']); ?>())
 <?php $columna++ ?>
 <?php endforeach; ?>
             ;
+            $this->em->detach($row[0]);
         }
 
-        $response = $this->phpExcelFactory->createStreamedResponse($spreadsheet, 'Xlsx');
         $dispositionHeader = $response->headers->makeDisposition(
             ResponseHeaderBag::DISPOSITION_ATTACHMENT,
             "exportacion_<?= $entity_var_plural ?>_{$actualDate->format('Y-m-d_H.m.s')}.xlsx"

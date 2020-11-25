@@ -10,6 +10,7 @@ use <?= $repository_full_class_name ?>;
 <?php endif ?>
 use <?= $export_service_full_class_name ?>;
 use Symfony\Bundle\FrameworkBundle\Controller\<?= $parent_class_name ?>;
+use Doctrine\ORM\Internal\Hydration\IterableResult;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
