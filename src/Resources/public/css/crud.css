@@ -85,6 +85,14 @@ footer {
     content: "Buscar";
 }
 
+label.required {
+    background-image:url(../img/required-field-asterisc.png);
+    background-size: 7px;
+    background-position:top right;
+    background-repeat:no-repeat;
+    padding-right:10px;
+}
+
 .btn-primary {
     color: #fff;
     background-color: #0875bc;
