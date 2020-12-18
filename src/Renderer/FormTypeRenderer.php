@@ -31,6 +31,7 @@ final class FormTypeRenderer
     {
         $fieldTypeUseStatements = [];
         $fields = [];
+
         foreach ($formFields as $name => $fieldTypeOptions) {
             if ( !isset($fieldTypeOptions['type']) ) {
                 $fieldTypeOptions['type'] = null;

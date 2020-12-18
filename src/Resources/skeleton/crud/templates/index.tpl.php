@@ -105,6 +105,15 @@
                 return false;
             }
             else {
+                $('#loading').show();
+                var interval = setInterval(function () {
+                    if ($.cookie('FileLoading')) {
+                        $('#loading').hide();
+                        $.removeCookie('FileLoading');
+                        clearInterval(interval);
+                    }
+                }, 1000);
+
                 return true;
             }
         });

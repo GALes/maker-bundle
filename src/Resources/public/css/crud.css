@@ -126,6 +126,19 @@ label.required {
     }
 }
 
+#loading {
+    display: none;
+    background: url(../img/lsb-loading.gif) no-repeat center center;
+    background-size: 100px 100px;
+    background-color:rgba(0, 0, 0, 0.2);
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 9999999;
+}
+
 /* Estilos originales de Petkopara Bundle */
 .filters-right {
     float: right;

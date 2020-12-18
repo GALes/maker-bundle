@@ -51,7 +51,18 @@ final class EntityDetails
         $fieldsWithTypes = [];
         
         foreach ($this->metadata->fieldMappings as $fieldName => $metadata) {
+            // agrego la metadata de cada campo
             $fieldsWithTypes[$fieldName] = ['metadata' => $metadata];
+
+            // Si es del tipo datetime o date se agrega el arreglo de opciones para el datepicker
+            if ($metadata['type'] == 'datetime' || $metadata['type'] == 'date') {
+                $fieldsWithTypes[$fieldName]['type'] = "Symfony\\Component\\Form\\Extension\\Core\\Type\\" . ($metadata['type'] == 'datetime' ? 'DateTimeType' : 'DateType');
+                $fieldsWithTypes[$fieldName]['options_code'] =
+        "                'widget'    => 'single_text',\n" .
+        "                'format'    => " . ($metadata['type'] == 'datetime' ? "'YYYY-MM-dd HH:mm'" : "'YYYY-MM-dd'") . ",\n" .
+        "                'attr'      => ['class' => '" . $metadata['type'] . "picker'],"
+                ;
+            }
         }
         
         // Remove the primary key field if it's not managed manually

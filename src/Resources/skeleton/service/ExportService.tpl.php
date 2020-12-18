@@ -78,6 +78,7 @@ class <?= $class_name ?>
         $response->headers->set('Pragma', 'public');
         $response->headers->set('Cache-Control', 'maxage=1');
         $response->headers->set('Content-Disposition', $dispositionHeader);
+        $response->headers->set('Set-Cookie:FileLoading=true', '');
 
         return $response;
     }
