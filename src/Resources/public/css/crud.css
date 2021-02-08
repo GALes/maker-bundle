@@ -38,6 +38,11 @@ body {
     color: #fff;
 }
 
+.navbar-nav .dropdown-menu {
+    background-color: #0875bc;
+    /*color: #fff;*/
+}
+
 .navbar.navbar-menu .nav-item {
     text-transform: uppercase;
     margin-right: 20px;
@@ -57,7 +62,7 @@ body {
 
 .navbar.navbar-menu .nav-item .active {
     background: whitesmoke;
-    color: #0875bc;
+    color: #0875bc !important;
 }
 
 .dropdown-menu {

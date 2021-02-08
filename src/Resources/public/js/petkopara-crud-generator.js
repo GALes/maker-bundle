@@ -1,15 +1,18 @@
 function toggleAll(source) {
-    var aInputs = document.getElementsByTagName('input');
+    // var source = document.getElementById('check-all-thead');
+
+    console.log(source);
+    var aInputs = document.getElementsByClassName("check-all-row");
+    console.log(aInputs);
     for (var i = 0; i < aInputs.length; i++) {
-        if (aInputs[i] != source && aInputs[i].className == source.className) {
-            aInputs[i].checked = source.checked;
-        }
+        console.log(aInputs[i]);
+        aInputs[i].checked = source.checked;
     }
+
     if (source.checked) {
         document.getElementById('bulkSubmitBtn').disabled = false;
     } else {
         document.getElementById('bulkSubmitBtn').disabled = true;
-
     }
 }
 
@@ -35,3 +38,40 @@ function bulkSubmitBtnManage()
     }
 }
 
+$(function() {
+
+    $('#check-all-thead').on('click', function() {
+        toggleAll(this)
+    });
+    $('.check-all-row').on('click', function () {
+        bulkSubmitBtnManage();
+    });
+
+    $('#filters :input').change(function () {
+        $('#button-export').attr('data-status','disabled');
+    });
+
+    $('#button-export').click('', function () {
+        if ( $('#button-export').attr('data-status') == 'disabled' ) {
+            $('#alert-container').append(
+                `<div class="alert alert-danger">
+                    Los filtros cambiaron, debe buscar primero antes de exportar
+                </div>`
+            );
+            return false;
+        }
+        else {
+            $('#loading').show();
+            var interval = setInterval(function () {
+                if ($.cookie('FileLoading')) {
+                    $('#loading').hide();
+                    $.removeCookie('FileLoading');
+                    clearInterval(interval);
+                }
+            }, 1000);
+
+            return true;
+        }
+    });
+
+});

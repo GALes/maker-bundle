@@ -28,7 +28,7 @@
         <table class="table table-striped table-hover table-bordered" cellspacing="0" cellpadding="0">
             <thead>
                 <tr>
-                    <th width="20px"><input type="checkbox" class="check-all" onclick="toggleAll(this)"></th>
+                    <th width="20px"><input id="check-all-thead" type="checkbox" class="check-all"></th>
 
                 {% import "@GALesMaker/macros/th_sortable.html.twig" as macros %}
 <?php foreach ($entity_fields as $field): ?>
@@ -40,7 +40,7 @@
             <tbody>
             {% for <?=$entity_twig_var_singular ;?> in <?=$entity_twig_var_plural ;?> %}
                 <tr>
-                    <td><input type="checkbox" name="ids[]" onclick='bulkSubmitBtnManage();' class="check-all" value="{{<?=$entity_twig_var_singular ;?>.<?=$entity_identifier ?>}}"/></td>
+                    <td><input type="checkbox" name="ids[]" onclick='bulkSubmitBtnManage();' class="check-all check-all-row" value="{{<?=$entity_twig_var_singular ;?>.<?=$entity_identifier ?>}}"/></td>
 <?php foreach ($entity_fields as $field): ?>
                     <td>{{ <?= $custom_helper->getEntityFieldPrintCode($entity_twig_var_singular, $field) ?> }}</td>
 <?php endforeach; ?>
@@ -86,39 +86,7 @@
 {% endblock %}
 
 {% block javascripts %}
-{{ parent() }}
-
-<script>
-    $(function() {
-
-        $('#filters :input').change(function () {
-            $('#button-export').attr('data-status','disabled');
-        });
-
-        $('#button-export').click('', function () {
-            if ( $('#button-export').attr('data-status') == 'disabled' ) {
-                $('#alert-container').append(
-                    `<div class="alert alert-danger">
-                            Los filtros cambiaron, debe buscar primero antes de exportar
-                        </div>`
-                );
-                return false;
-            }
-            else {
-                $('#loading').show();
-                var interval = setInterval(function () {
-                    if ($.cookie('FileLoading')) {
-                        $('#loading').hide();
-                        $.removeCookie('FileLoading');
-                        clearInterval(interval);
-                    }
-                }, 1000);
-
-                return true;
-            }
-        });
-    });
-</script>
+    {{ parent() }}
 
 {% endblock %}
 
