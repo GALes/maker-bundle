@@ -34,12 +34,12 @@ body {
 }
 
 .navbar.navbar-menu {
-    background-color: #0875bc;
+    background-color: #4570b4;
     color: #fff;
 }
 
 .navbar-nav .dropdown-menu {
-    background-color: #0875bc;
+    background-color: #4570b4;
     /*color: #fff;*/
 }
 
@@ -56,17 +56,17 @@ body {
 
 .navbar.navbar-menu .nav-item a:hover {
     background-color: #efefef;
-    color: #0875bc;
+    color: #4570b4;
     font-weight: 700;
 }
 
 .navbar.navbar-menu .nav-item .active {
     background: whitesmoke;
-    color: #0875bc !important;
+    color: #4570b4 !important;
 }
 
 .dropdown-menu {
-    background: #0875bc;
+    background: #4570b4;
     padding: 2px;
 }
 
@@ -75,7 +75,7 @@ h4 {
 }
 
 footer {
-    background-color: #0875bc;
+    background-color: #4570b4;
     color: #fff;
 }
 
@@ -100,12 +100,12 @@ label.required {
 
 .btn-primary {
     color: #fff;
-    background-color: #0875bc;
-    border-color: #0875bc;
+    background-color: #4570b4;
+    border-color: #4570b4;
 }
 .btn-primary:hover {
-    background-color: #0875bc;
-    border-color: #0875bc;
+    background-color: #4570b4;
+    border-color: #4570b4;
     opacity: 0.8;
 }
 
