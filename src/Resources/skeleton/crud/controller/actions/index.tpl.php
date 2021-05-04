@@ -7,12 +7,15 @@
         $em = $this->getDoctrine()->getManager();
         /** @var QueryBuilder $queryBuilder */
         $queryBuilder = $em->getRepository(<?= $entity_class_name ?>::class)->createQueryBuilder('zzz');
-
         $filter_response = $this->filter($queryBuilder, $request);
         if ($filter_response instanceof RedirectResponse) {
             return $filter_response;
         }
         list($filterForm, $queryBuilder) = $filter_response;
+
+        /*** Agregar condiciones de filtrado extra aquí, si se agregan antes del filter() se pierden ***/
+        // $queryBuilder->innerJoin()->andWhere()->setParameters([]);
+
         $querryExport = $queryBuilder->getQuery();
 
         list($<?= $entity_var_plural; ?>, $pagerHtml) = $this->paginator($queryBuilder, $request);
