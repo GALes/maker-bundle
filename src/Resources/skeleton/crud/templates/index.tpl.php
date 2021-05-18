@@ -61,7 +61,7 @@
 <div class="row">
     <div class="col-md-3 pull-left">
         <div class="input-group mb-3">
-            <select class = "form-control" name="bulk_action" >
+            <select class = "form-control not-selectized" name="bulk_action" >
                 <option value="delete">ELIMINAR</option>
             </select>
             <div class="input-group-append">

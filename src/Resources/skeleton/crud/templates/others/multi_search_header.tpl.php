@@ -1,7 +1,7 @@
     <div class="col-md-3 pull-left">
         <!-- PAGE SIZE -->
         <div class="pagination form-inline ">
-            <select class = "form-control"  onchange="window.location = this.value" >
+            <select class = "form-control not-selectized"  onchange="window.location = this.value" >
                 <option value='{{ path('<?= $route_name ?>_index', app.request.query.all|merge({'pcg_show': '10'})) }}' {% if app.request.get('pcg_show') == 10 %} selected {% endif %}>10</option>
                 <option value='{{ path('<?= $route_name ?>_index', app.request.query.all|merge({'pcg_show': '20'})) }}' {% if app.request.get('pcg_show') == 20 %} selected {% endif %}>20</option>
                 <option value='{{ path('<?= $route_name ?>_index', app.request.query.all|merge({'pcg_show': '50'})) }}' {% if app.request.get('pcg_show') == 50 %} selected {% endif %}>50</option>

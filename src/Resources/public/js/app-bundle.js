@@ -18,8 +18,26 @@ $( () => {
     $('.check-all-row').on('click', () => bulkSubmitBtnManage() );
 
     bsCustomFileInput.init();
+    /* Mostrar el boton de visualizacion en los fileInputs */
+    var fileInputs = $(".custom-file");
+    var i = 0;
+    fileInputs.each(function () {
+        $(this).before(`<div id="input-group-file${i}" class="input-group"></div>`)
+        $(this).detach();
+        $(this).appendTo("#input-group-file" + i++);
 
-    $("select").selectize({
+        // var fileName = $(this).find('input').attr('placeholder');
+        var fileUrl = $(this).find('input').data('fileurl');
+        if (fileUrl) {
+            $(this).after(
+                `<div class="input-group-append">
+                    <a href="${fileUrl}" target="_blank" class="btn btn-outline-primary"><span class="fa fa-download"></a>
+                </div>`
+            );
+        }
+    });
+
+    $("select:not('.not-selectized')").selectize({
         create: true,
         sortField: 'text'
     });
