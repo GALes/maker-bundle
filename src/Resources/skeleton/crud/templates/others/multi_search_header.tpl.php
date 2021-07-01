@@ -20,6 +20,11 @@
             {{ form_widget(filterForm.search, { 'attr': {'class': 'form-control'} }) }}
             {{ form_rest(filterForm) }}
             <div class="input-group-append">
+                <button class="btn btn-primary" type="submit" name="filter_action" value="filter">
+                    <span class="fa fa-search"></span>
+                </button>
+            </div>
+            <div class="input-group-append">
                 <button class="btn btn-info"  type="submit" name="filter_action" value="reset">
                     <span class="fa fa-remove" aria-hidden="true"></span>
                 </button>
@@ -27,11 +32,6 @@
             <div class="input-group-append">
                 <button class="btn btn-secondary" type="submit" name="filter_action" id="button-export" value="exportXlsx">
                     <span class="fa fa-download" aria-hidden="true"></span>
-                </button>
-            </div>
-            <div class="input-group-append">
-                <button class="btn btn-primary" type="submit" name="filter_action" value="filter">
-                    <span class="fa fa-search"></span>
                 </button>
             </div>
         </div>
