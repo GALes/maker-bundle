@@ -14,8 +14,10 @@ namespace GALes\MakerBundle\Maker;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\Common\Inflector\Inflector as LegacyInflector;
 use Doctrine\Inflector\InflectorFactory;
+use Doctrine\Inflector\Language;
 use GALes\MakerBundle\Doctrine\EntityDetails;
 use GALes\MakerBundle\Helper\GeneratorTwigHelper;
+use GALes\MakerBundle\Renderer\CrudServiceRenderer;
 use GALes\MakerBundle\Renderer\ExportServiceRenderer;
 use GALes\MakerBundle\Renderer\FormFilterTypeRenderer;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
@@ -48,7 +50,7 @@ final class MakeCrud extends AbstractMaker
 
     private $formTypeRenderer;
 
-    private $exportServiceRenderer;
+    private $crudServiceRenderer;
 
     private $inflector;
 
@@ -60,28 +62,34 @@ final class MakeCrud extends AbstractMaker
 
     public function __construct(
         DoctrineHelper          $doctrineHelper, 
-        FormTypeRenderer        $formTypeRenderer, 
-        ExportServiceRenderer   $exportServiceRenderer,
+        FormTypeRenderer        $formTypeRenderer,
+        CrudServiceRenderer     $crudServiceRenderer,
         Kernel                  $appKernel, 
         GeneratorTwigHelper     $generatorTwigHelper, 
         $roleHierarchy)
     {
         $this->doctrineHelper           = $doctrineHelper;
         $this->formTypeRenderer         = $formTypeRenderer;
-        $this->exportServiceRenderer    = $exportServiceRenderer;
+        $this->crudServiceRenderer      = $crudServiceRenderer;
         $this->appKernel                = $appKernel;
         $this->generatorTwigHelper      = $generatorTwigHelper;
         
         $this->availableRoles           = $this->extractAvailableRoles($roleHierarchy);
 
         if (class_exists(InflectorFactory::class)) {
-            $this->inflector = InflectorFactory::create()->build();
+            $this->inflector = InflectorFactory::createForLanguage(Language::SPANISH)->build();
         }
+        $this->crudServiceRenderer = $crudServiceRenderer;
     }
 
     public static function getCommandName(): string
     {
         return 'gales:make:crud';
+    }
+
+    public static function getCommandDescription(): string
+    {
+        return 'Creates CRUD for Doctrine entity class with style ;)';
     }
 
     /**
@@ -150,8 +158,8 @@ final class MakeCrud extends AbstractMaker
             'Controller'
         );
 
-        $exportServiceClassDetails = $generator->createClassNameDetails(
-            $entityClassDetails->getRelativeNameWithoutSuffix().'ExportService',
+        $crudServiceClassDetails = $generator->createClassNameDetails(
+            $entityClassDetails->getRelativeNameWithoutSuffix().'CrudService',
             'Service\\',
             'Service'
         );
@@ -182,15 +190,18 @@ final class MakeCrud extends AbstractMaker
 
         $templatesBasePath = $this->appKernel->getProjectDir() . '/vendor/gales/maker-bundle/src/Resources/skeleton/';
 
-        $this->exportServiceRenderer->generateClass(
-            $exportServiceClassDetails->getFullName(),
-            $templatesBasePath . 'service/ExportService.tpl.php',
+        $this->crudServiceRenderer->generateClass(
+            $crudServiceClassDetails->getFullName(),
+            $templatesBasePath . 'service/CrudService.tpl.php',
             [
                 'entity_class_name'             => $entityClassDetails->getShortName(),
                 'entity_full_class_name'        => $entityClassDetails->getFullName(),
                 'entity_var_plural'             => $entityVarPlural,
                 'entity_var_singular'           => $entityVarSingular,
                 'entity_fields'                 => $entityDoctrineDetails->getFormFields(),
+                'entity_identifier'             => $entityDoctrineDetails->getIdentifier(),
+                'form_filter_class_name'        => $formFilterClassDetails->getShortName(),
+                'route_name'                    => $routeName,
                 'custom_helper'                 => $this->generatorTwigHelper,
             ]
         );
@@ -213,7 +224,7 @@ final class MakeCrud extends AbstractMaker
                     'entity_var_singular'               => $entityVarSingular,
                     'entity_twig_var_singular'          => $entityTwigVarSingular,
                     'entity_identifier'                 => $entityDoctrineDetails->getIdentifier(),
-                    'export_service_full_class_name'    => $exportServiceClassDetails->getFullName(),
+                    'crud_service_full_class_name'      => $crudServiceClassDetails->getFullName(),
                 ],
                 $repositoryVars
             )

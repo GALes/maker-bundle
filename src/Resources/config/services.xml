@@ -19,7 +19,7 @@
         <service id="gales.maker.make_crud" class="GALes\MakerBundle\Maker\MakeCrud">
             <argument type="service" id="maker.doctrine_helper" />
             <argument type="service" id="gales.maker.renderer.form_type_renderer" />
-            <argument type="service" id="gales.maker.renderer.export_service_renderer" />
+            <argument type="service" id="gales.maker.renderer.crud_service_renderer" />
             <argument type="service" id="kernel" />
             <argument type="service" id="gales.maker.generator_twig_helper" />
             <argument type="collection">%security.role_hierarchy.roles%</argument>
@@ -30,7 +30,7 @@
             <argument type="service" id="maker.generator" />
         </service>
 
-        <service id="gales.maker.renderer.export_service_renderer" class="GALes\MakerBundle\Renderer\ExportServiceRenderer">
+        <service id="gales.maker.renderer.crud_service_renderer" class="GALes\MakerBundle\Renderer\CrudServiceRenderer">
             <argument type="service" id="maker.generator" />
             <argument type="service" id="maker.file_manager" />
         </service>
