@@ -3,6 +3,8 @@
 namespace <?= $namespace ?>;
 
 use <?= $entity_full_class_name ?>;
+use <?= $form_full_class_name ?>;
+use <?= $form_filter_full_class_name ?>;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Internal\Hydration\IterableResult;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -14,6 +16,9 @@ use Petkopara\MultiSearchBundle\Service\MultiSearchBuilderService;
 use Pagerfanta\Pagerfanta;
 use Pagerfanta\Adapter\DoctrineORMAdapter;
 use Pagerfanta\View\TwitterBootstrap4View;
+use Doctrine\ORM\QueryBuilder;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 
 /**

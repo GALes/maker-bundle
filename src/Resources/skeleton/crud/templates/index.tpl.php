@@ -6,7 +6,7 @@
 <div class="row mt-5">
 <?php include 'others/flash_messages.tpl.php' ?>
     <div class="col-lg-12">
-        <h4>Listado de <?= $custom_helper->asHumanWords($entity_class_name) ?></h4>
+        <h4>Listado de <?= $custom_helper->asHumanWords($entity_twig_var_plural) ?></h4>
     </div>
 
 <?php include 'others/multi_search_header.tpl.php' ?>

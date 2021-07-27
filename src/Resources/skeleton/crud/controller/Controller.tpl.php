@@ -4,13 +4,11 @@ namespace <?= $namespace ?>;
 
 use <?= $entity_full_class_name ?>;
 use <?= $form_full_class_name ?>;
-use <?= $form_filter_full_class_name ?>;
 <?php if (isset($repository_full_class_name)): ?>
 use <?= $repository_full_class_name ?>;
 <?php endif ?>
 use <?= $crud_service_full_class_name ?>;
 use Symfony\Bundle\FrameworkBundle\Controller\<?= $parent_class_name ?>;
-use Doctrine\ORM\Internal\Hydration\IterableResult;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
