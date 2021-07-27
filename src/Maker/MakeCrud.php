@@ -188,6 +188,7 @@ final class MakeCrud extends AbstractMaker
         $routeName = Str::asRouteName($controllerClassDetails->getRelativeNameWithoutSuffix());
         $templatesPath = Str::asFilePath($controllerClassDetails->getRelativeNameWithoutSuffix());
 
+        $templateBaseTwig = '@GALesMaker/base.html.twig';
         $templatesBasePath = $this->appKernel->getProjectDir() . '/vendor/gales/maker-bundle/src/Resources/skeleton/';
 
         $this->crudServiceRenderer->generateClass(
@@ -249,22 +250,21 @@ final class MakeCrud extends AbstractMaker
             $templatesBasePath . 'form/FilterType.tpl.php'
         );
 
+        $io->writeln([
+            'By default, the created views extends the <comment>@GALesMaker/base.html.twig</comment>',
+            'You can also set your template which the views to extend, for example <comment>base.html.twig</comment>',
+        ]);
+        $question = new Question('Base template for the views', '@GALesMaker/base.html.twig');
+        $question->setAutocompleterValues([
+            '@GALesMaker/base.html.twig',
+            'base.html.twig',
+        ]);
+        if ($answer = $io->askQuestion($question)) {
+            $templateBaseTwig = $answer;
+        }
         $templates = [
-            '_delete_form' => [
-                'route_name'                => $routeName,
-                'entity_twig_var_singular'  => $entityTwigVarSingular,
-                'entity_identifier'         => $entityDoctrineDetails->getIdentifier(),
-                'custom_helper'             => $this->generatorTwigHelper,
-            ],
-            '_form' => [],
-            'edit' => [
-                'entity_class_name'         => $entityClassDetails->getShortName(),
-                'entity_twig_var_singular'  => $entityTwigVarSingular,
-                'entity_identifier'         => $entityDoctrineDetails->getIdentifier(),
-                'route_name'                => $routeName,
-                'custom_helper'             => $this->generatorTwigHelper
-            ],
             'index' => [
+                'template_base_twig'        => $templateBaseTwig,
                 'entity_class_name'         => $entityClassDetails->getShortName(),
                 'entity_twig_var_plural'    => $entityTwigVarPlural,
                 'entity_twig_var_singular'  => $entityTwigVarSingular,
@@ -273,7 +273,16 @@ final class MakeCrud extends AbstractMaker
                 'route_name'                => $routeName,
                 'custom_helper'             => $this->generatorTwigHelper
             ],
+            'edit' => [
+                'template_base_twig'        => $templateBaseTwig,
+                'entity_class_name'         => $entityClassDetails->getShortName(),
+                'entity_twig_var_singular'  => $entityTwigVarSingular,
+                'entity_identifier'         => $entityDoctrineDetails->getIdentifier(),
+                'route_name'                => $routeName,
+                'custom_helper'             => $this->generatorTwigHelper
+            ],
             'new' => [
+                'template_base_twig'        => $templateBaseTwig,
                 'entity_class_name'         => $entityClassDetails->getShortName(),
                 'entity_twig_var_singular'  => $entityTwigVarSingular,
                 'entity_identifier'         => $entityDoctrineDetails->getIdentifier(),
@@ -281,6 +290,7 @@ final class MakeCrud extends AbstractMaker
                 'custom_helper'             => $this->generatorTwigHelper
             ],
             'show' => [
+                'template_base_twig'        => $templateBaseTwig,
                 'entity_class_name'         => $entityClassDetails->getShortName(),
                 'entity_twig_var_singular'  => $entityTwigVarSingular,
                 'entity_identifier'         => $entityDoctrineDetails->getIdentifier(),

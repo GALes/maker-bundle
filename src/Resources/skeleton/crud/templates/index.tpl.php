@@ -1,4 +1,4 @@
-<?= $custom_helper->getHeadPrintCode('Listado de ' . $custom_helper->asHumanWords($entity_class_name), '@GALesMaker/base.html.twig' ); ?>
+<?= $custom_helper->getHeadPrintCode('Listado de ' . $custom_helper->asHumanWords($entity_class_name), $template_base_twig ); ?>
 
 {% block body %}
 
