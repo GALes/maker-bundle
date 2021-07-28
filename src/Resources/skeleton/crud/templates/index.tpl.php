@@ -9,7 +9,12 @@
         <h4>Listado de <?= $custom_helper->asHumanWords($entity_twig_var_plural) ?></h4>
     </div>
 
-<?php include 'others/multi_search_header.tpl.php' ?>
+<?php
+if ( $filter_type === 'input' )
+    include 'others/multi_search_header.tpl.php';
+else if ( $filter_type === 'form' )
+    include 'others/form_filter_header.tpl.php';
+?>
 
     <div class="col-md-12">
         {%- if form_errors(filterForm) %}

@@ -12,7 +12,11 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Yectep\PhpSpreadsheetBundle\Factory;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+<?php if ( $filter_type === 'input' ): ?>
 use Petkopara\MultiSearchBundle\Service\MultiSearchBuilderService;
+<?php elseif ( $filter_type === 'form' ): ?>
+use Lexik\Bundle\FormFilterBundle\Filter\FilterBuilderUpdater;
+<?php endif; ?>
 use Pagerfanta\Pagerfanta;
 use Pagerfanta\Adapter\DoctrineORMAdapter;
 use Pagerfanta\View\TwitterBootstrap4View;
@@ -39,15 +43,23 @@ class <?= $class_name ?>
         Factory                     $phpExcelFactory,
         EntityManagerInterface      $em,
         FormFactoryInterface        $formFactory,
-        MultiSearchBuilderService   $multiSearchBuilderService,
-        UrlGeneratorInterface       $urlGenerator
+        UrlGeneratorInterface       $urlGenerator,
+<?php if ( $filter_type === 'input' ): ?>
+        MultiSearchBuilderService   $multiSearchBuilderService
+<?php elseif ( $filter_type === 'form' ): ?>
+        FilterBuilderUpdater $lexikQueryBuilderUpdater
+<?php endif; ?>
     )
     {
         $this->phpExcelFactory = $phpExcelFactory;
         $this->em = $em;
         $this->formFactory = $formFactory;
-        $this->multiSearchBuilderService = $multiSearchBuilderService;
         $this->urlGenerator = $urlGenerator;
+<?php if ( $filter_type === 'input' ): ?>
+        $this->multiSearchBuilderService = $multiSearchBuilderService;
+<?php elseif ( $filter_type === 'form' ): ?>
+        $this->lexikQueryBuilderUpdater = $lexikQueryBuilderUpdater;
+<?php endif; ?>
     }
 
     public function exportXlsx(IterableResult $iterableResult)
@@ -135,7 +147,11 @@ class <?= $class_name ?>
                 // Si se presiono el boton de busqueda del filtro
                 if ($filterForm->isSubmitted() && $filterForm->isValid()) {
                     // Build the query from the given form object
+<?php if ( $filter_type === 'input' ): ?>
                     $this->multiSearchBuilderService->searchForm($queryBuilder, $filterForm->get('search'));
+<?php elseif ( $filter_type === 'form' ): ?>
+                    $this->lexikQueryBuilderUpdater->addFilterConditions($filterForm, $queryBuilder);
+<?php endif; ?>
 
                     // Save filter to session
                     $filterUrl = $request->query->all();

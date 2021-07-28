@@ -63,12 +63,10 @@ Ejecutar el comando
 
 Luego seleccionar la Entidad a la cual generar el ABM. Archivos que se generan
 
-    created: src/Service/<entity_name>ExportService.php (Exportacion del listado en formato Xlsx)
+    created: src/Service/<entity_name>CrudService.php (Logica auxiliar para el funcionamiento del ABM)
     created: src/Controller/<entity_name>Controller.php (Controlador con la logica del ABM)
     created: src/Form/<entity_name>Type.php (Formulario para el alta/edicion de la entidad)
     created: src/Form/<entity_name>FilterType.php (Filtro rapido del listado)
-    created: templates/<entity_name>/_delete_form.html.twig (No se usa, probablemente se elimine en nuevas versiones)
-    created: templates/<entity_name>/_form.html.twig (No se usa, probablemente se elimine en nuevas versiones)
     created: templates/<entity_name>/edit.html.twig (Vista de edicion de la entidad)
     created: templates/<entity_name>/index.html.twig  (Vista para el listado de entidades)
     created: templates/<entity_name>/new.html.twig  (Vista de creacion de nueva entidad)

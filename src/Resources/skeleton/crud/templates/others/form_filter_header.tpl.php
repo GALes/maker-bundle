@@ -4,14 +4,13 @@
 <div class="col-md-12">
     <div  id="filters" class="collapse">
 
-        <form class="well" action="{{ "{{ path('"~ route_name_prefix ~"') }}" }}" method="get" >
+        <form class="well" action={{ path('<?= $route_name ?>_index') }} method="get" >
             <div class="row">
-                {% for field, metadata in fields %} 
-                    <div class="col-md-6">{{"{{ form_row(filterForm."~field~") }}"}}</div>
-
-                {% endfor %}
+<?php foreach ($entity_fields as $field=>$metadata): ?>
+                    <div class="col-md-6">{{ form_row(filterForm.<?= $field ?>) }}</div>
+<?php endforeach; ?>
                 <div class="col-md-6">
-                    {{ "{{ form_rest(filterForm) }}" }}
+                    {{ form_rest(filterForm) }}
                 </div>
                 <div class="col-md-12">
                     <div class="form-group">
@@ -27,7 +26,7 @@
 
 
 <div class="col-md-3 pull-left">
-    {% include 'crud/views/others/page_size.html.twig.twig' %}
+<?php include 'others/page_size.html.tpl.php' ?>
 </div>
 
 <div class="col-md-6">
@@ -38,7 +37,7 @@
 <div class="col-md-3">
 
     {% if 'new' in actions %}
-        <a class="btn btn-primary h3 pull-right" href="{{ "{{ path('"~ route_name_prefix ~"_new') }}" }}" style="margin-bottom:10px">
+        <a class="btn btn-primary h3 pull-right" href={{ path('<?= $route_name ?>_new') }} style="margin-bottom:10px">
             <span class="fa fa-plus" aria-hidden="true"></span> Nuevo
         </a>
     {% endif %}

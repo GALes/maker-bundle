@@ -69,6 +69,7 @@ final class GeneratorTwigHelper
 
     public function getHeadPrintCode( $title, $baseTemplate = null ): string
     {
+        // TODO: Revertir la condición para que por defecto se extienda de '@GALesMaker/base.html.twig'
         if ( is_string($baseTemplate) && trim($baseTemplate) != '' ) {
             return <<<TWIG
 {% extends '$baseTemplate' %}

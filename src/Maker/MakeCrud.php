@@ -34,6 +34,7 @@ use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Routing\Annotation\Route;
@@ -164,20 +165,44 @@ final class MakeCrud extends AbstractMaker
             'Service'
         );
 
-        $iter = 0;
-        do {
-            $formClassDetails = $generator->createClassNameDetails(
-                $entityClassDetails->getRelativeNameWithoutSuffix().($iter ?: '').'Type',
-                'Form\\',
-                'Type'
-            );
-            $formFilterClassDetails = $generator->createClassNameDetails(
-                $entityClassDetails->getRelativeNameWithoutSuffix().($iter ?: '').'FilterType',
-                'Form\\',
-                'FilterType'
-            );
-            ++$iter;
-        } while (class_exists($formClassDetails->getFullName()));
+        $io->writeln(array(
+            'By default, the generator generate filter code.',
+            '<comment>input</comment> to use PetkoparaMultiSearchBundle to search only with one input in the entity.',
+            '<comment>form</comment> to use LexikFormFilterBundle to search in the entity.',
+            '<comment>none</comment> use this to not generate any filter code.',
+        ));
+        $question = new Question('Filter Type (input, form, none)', 'input');
+        $question->setAutocompleterValues([
+            'input',
+            'form',
+            'none',
+        ]);
+        $filterType = $io->askQuestion($question);
+        if ($filterType !== 'none') {
+            $iter = 0;
+            do {
+                $formClassDetails = $generator->createClassNameDetails(
+                    $entityClassDetails->getRelativeNameWithoutSuffix().($iter ?: '').'Type',
+                    'Form\\',
+                    'Type'
+                );
+                if ($filterType === 'input') {
+                    $formFilterClassDetails = $generator->createClassNameDetails(
+                        $entityClassDetails->getRelativeNameWithoutSuffix().($iter ?: '').'FilterType',
+                        'Form\\',
+                        'FilterType'
+                    );
+                }
+                else {
+                    $formFilterClassDetails = $generator->createClassNameDetails(
+                        $entityClassDetails->getRelativeNameWithoutSuffix().($iter ?: '').'FullFilterType',
+                        'Form\\',
+                        'FullFilterType'
+                    );
+                }
+                ++$iter;
+            } while (class_exists($formClassDetails->getFullName()));
+        }
 
         $entityVarPlural = lcfirst($this->pluralize($entityClassDetails->getShortName()));
         $entityVarSingular = lcfirst($this->singularize($entityClassDetails->getShortName()));
@@ -203,6 +228,7 @@ final class MakeCrud extends AbstractMaker
                 'entity_identifier'             => $entityDoctrineDetails->getIdentifier(),
                 'form_full_class_name'          => $formClassDetails->getFullName(),
                 'form_class_name'               => $formClassDetails->getShortName(),
+                'filter_type'                   => $filterType,
                 'form_filter_full_class_name'   => $formFilterClassDetails->getFullName(),
                 'form_filter_class_name'        => $formFilterClassDetails->getShortName(),
                 'route_name'                    => $routeName,
@@ -231,8 +257,8 @@ final class MakeCrud extends AbstractMaker
                 $repositoryVars
             )
         );
-        
-//        dump($entityDoctrineDetails->getFormFields());
+
+//        dd($entityDoctrineDetails->getFormFields());
         $this->formTypeRenderer->render(
             $formClassDetails,
             $entityDoctrineDetails->getFormFields(),
@@ -241,14 +267,17 @@ final class MakeCrud extends AbstractMaker
             [],
             $templatesBasePath . 'form/Type.tpl.php'
         );
-        $this->formTypeRenderer->render(
-            $formFilterClassDetails,
-            $entityDoctrineDetails->getFormFields(),
-            $entityClassDetails,
-            [],
-            [],
-            $templatesBasePath . 'form/FilterType.tpl.php'
-        );
+
+        if ($filterType !== 'none') {
+            $this->formTypeRenderer->render(
+                $formFilterClassDetails,
+                $filterType === 'input' ? $entityDoctrineDetails->getFormFields() : $entityDoctrineDetails->getLexikFormFields(),
+                $entityClassDetails,
+                [],
+                [],
+                $templatesBasePath . ($filterType === 'input' ? 'form/FilterType.tpl.php' : 'form/FullFilterType.tpl.php')
+            );
+        }
 
         $io->writeln([
             'By default, the created views extends the <comment>@GALesMaker/base.html.twig</comment>',
@@ -265,6 +294,7 @@ final class MakeCrud extends AbstractMaker
         $templates = [
             'index' => [
                 'template_base_twig'        => $templateBaseTwig,
+                'filter_type'               => $filterType,
                 'entity_class_name'         => $entityClassDetails->getShortName(),
                 'entity_twig_var_plural'    => $entityTwigVarPlural,
                 'entity_twig_var_singular'  => $entityTwigVarSingular,

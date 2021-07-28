@@ -90,4 +90,68 @@ final class EntityDetails
 
         return $fieldsWithTypes;
     }
+
+    public function getLexikFormFields()
+    {
+        $fieldsWithTypes = [];
+
+        foreach ($this->metadata->fieldMappings as $fieldName => $metadata) {
+            // agrego la metadata de cada campo
+            $fieldsWithTypes[$fieldName] = ['metadata' => $metadata];
+
+            switch ($metadata['type']) {
+                case 'integer':
+                case 'float':
+                    $fieldsWithTypes[$fieldName]['type'] = "Lexik\\Bundle\\FormFilterBundle\\Filter\\Form\\Type\\NumberFilterType";
+                  break;
+                case 'string':
+//                  TODO: Implementar tipo Boolean
+//                case 'boolean':
+//                  break;
+//                  TODO: Implementar tipo Date
+//                case 'datetime':
+//                case 'date':
+//                    $fieldsWithTypes[$fieldName]['type'] = "Symfony\\Component\\Form\\Extension\\Core\\Type\\" . ($metadata['type'] == 'datetime' ? 'DateTimeType' : 'DateType');
+//                    $fieldsWithTypes[$fieldName]['options_code'] =
+//                        "                'widget'    => 'single_text',\n" .
+//                        "                'format'    => " . ($metadata['type'] == 'datetime' ? "'YYYY-MM-dd HH:mm'" : "'YYYY-MM-dd'") . ",\n" .
+//                        "                'attr'      => ['class' => '" . $metadata['type'] . "picker'],"
+//                    ;
+//                  break;
+//                  TODO: Implementar tipo Class (Joins)
+//
+                case 'text':
+                default:
+                    $fieldsWithTypes[$fieldName]['type'] = "Lexik\\Bundle\\FormFilterBundle\\Filter\\Form\\Type\\TextFilterType";
+                    $fieldsWithTypes[$fieldName]['options_code'] =
+                        "                'condition_pattern'    => FilterOperands::STRING_CONTAINS,";
+                    break;
+            }
+        }
+
+        // Remove the primary key field if it's not managed manually
+        // MOD: Agrego el campo como campo del tipo identifier
+        if (!$this->metadata->isIdentifierNatural()) {
+            foreach ($this->metadata->identifier as $identifier) {
+                $fieldsWithTypes[$identifier]['metadata']['identifier'] = true;
+            }
+        }
+
+        // TODO: Por el momento no se soportan declaraciones Doctrine Embeddables dentro del objeto
+        if (!empty($this->metadata->embeddedClasses)) {
+            dump('No se soportan declaraciones Doctrine Embeddables dentro del objeto, serán omitidas');
+//            foreach (array_keys($this->metadata->embeddedClasses) as $embeddedClassKey) {
+//                $fields = array_filter($fields, function ($v) use ($embeddedClassKey) {
+//                    return 0 !== strpos($v, $embeddedClassKey.'.');
+//                });
+//            }
+        }
+
+        foreach ($this->metadata->associationMappings as $fieldName => $relation) {
+            $fieldsWithTypes[$fieldName] = ['metadata' => $relation];
+            $fieldsWithTypes[$fieldName]['metadata']['identifier'] = 'false';
+        }
+
+        return $fieldsWithTypes;
+    }
 }
