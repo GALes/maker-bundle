@@ -104,28 +104,54 @@ final class EntityDetails
                 case 'float':
                     $fieldsWithTypes[$fieldName]['type'] = "Lexik\\Bundle\\FormFilterBundle\\Filter\\Form\\Type\\NumberFilterType";
                   break;
-                case 'string':
-//                  TODO: Implementar tipo Boolean
-//                case 'boolean':
-//                  break;
-//                  TODO: Implementar tipo Date
-//                case 'datetime':
-//                case 'date':
-//                    $fieldsWithTypes[$fieldName]['type'] = "Symfony\\Component\\Form\\Extension\\Core\\Type\\" . ($metadata['type'] == 'datetime' ? 'DateTimeType' : 'DateType');
-//                    $fieldsWithTypes[$fieldName]['options_code'] =
-//                        "                'widget'    => 'single_text',\n" .
-//                        "                'format'    => " . ($metadata['type'] == 'datetime' ? "'YYYY-MM-dd HH:mm'" : "'YYYY-MM-dd'") . ",\n" .
-//                        "                'attr'      => ['class' => '" . $metadata['type'] . "picker'],"
-//                    ;
-//                  break;
+                case 'boolean':
+                    $fieldsWithTypes[$fieldName]['type'] = "Lexik\\Bundle\\FormFilterBundle\\Filter\\Form\\Type\\ChoiceFilterType";
+                    $fieldsWithTypes[$fieldName]['options_code'] =
+                        "                \n" .
+                        "                'choices' => [\n" .
+                        "                    '' => '',\n" .
+                        "                    'Si' => 1,\n" .
+                        "                    'No' => 0,\n" .
+                        "                ],\n" .
+                        "//                'label' => '(Nombre del campo)',\n" .
+                        "                'placeholder' => '',\n" .
+                        "                'empty_data' => '',\n" .
+                        "                'required' => false"
+                    ;
+                  break;
+                case 'datetime':
+                case 'date':
+                    $fieldsWithTypes[$fieldName]['type'] = "Lexik\\Bundle\\FormFilterBundle\\Filter\\Form\\Type\\DateTimeFilterType";
+                    $fieldsWithTypes[$fieldName]['options_code'] =
+                        "                'apply_filter' => function (QueryInterface \$filterQuery, \$field, \$values) {\n" .
+                        "                    if (empty(\$values['value'])) {\n" .
+                        "                        return null;\n" .
+                        "                    }\n" .
+                        "                    \$paramName = sprintf('p_%s', str_replace('.', '_', \$field));\n" .
+                        "                    \$field = explode('.', \$field)[0] . '." . $fieldName . "';\n" .
+                        "                    \$expression = \$filterQuery->getExpr()->eq(\$field, ':'.\$paramName);\n" .
+                        "                    \$parameters = array(\$paramName => \$values['value']);\n" .
+                        "                    return \$filterQuery->createCondition(\$expression, \$parameters);\n" .
+                        "                },\n" .
+                        "//                'label' => 'Fecha Desde',\n" .
+                        "                'widget' => 'single_text',\n" .
+                        "                'html5' => false,\n" .
+                        "                'attr' => ['class' => 'datepicker'],\n" .
+                        "                'format' => 'YYYY-MM-dd',\n" .
+                        "//                'data' => new \DateTime('2020-03-18')\n" .
+                        "                'required' => false\n"
+                    ;
+                  break;
 //                  TODO: Implementar tipo Class (Joins)
 //
+                case 'string':
                 case 'text':
                 default:
                     $fieldsWithTypes[$fieldName]['type'] = "Lexik\\Bundle\\FormFilterBundle\\Filter\\Form\\Type\\TextFilterType";
                     $fieldsWithTypes[$fieldName]['options_code'] =
-                        "                'condition_pattern'    => FilterOperands::STRING_CONTAINS,";
-                    break;
+                        "                'condition_pattern'    => FilterOperands::STRING_CONTAINS,"
+                    ;
+                  break;
             }
         }
 
