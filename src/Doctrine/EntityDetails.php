@@ -127,10 +127,19 @@ final class EntityDetails
                         "                    if (empty(\$values['value'])) {\n" .
                         "                        return null;\n" .
                         "                    }\n" .
+                        "                    \n" .
                         "                    \$paramName = sprintf('p_%s', str_replace('.', '_', \$field));\n" .
+                        "                    \$paramName2 = sprintf('p_%s_2', str_replace('.', '_', \$field));\n" .
+                        "                    \n" .
                         "                    \$field = explode('.', \$field)[0] . '." . $fieldName . "';\n" .
-                        "                    \$expression = \$filterQuery->getExpr()->eq(\$field, ':'.\$paramName);\n" .
-                        "                    \$parameters = array(\$paramName => \$values['value']);\n" .
+                        "                    \$expression = \$filterQuery->getExpr()->andX(\n" .
+                        "                        \$filterQuery->getExpr()->gte(\$field, ':'.\$paramName),\n" .
+                        "                        \$filterQuery->getExpr()->lte(\$field, ':'.\$paramName2)\n" .
+                        "                    );\n" .
+                        "                    \$parameters = [\n" .
+                        "                        \$paramName => \$values['value'],\n" .
+                        "                        \$paramName2 => (clone \$values['value'])->setTime(23, 59, 59, 999999),\n" .
+                        "                    ];\n" .
                         "                    return \$filterQuery->createCondition(\$expression, \$parameters);\n" .
                         "                },\n" .
                         "//                'label' => 'Fecha Desde',\n" .

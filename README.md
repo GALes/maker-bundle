@@ -36,7 +36,7 @@ Agregar al composer.json del proyecto los siguientes repositorios:
     "repositories":[
         {
             "type": "path",
-            "url": "../bundles/make-bundle"
+            "url": "../bundles/maker-bundle"
         }
     ],
     "minimum-stability": "dev",
