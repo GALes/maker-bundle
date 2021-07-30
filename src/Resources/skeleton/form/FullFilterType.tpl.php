@@ -5,6 +5,9 @@ namespace <?= $namespace ?>;
 <?php if ($bounded_full_class_name): ?>
 use <?= $bounded_full_class_name ?>;
 <?php endif ?>
+<?php foreach ($join_type_use_statements as $className): ?>
+use <?= $className ?>;
+<?php endforeach; ?>
 <?php foreach ($constraint_use_statements as $className): ?>
 use <?= $className ?>;
 <?php endforeach; ?>

@@ -30,6 +30,7 @@ final class FormTypeRenderer
     public function render(ClassNameDetails $formClassDetails, array $formFields, ClassNameDetails $boundClassDetails = null, array $constraintClasses = [], array $extraUseClasses = [], $templateName = 'form/Type.tpl.php')
     {
         $fieldTypeUseStatements = [];
+        $joinTypeUseStatements = [];
         $fields = [];
 
         foreach ($formFields as $name => $fieldTypeOptions) {
@@ -45,6 +46,10 @@ final class FormTypeRenderer
                 $fieldTypeOptions['type'] = Str::getShortClassName($fieldTypeOptions['type']);
             }
 
+            if (isset($fieldTypeOptions['targetEntityJoin'])) {
+                $joinTypeUseStatements[] = $fieldTypeOptions['targetEntityJoin'];
+            }
+
             $fields[$name] = $fieldTypeOptions;
         }
 
@@ -58,6 +63,7 @@ final class FormTypeRenderer
                 'bounded_full_class_name' => $boundClassDetails ? $boundClassDetails->getFullName() : null,
                 'bounded_class_name' => $boundClassDetails ? $boundClassDetails->getShortName() : null,
                 'form_fields' => $fields,
+                'join_type_use_statements'  => $joinTypeUseStatements,
                 'field_type_use_statements' => $mergedTypeUseStatements,
                 'constraint_use_statements' => $constraintClasses,
             ]

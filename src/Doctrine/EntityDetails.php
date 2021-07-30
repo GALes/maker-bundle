@@ -13,6 +13,7 @@ namespace GALes\MakerBundle\Doctrine;
 
 use Doctrine\Common\Persistence\Mapping\ClassMetadata as LegacyClassMetadata;
 use Doctrine\Persistence\Mapping\ClassMetadata;
+use Symfony\Bundle\MakerBundle\Str;
 
 /**
  * @author Sadicov Vladimir <sadikoff@gmail.com>
@@ -140,6 +141,7 @@ final class EntityDetails
                         "                        \$paramName => \$values['value'],\n" .
                         "                        \$paramName2 => (clone \$values['value'])->setTime(23, 59, 59, 999999),\n" .
                         "                    ];\n" .
+                        "                    \n" .
                         "                    return \$filterQuery->createCondition(\$expression, \$parameters);\n" .
                         "                },\n" .
                         "//                'label' => 'Fecha Desde',\n" .
@@ -151,8 +153,6 @@ final class EntityDetails
                         "                'required' => false\n"
                     ;
                   break;
-//                  TODO: Implementar tipo Class (Joins)
-//
                 case 'string':
                 case 'text':
                 default:
@@ -182,9 +182,28 @@ final class EntityDetails
 //            }
         }
 
+//        dump($fieldsWithTypes);
+//        dd($this->metadata->associationMappings);
         foreach ($this->metadata->associationMappings as $fieldName => $relation) {
-            $fieldsWithTypes[$fieldName] = ['metadata' => $relation];
-            $fieldsWithTypes[$fieldName]['metadata']['identifier'] = 'false';
+//                  TODO: Implementar tipo Class (Joins)
+            switch ($relation['type']) {
+                case 2: // ManyToOne Join
+                    $fieldsWithTypes[$fieldName]['type'] = "Lexik\\Bundle\\FormFilterBundle\\Filter\\Form\\Type\\EntityFilterType";
+                    $fieldsWithTypes[$fieldName]['options_code'] =
+                        "                'class' => " . Str::getShortClassName($relation['targetEntity']) . "::class,\n" .
+                        "                'placeholder'   => 'Seleccione',\n" .
+                        "                'empty_data'    => null,\n" .
+                        "//                'query_builder' => function (EntityRepository \$er) {\n" .
+                        "//                    return \$er->createQueryBuilder('t')\n" .
+                        "//                        ->orderBy('t.nombre', 'ASC');\n" .
+                        "//                'choice_label' => 'nombre',\n"
+                    ;
+                    $fieldsWithTypes[$fieldName]['targetEntityJoin'] = $relation['targetEntity'];
+                  break;
+                default:
+                    $fieldsWithTypes[$fieldName] = ['metadata' => $relation];
+                    $fieldsWithTypes[$fieldName]['metadata']['identifier'] = 'false';
+            }
         }
 
         return $fieldsWithTypes;

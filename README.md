@@ -9,20 +9,10 @@ It requires dev-master branch of petkopara/multi-search-bundle allowing the use 
 
 
 ## Pasos para la instalación
-Agregar referencia al repositorio con las configuraciones para que tome codigo en estado en desarrollo
 
-    "repositories":[
-        {
-            "type": "vcs",
-            "url": "https://github.com/GALes/maker-bundle.git"
-        }
-    ],
-    "minimum-stability": "dev",
-    "prefer-stable": true,
+Agregar el Bundle con composer:
 
-Agregar con composer el Bundles:
-
-    composer require gales/maker-bundle:*@dev
+    composer require gales/maker-bundle:^0.0
 
 ## Pasos para desarrollo y pruebas locales
 Clonar el repositorio del bundle fuera del proyecto al que se quiera agregar, ej estando dentro de la raiz del proyecto:
@@ -66,7 +56,7 @@ Luego seleccionar la Entidad a la cual generar el ABM. Archivos que se generan
     created: src/Service/<entity_name>CrudService.php (Logica auxiliar para el funcionamiento del ABM)
     created: src/Controller/<entity_name>Controller.php (Controlador con la logica del ABM)
     created: src/Form/<entity_name>Type.php (Formulario para el alta/edicion de la entidad)
-    created: src/Form/<entity_name>FilterType.php (Filtro rapido del listado)
+    created: src/Form/<entity_name>(Full)FilterType.php (Filtro del listado)
     created: templates/<entity_name>/edit.html.twig (Vista de edicion de la entidad)
     created: templates/<entity_name>/index.html.twig  (Vista para el listado de entidades)
     created: templates/<entity_name>/new.html.twig  (Vista de creacion de nueva entidad)
