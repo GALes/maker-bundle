@@ -19,21 +19,50 @@ $( () => {
 
     bsCustomFileInput.init();
     /* Mostrar el boton de visualizacion en los fileInputs */
-    var fileInputs = $(".custom-file");
-    var i = 0;
+    let fileInputs = $(".custom-file");
+    let i = 0;
     fileInputs.each(function () {
-        $(this).before(`<div id="input-group-file${i}" class="input-group"></div>`)
+        $(this).before(`<div id="input-group-file${i}" class="input-group"></div>`);
         $(this).detach();
         $(this).appendTo("#input-group-file" + i++);
 
-        // var fileName = $(this).find('input').attr('placeholder');
-        var fileUrl = $(this).find('input').data('fileurl');
+        // const fileName = $(this).find('input').attr('placeholder');
+        const fileId    = $(this).find('input').data('fileid');
+        const fileUrl   = $(this).find('input').data('fileurl');
         if (fileUrl) {
             $(this).after(
-                `<div class="input-group-append">
+                `<div class="input-group-append download-file">
                     <a href="${fileUrl}" target="_blank" class="btn btn-outline-primary"><span class="fa fa-download"></a>
                 </div>`
             );
+            const formName = $(this).closest('form').attr('name');
+            const deletedFilesInput = $(this).closest('form').find(`:hidden#${formName}_deletedFiles`);
+            if (deletedFilesInput.length > 0) {
+                $(this).after(
+                    `<div class="input-group-append delete-file">
+                    <a 
+                        id="delete-file-${fileId}" 
+                        class="btn btn-outline-danger"
+                    >
+                    <span class="fa fa-trash"></a>
+                </div>`
+                );
+                $(`#delete-file-${fileId}`).click((e) => {
+                    const fileCodigo = $(this).find('input').data('filecodigo');
+
+                    e.preventDefault();
+                    $(this).find('.custom-file-input').val('');
+                    $(this).find('.custom-file-input').attr('placeholder', '');
+                    $(this).find('.custom-file-label').html('');
+                    $(this).parent().find('.download-file').hide();
+                    $(this).parent().find('.delete-file').hide();
+
+                    const formName = $(this).closest('form').attr('name');
+                    const deletedFilesInput = $(this).closest('form').find(`:hidden#${formName}_deletedFiles`);
+                    let deletedFiles = JSON.parse(deletedFilesInput.val());
+                    (deletedFiles.indexOf(fileCodigo) === -1) && deletedFiles.push(fileCodigo) && deletedFilesInput.val(JSON.stringify(deletedFiles));
+                });
+            }
         }
     });
 
