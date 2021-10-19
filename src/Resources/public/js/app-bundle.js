@@ -6,12 +6,11 @@ import 'selectize';
 import bsCustomFileInput from 'bs-custom-file-input';
 import 'flatpickr';
 import 'flatpickr/dist/l10n/es.js';
+import Swal from "sweetalert2";
 
 import '../css/app-bundle.scss';
 
 import { toggleAll, bulkSubmitBtnManage } from './petkopara-crud-generator-webpack';
-
-// console.log('Hola desde GALesMakerBundle');
 
 $( () => {
     $('#check-all-thead').on('click', ($e) => toggleAll($e.target) );
@@ -22,11 +21,10 @@ $( () => {
     let fileInputs = $(".custom-file");
     let i = 0;
     fileInputs.each(function () {
-        $(this).before(`<div id="input-group-file${i}" class="input-group"></div>`);
+        $(this).before(`<div id="input-group-file${i}" class="input-group"></div>`)
         $(this).detach();
         $(this).appendTo("#input-group-file" + i++);
 
-        // const fileName = $(this).find('input').attr('placeholder');
         const fileId    = $(this).find('input').data('fileid');
         const fileUrl   = $(this).find('input').data('fileurl');
         if (fileUrl) {
@@ -48,19 +46,44 @@ $( () => {
                 </div>`
                 );
                 $(`#delete-file-${fileId}`).click((e) => {
-                    const fileCodigo = $(this).find('input').data('filecodigo');
-
                     e.preventDefault();
-                    $(this).find('.custom-file-input').val('');
-                    $(this).find('.custom-file-input').attr('placeholder', '');
-                    $(this).find('.custom-file-label').html('');
-                    $(this).parent().find('.download-file').hide();
-                    $(this).parent().find('.delete-file').hide();
+                    const fileCodigo    = $(this).find('input').data('filecodigo');
+                    const fileRequired  = $(this).find('input').data('filerequired');
+                    console.log(fileRequired);
 
-                    const formName = $(this).closest('form').attr('name');
-                    const deletedFilesInput = $(this).closest('form').find(`:hidden#${formName}_deletedFiles`);
-                    let deletedFiles = JSON.parse(deletedFilesInput.val());
-                    (deletedFiles.indexOf(fileCodigo) === -1) && deletedFiles.push(fileCodigo) && deletedFilesInput.val(JSON.stringify(deletedFiles));
+                    Swal.fire({
+                        title: '¿Está seguro de realizar la acción?',
+                        text: "Seleccione una opción",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Si',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $(this).find('.custom-file-input').val('');
+                            $(this).find('.custom-file-input').attr('placeholder', '');
+                            $(this).find('.custom-file-label').html('');
+                            $(this).parent().find('.download-file').hide();
+                            $(this).parent().find('.delete-file').hide();
+                            if (fileRequired) {
+                                $(this).closest('.form-group').find(`label`).addClass('required');
+                                $(this).find('input:file').attr('required', 'required');
+                            }
+
+                            const formName = $(this).closest('form').attr('name');
+                            const deletedFilesInput = $(this).closest('form').find(`:hidden#${formName}_deletedFiles`);
+                            let deletedFiles = JSON.parse(deletedFilesInput.val());
+                            (deletedFiles.indexOf(fileCodigo) === -1) && deletedFiles.push(fileCodigo) && deletedFilesInput.val(JSON.stringify(deletedFiles));
+
+                            Swal.fire(
+                                '¡Se ha marcado para eliminar!',
+                                'Para confirmar la acción guarde los cambios del formulario.',
+                                'success'
+                            )
+                        }
+                    });
                 });
             }
         }
