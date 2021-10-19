@@ -49,7 +49,6 @@ $( () => {
                     e.preventDefault();
                     const fileCodigo    = $(this).find('input').data('filecodigo');
                     const fileRequired  = $(this).find('input').data('filerequired');
-                    console.log(fileRequired);
 
                     Swal.fire({
                         title: '¿Está seguro de realizar la acción?',
