@@ -25,8 +25,9 @@ $( () => {
         $(this).detach();
         $(this).appendTo("#input-group-file" + i++);
 
-        const fileId    = $(this).find('input').data('fileid');
-        const fileUrl   = $(this).find('input').data('fileurl');
+        const fileId        = $(this).find('input').data('fileid');
+        const fileUrl       = $(this).find('input').data('fileurl');
+        const fileDisabled  = $(this).find('input').attr('disabled') === 'disabled';
         if (fileUrl) {
             $(this).after(
                 `<div class="input-group-append download-file">
@@ -35,7 +36,7 @@ $( () => {
             );
             const formName = $(this).closest('form').attr('name');
             const deletedFilesInput = $(this).closest('form').find(`:hidden#${formName}_deletedFiles`);
-            if (deletedFilesInput.length > 0) {
+            if ( deletedFilesInput.length > 0 && !fileDisabled ) {
                 $(this).after(
                     `<div class="input-group-append delete-file">
                     <a 
