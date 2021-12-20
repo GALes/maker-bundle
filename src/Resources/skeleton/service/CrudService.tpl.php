@@ -18,7 +18,7 @@ use Petkopara\MultiSearchBundle\Service\MultiSearchBuilderService;
 use Lexik\Bundle\FormFilterBundle\Filter\FilterBuilderUpdater;
 <?php endif; ?>
 use Pagerfanta\Pagerfanta;
-use Pagerfanta\Adapter\DoctrineORMAdapter;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Pagerfanta\View\TwitterBootstrap4View;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\HttpFoundation\Request;
@@ -190,7 +190,7 @@ class <?= $class_name ?>
         $sortCol = $queryBuilder->getRootAlias().'.'.$request->get('pcg_sort_col', 'id');
         $queryBuilder->orderBy($sortCol, $request->get('pcg_sort_order', 'desc'));
         // Paginator
-        $adapter = new DoctrineORMAdapter($queryBuilder);
+        $adapter = new QueryAdapter($queryBuilder);
         $pagerfanta = new Pagerfanta($adapter);
         $pagerfanta->setMaxPerPage($request->get('pcg_show' , 10));
         

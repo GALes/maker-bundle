@@ -60,6 +60,7 @@ final class EntityDetails
                 $fieldsWithTypes[$fieldName]['type'] = "Symfony\\Component\\Form\\Extension\\Core\\Type\\" . ($metadata['type'] == 'datetime' ? 'DateTimeType' : 'DateType');
                 $fieldsWithTypes[$fieldName]['options_code'] =
         "                'widget'    => 'single_text',\n" .
+        "                'html5'     => false,\n" .
         "                'format'    => " . ($metadata['type'] == 'datetime' ? "'YYYY-MM-dd HH:mm'" : "'YYYY-MM-dd'") . ",\n" .
         "                'attr'      => ['class' => '" . $metadata['type'] . "picker'],"
                 ;

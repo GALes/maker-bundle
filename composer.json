@@ -12,11 +12,13 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": "^7.1.3",
+        "php": "^7.4|^8.0",
+        "symfony/form": "^4.4|^5.1",
+        "symfony/framework-bundle": "^4.4|^5.1",
         "symfony/maker-bundle": "^1.21",
-        "lexik/form-filter-bundle": "^6.0",
+        "lexik/form-filter-bundle": "^7.0",
         "gales-petkopara/multi-search-bundle": "^2.0",
-        "pagerfanta/pagerfanta": "^2.4",
+        "pagerfanta/pagerfanta": "^3.0",
         "yectep/phpspreadsheet-bundle": "^0.1"
     },
     "autoload": {
