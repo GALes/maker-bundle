@@ -13,9 +13,9 @@
 <?php foreach ($entity_fields as $field=>$metadata): ?>
                             <div class="col-md-6">{{ form_row(filterForm.<?= $field ?>) }}</div>
 <?php endforeach; ?>
-                        <div class="col-md-6">
-                            {{ form_rest(filterForm) }}
-                        </div>
+<!--                        <div class="col-md-6">-->
+<!--                            {{ form_rest(filterForm) }}-->
+<!--                        </div>-->
                         <div class="col-md-12">
                             <div class="form-group">
                                 <button type="submit" class="btn btn-warning" name="filter_action" value="filter"> <span class="fa fa-search" aria-hidden="true"></span> Buscar</button>
