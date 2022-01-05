@@ -47,6 +47,38 @@ final class EntityDetails
         return $this->metadata->fieldMappings;
     }
 
+    public function getFullDisplayFields()
+    {
+        $retorno = $this->metadata->fieldMappings;
+//        dd($this->metadata->associationMappings);
+        foreach ($this->metadata->associationMappings as $fieldName => $relation) {
+            $retorno[$fieldName] = $relation;
+
+
+
+////                  TODO: Implementar tipo Class (Joins)
+//            switch ($relation['type']) {
+//                case 2: // ManyToOne Join
+//                    $fieldsWithTypes[$fieldName]['type'] = "Lexik\\Bundle\\FormFilterBundle\\Filter\\Form\\Type\\EntityFilterType";
+//                    $fieldsWithTypes[$fieldName]['options_code'] =
+//                        "                'class' => " . Str::getShortClassName($relation['targetEntity']) . "::class,\n" .
+//                        "                'placeholder'   => 'Seleccione',\n" .
+//                        "                'empty_data'    => null,\n" .
+//                        "//                'query_builder' => function (EntityRepository \$er) {\n" .
+//                        "//                    return \$er->createQueryBuilder('t')\n" .
+//                        "//                        ->orderBy('t.nombre', 'ASC');\n" .
+//                        "//                'choice_label' => 'nombre',\n"
+//                    ;
+//                    $fieldsWithTypes[$fieldName]['targetEntityJoin'] = $relation['targetEntity'];
+//                    break;
+//                default:
+//                    $fieldsWithTypes[$fieldName] = ['metadata' => $relation];
+//                    $fieldsWithTypes[$fieldName]['metadata']['identifier'] = 'false';
+        }
+
+        return $retorno;
+    }
+
     public function getFormFields()
     {
         $fieldsWithTypes = [];

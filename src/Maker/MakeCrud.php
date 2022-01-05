@@ -168,8 +168,8 @@ final class MakeCrud extends AbstractMaker
         $io->writeln(array(
             'By default, the generator generate filter code.',
             '<comment>input</comment> to use PetkoparaMultiSearchBundle to search only with one input in the entity.',
-            '<comment>form</comment> to use LexikFormFilterBundle to search in the entity.',
-            '<comment>none</comment> use this to not generate any filter code.',
+            '<comment>form</comment> to use LexikFormFilterBundle to search in the entity. <comment>(beta)</comment>',
+            '<comment>none</comment> use this to not generate any filter code. <comment>(beta)</comment>',
         ));
         $question = new Question('Filter Type (input, form, none)', 'input');
         $question->setAutocompleterValues([
@@ -299,7 +299,8 @@ final class MakeCrud extends AbstractMaker
                 'entity_twig_var_plural'    => $entityTwigVarPlural,
                 'entity_twig_var_singular'  => $entityTwigVarSingular,
                 'entity_identifier'         => $entityDoctrineDetails->getIdentifier(),
-                'entity_fields'             => $entityDoctrineDetails->getDisplayFields(),
+                'entity_fields'             => ( $filterType == 'form' ? $entityDoctrineDetails->getFullDisplayFields() : $entityDoctrineDetails->getDisplayFields() ),
+//                'entity_full_fields'        => $entityDoctrineDetails->getFormFields(),
                 'route_name'                => $routeName,
                 'custom_helper'             => $this->generatorTwigHelper
             ],
