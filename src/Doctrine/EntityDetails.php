@@ -107,6 +107,22 @@ final class EntityDetails
         return $fieldsWithTypes;
     }
 
+    public function getFullDisplayFormFields()
+    {
+        $formFields = $this->getFormFields();
+//        dd($formFields);
+        // No se permiten relaciones OneToMany ni ManyToMany
+        foreach ($formFields as $fieldName => $metadata) {
+            if (isset($metadata['metadata']) && isset($metadata['metadata']['type']) &&
+                ($metadata['metadata']['type'] === 4 || $metadata['metadata']['type'] === 8) )
+            {
+                unset($formFields[$fieldName]);
+            }
+        }
+
+        return $formFields;
+    }
+
     public function getLexikFormFields()
     {
         $fieldsWithTypes = [];

@@ -224,7 +224,7 @@ final class MakeCrud extends AbstractMaker
                 'entity_full_class_name'        => $entityClassDetails->getFullName(),
                 'entity_var_plural'             => $entityVarPlural,
                 'entity_var_singular'           => $entityVarSingular,
-                'entity_fields'                 => $entityDoctrineDetails->getFormFields(),
+                'entity_fields'                 => $entityDoctrineDetails->getFullDisplayFormFields(),
                 'entity_identifier'             => $entityDoctrineDetails->getIdentifier(),
                 'form_full_class_name'          => $formClassDetails->getFullName(),
                 'form_class_name'               => $formClassDetails->getShortName(),
@@ -265,7 +265,10 @@ final class MakeCrud extends AbstractMaker
             $entityClassDetails,
             [],
             [],
-            $templatesBasePath . 'form/Type.tpl.php'
+            $templatesBasePath . 'form/Type.tpl.php',
+            [
+                'entity_var_singular'           => $entityVarSingular,
+            ]
         );
 
         if ($filterType !== 'none') {
