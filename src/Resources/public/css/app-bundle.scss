@@ -2,3 +2,15 @@
 @import '~font-awesome';
 @import '~flatpickr/dist/themes/material_blue.css';
 @import './crud.css';
+
+// Redefiniciones para webpack
+
+footer {
+  background-color: #4570b4;
+  color: #fff;
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: $zindex-fixed;
+}

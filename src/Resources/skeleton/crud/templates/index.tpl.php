@@ -36,8 +36,9 @@ else if ( $filter_type === 'form' )
                     <th width="20px"><input id="check-all-thead" type="checkbox" class="check-all"></th>
 
                 {% import "@GALesMaker/macros/th_sortable.html.twig" as macros %}
-<?php foreach ($entity_fields as $field): ?>
-                    <th>{{macros.th_sortable('<?= $field['fieldName'] ?>', app.request.get('pcg_sort_col'), app.request.get('pcg_sort_order') , '<?= $route_name ?>_index', '<?= ucfirst($custom_helper->asHumanWords($field['fieldName'])) ?>')}}</th>
+<?php foreach ($entity_fields as $field): $fieldName = $field['fieldName'] ?>
+    <?php if (isset($field['type']) && $field['type'] === 2): $fieldName = $field['fieldName'] . '.' . $field['joinColumns'][0]['referencedColumnName'] ?><?php endif ?>
+                    <th>{{macros.th_sortable('<?= $fieldName ?>', app.request.get('pcg_sort_col'), app.request.get('pcg_sort_order') , '<?= $route_name ?>_index', '<?= ucfirst($custom_helper->asHumanWords($field['fieldName'])) ?>')}}</th>
 <?php endforeach; ?>
                     <th width = "130px">Acciones</th>
                 </tr>

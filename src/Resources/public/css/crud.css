@@ -1,3 +1,7 @@
+.body-container {
+    margin-bottom: 5rem;
+}
+
 body {
     font-family: "Montserrat";
     font-size: 0.85rem;
