@@ -37,7 +37,7 @@ else if ( $filter_type === 'form' )
 
                 {% import "@GALesMaker/macros/th_sortable.html.twig" as macros %}
 <?php foreach ($entity_fields as $field): $fieldName = $field['fieldName'] ?>
-    <?php if (isset($field['type']) && $field['type'] === 2): $fieldName = $field['fieldName'] . '.' . $field['joinColumns'][0]['referencedColumnName'] ?><?php endif ?>
+    <?php if (isset($field['type']) && $field['type'] === 2): $fieldName = $field['fieldName'] . '.' . $field['orderBy'] ?><?php endif ?>
                     <th>{{macros.th_sortable('<?= $fieldName ?>', app.request.get('pcg_sort_col'), app.request.get('pcg_sort_order') , '<?= $route_name ?>_index', '<?= ucfirst($custom_helper->asHumanWords($field['fieldName'])) ?>')}}</th>
 <?php endforeach; ?>
                     <th width = "130px">Acciones</th>
