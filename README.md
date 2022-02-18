@@ -12,7 +12,7 @@ It requires dev-master branch of petkopara/multi-search-bundle allowing the use 
 
 Agregar el Bundle con composer:
 
-    composer require gales/maker-bundle:^0.0
+    composer require gales/maker-bundle:^0.1
 
 ## Pasos para desarrollo y pruebas locales
 Clonar el repositorio del bundle fuera del proyecto al que se quiera agregar, ej estando dentro de la raiz del proyecto:
