@@ -1,6 +1,7 @@
 # GALes Maker Bundle for CRUD Creation
 
-Symfony4 / 5 CRUD generator bundle with pagination, filtering, Twitter bootstrap v4.4.1 markup and many other features. It's Simple to use (TODO: and fully customizable).
+Symfony4 / 5 CRUD generator bundle with pagination, filtering, Twitter bootstrap v4.6 markup and many other features. 
+It's Simple to use and fully customizable.
 
 Designed to bring back the functionality of PetkoparaCrudGeneratorBundle, but reusing the logic from Symfony's Maker Bundle.
 
