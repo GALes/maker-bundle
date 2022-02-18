@@ -51,6 +51,45 @@ Ejecutar el comando
 
     php bin/console gales:make:crud
 
+#### Notaciones:
+- Listado: para definir el campo a utilizarse en el ordenamiento de una columna asociada a una entidad relacionada, 
+  se puede utilizar la siguiente notación en dicha entidad (`@GalesMaker(orderBy=nombre_propiedad)`). Ej: El listado de 
+  solicitudes posee la columna Estado la cual muestra la descripción del mismo, y se desea que se ordene por esta:
+
+```php
+// src/Entity/Solicitud.php
+namespace App\Entity;
+...
+class SolicitudBanco
+{
+    ...
+    /**
+     * @ORM\ManyToOne(targetEntity=SolicitudEstado::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $estado;
+    ...
+```
+
+```php
+// src/Entity/SolicitudEstado.php
+namespace App\Entity;
+...
+/**
+ ...
+ * @GalesMaker(orderBy="descripcion")
+ */
+class SolicitudEstado
+{
+    ...
+    private $descripcion;
+    ...
+
+```
+  
+
+#### Archivos generados por el bundle:
+
 Luego seleccionar la Entidad a la cual generar el ABM. Archivos que se generan
 
     created: src/Service/<entity_name>CrudService.php (Logica auxiliar para el funcionamiento del ABM)
