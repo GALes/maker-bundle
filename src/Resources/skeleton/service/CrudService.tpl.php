@@ -62,7 +62,7 @@ class <?= $class_name ?>
 <?php endif; ?>
     }
 
-    public function exportXlsx(IterableResult $iterableResult)
+    public function exportXlsx(iterable $iterableResult)
     {
         ini_set('memory_limit', -1);
         ini_set('max_execution_time', 600);
@@ -90,7 +90,7 @@ class <?= $class_name ?>
 
         foreach ($iterableResult as $key => $row) {
             /** @var <?= $entity_class_name; ?> $<?= $entity_var_singular ?> */
-            $<?= $entity_var_singular ?> = $row[0];
+            $<?= $entity_var_singular ?> = $row;
             $rowNumber = $key + 2; // Los datos comienzan desde la fila 2
             $sheet
 <?php $columna = 'A'; ?>
@@ -99,7 +99,7 @@ class <?= $class_name ?>
 <?php $columna++ ?>
 <?php endforeach; ?>
             ;
-            $this->em->detach($row[0]);
+            $this->em->detach($row);
         }
 
         $dispositionHeader = $response->headers->makeDisposition(
@@ -125,6 +125,9 @@ class <?= $class_name ?>
         $session = $request->getSession();
         $filterForm = $this->formFactory->create(<?= $form_filter_class_name ?>::class);
 
+        // Para evitar error cuando se utilizan joins oneToMany y manyToMany:
+        // Iterate with fetch join in using association not allowed.
+        $queryBuilder->distinct();
         //Reset Filters
         if ($request->get('filter_action') == 'reset') {
             $request->query->remove('filter_action');
