@@ -37,7 +37,7 @@ class OrderByHelper
             $joinTable = array_pop($elements);
             $joinCol = $joinTable . '.' . $sortCol;
             $queryBuilder
-                ->innerJoin($rootAlias . '.' . $joinTable, $joinTable)
+                ->leftJoin($rootAlias . '.' . $joinTable, $joinTable)
                 ->orderBy($joinCol, $sortOrder)
             ;
         }
