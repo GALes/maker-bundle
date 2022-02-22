@@ -127,7 +127,7 @@ class <?= $class_name ?>
 
         // Para evitar error cuando se utilizan joins oneToMany y manyToMany:
         // Iterate with fetch join in using association not allowed.
-        $queryBuilder->distinct();
+//        $queryBuilder->distinct();
         //Reset Filters
         if ($request->get('filter_action') == 'reset') {
             $request->query->remove('filter_action');
