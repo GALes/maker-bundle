@@ -23,6 +23,7 @@ use Pagerfanta\View\TwitterBootstrap4View;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use GALes\MakerBundle\Helper\OrderByHelper;
 
 
 /**
@@ -183,43 +184,6 @@ class <?= $class_name ?>
         return array($filterForm, $queryBuilder);
     }
 
-    private function getElements(string $field) : array
-    {
-        $retorno = [];
-        $matches = [];
-        while ($field) {
-            preg_match_all('/([A-Za-z0-9_-]+)[\.]*/', $field, $matches);
-            if ($matches) {
-                array_unshift($retorno, $matches[1]);
-                $field = str_replace($matches[0], '', $field);
-            }
-        }
-        return $retorno ? $retorno[0] : $retorno;
-    }
-
-    private function addOrderToQuery(QueryBuilder $queryBuilder, string $field, string $sortOrder): QueryBuilder
-    {
-        $elements = $this->getElements($field);
-
-        $rootAlias = $queryBuilder->getRootAlias();
-        $sortCol = array_pop($elements);
-
-        if ( $sortCol && $elements ) {
-            $joinTable = array_pop($elements);
-            $joinCol = $joinTable . '.' . $sortCol;
-            $queryBuilder
-                ->innerJoin($rootAlias . '.' . $joinTable, $joinTable)
-                ->orderBy($joinCol, $sortOrder)
-            ;
-        }
-        else {
-            $sortCol = $rootAlias . '.' . $sortCol;
-            $queryBuilder->orderBy($sortCol, $sortOrder);
-        }
-
-        return $queryBuilder;
-    }
-
     /**
     * Get results from paginator and get paginator view.
     *
@@ -229,8 +193,7 @@ class <?= $class_name ?>
         //sorting
         $sortCol    = $request->get('pcg_sort_col', 'id');
         $sortOrder  = $request->get('pcg_sort_order', 'desc');
-
-        $queryBuilder = $this->addOrderToQuery($queryBuilder, $sortCol, $sortOrder);
+        $queryBuilder = OrderByHelper::addOrderByToQuery($queryBuilder, $sortCol, $sortOrder);
 
         // Paginator
         $adapter = new DoctrineORMAdapter($queryBuilder);
