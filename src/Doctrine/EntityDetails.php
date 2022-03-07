@@ -47,6 +47,21 @@ final class EntityDetails
         return $this->metadata->fieldMappings;
     }
 
+    public function getFullDisplayFields()
+    {
+        $retorno = $this->metadata->fieldMappings;
+//        dd($this->metadata->associationMappings);
+        foreach ($this->metadata->associationMappings as $fieldName => $relation) {
+            // Solo se permite mostrar los campos si la relacion es del tipo 2: ManyToOne,
+            // no se permiten 4: OneToMany ni 8: ManyToMany
+            if ($relation['type'] === 2) {
+                $retorno[$fieldName] = $relation;
+            }
+        }
+
+        return $retorno;
+    }
+
     public function getFormFields()
     {
         $fieldsWithTypes = [];
@@ -91,6 +106,22 @@ final class EntityDetails
         }
 
         return $fieldsWithTypes;
+    }
+
+    public function getFullDisplayFormFields()
+    {
+        $formFields = $this->getFormFields();
+//        dd($formFields);
+        // No se permiten relaciones OneToMany ni ManyToMany
+        foreach ($formFields as $fieldName => $metadata) {
+            if (isset($metadata['metadata']) && isset($metadata['metadata']['type']) &&
+                ($metadata['metadata']['type'] === 4 || $metadata['metadata']['type'] === 8) )
+            {
+                unset($formFields[$fieldName]);
+            }
+        }
+
+        return $formFields;
     }
 
     public function getLexikFormFields()

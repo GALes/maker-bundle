@@ -27,8 +27,15 @@ final class FormTypeRenderer
         $this->generator = $generator;
     }
 
-    public function render(ClassNameDetails $formClassDetails, array $formFields, ClassNameDetails $boundClassDetails = null, array $constraintClasses = [], array $extraUseClasses = [], $templateName = 'form/Type.tpl.php')
-    {
+    public function render(
+        ClassNameDetails $formClassDetails,
+        array $formFields,
+        ClassNameDetails $boundClassDetails = null,
+        array $constraintClasses = [],
+        array $extraUseClasses = [],
+        $templateName = 'form/Type.tpl.php',
+        array $variables = []
+    ) {
         $fieldTypeUseStatements = [];
         $joinTypeUseStatements = [];
         $fields = [];
@@ -59,14 +66,17 @@ final class FormTypeRenderer
         $this->generator->generateClass(
             $formClassDetails->getFullName(),
             $templateName,
-            [
-                'bounded_full_class_name' => $boundClassDetails ? $boundClassDetails->getFullName() : null,
-                'bounded_class_name' => $boundClassDetails ? $boundClassDetails->getShortName() : null,
-                'form_fields' => $fields,
-                'join_type_use_statements'  => $joinTypeUseStatements,
-                'field_type_use_statements' => $mergedTypeUseStatements,
-                'constraint_use_statements' => $constraintClasses,
-            ]
+            array_merge(
+                [
+                    'bounded_full_class_name' => $boundClassDetails ? $boundClassDetails->getFullName() : null,
+                    'bounded_class_name' => $boundClassDetails ? $boundClassDetails->getShortName() : null,
+                    'form_fields' => $fields,
+                    'join_type_use_statements'  => $joinTypeUseStatements,
+                    'field_type_use_statements' => $mergedTypeUseStatements,
+                    'constraint_use_statements' => $constraintClasses,
+                ],
+                $variables
+            )
         );
     }
 }

@@ -3,9 +3,9 @@
 
 {% block body %}
 
-<div class="row mt-5">
+<div class="row mt-3">
 <?php include 'others/flash_messages.tpl.php' ?>
-    <div class="col-lg-12">
+    <div class="col-lg-12 mt-2">
         <h4>Alta de <?=$custom_helper->asHumanWords($entity_class_name) ;?> <span class="fa fa-file" aria-hidden="true"></span> </h4>
     </div>
 </div>

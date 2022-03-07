@@ -17,7 +17,7 @@
         <service id="GALes\MakerBundle\GALesMaker" alias="gales.maker.gales_maker" public="false"/>
 
         <service id="gales.maker.make_crud" class="GALes\MakerBundle\Maker\MakeCrud">
-            <argument type="service" id="maker.doctrine_helper" />
+            <argument type="service" id="gales.maker.doctrine_helper" />
             <argument type="service" id="gales.maker.renderer.form_type_renderer" />
             <argument type="service" id="gales.maker.renderer.crud_service_renderer" />
             <argument type="service" id="kernel" />
@@ -37,6 +37,10 @@
 
         <service id="gales.maker.generator_twig_helper" class="GALes\MakerBundle\Helper\GeneratorTwigHelper">
             <argument type="service" id="maker.file_manager" />
+        </service>
+
+        <service id="gales.maker.doctrine_helper" class="GALes\MakerBundle\Doctrine\DoctrineHelper">
+            <argument type="service" id="maker.doctrine_helper" />
         </service>
 
     </services>
