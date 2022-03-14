@@ -223,7 +223,6 @@ final class MakeCrud extends AbstractMaker
 
         $templateBaseTwig = 'bundles/GALesMaker/base.html.twig';
         $templatesBasePath = $this->appKernel->getProjectDir() . '/vendor/gales/maker-bundle/src/Resources/skeleton/';
-        $twigFiles = $this->appKernel->getProjectDir() . '/vendor/gales/maker-bundle/src/Resources/views/';
 
         $this->crudServiceRenderer->generateClass(
             $crudServiceClassDetails->getFullName(),
@@ -357,8 +356,10 @@ final class MakeCrud extends AbstractMaker
         }
 
         $generator->writeChanges();
+
+        $twigFilesPath = $this->appKernel->getProjectDir() . '/vendor/gales/maker-bundle/src/Resources/views/';
         $this->filesystem->mirror(
-            $twigFiles,
+            $twigFilesPath,
             $this->appKernel->getProjectDir() . '/templates/bundles/GALesMaker',
             null,
             [ 'override' => true, ]
