@@ -4,7 +4,7 @@
 {% block body %}
 
 <div class="row mt-3">
-<?php include 'others/flash_messages.tpl.php' ?>
+    {{ include('bundles/GALesMaker/_components/_flashMessages.html.twig') }}
     <div class="col-lg-12 mt-2">
         <h4>Alta de <?=$custom_helper->asHumanWords($entity_class_name) ;?> <span class="fa fa-file" aria-hidden="true"></span> </h4>
     </div>

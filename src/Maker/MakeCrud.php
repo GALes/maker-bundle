@@ -36,10 +36,14 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Csrf\CsrfTokenManager;
 use Symfony\Component\Validator\Validation;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Filesystem\Path;
+use Symfony\Component\Finder\SplFileInfo;
 use App\Kernel;
 
 /**
@@ -58,6 +62,8 @@ final class MakeCrud extends AbstractMaker
     private $appKernel;
 
     private $generatorTwigHelper;
+
+    private $filesystem;
     
     protected $availableRoles = array();
 
@@ -74,6 +80,8 @@ final class MakeCrud extends AbstractMaker
         $this->crudServiceRenderer      = $crudServiceRenderer;
         $this->appKernel                = $appKernel;
         $this->generatorTwigHelper      = $generatorTwigHelper;
+
+        $this->filesystem = new Filesystem();
         
         $this->availableRoles           = $this->extractAvailableRoles($roleHierarchy);
 
@@ -213,8 +221,9 @@ final class MakeCrud extends AbstractMaker
         $routeName = Str::asRouteName($controllerClassDetails->getRelativeNameWithoutSuffix());
         $templatesPath = Str::asFilePath($controllerClassDetails->getRelativeNameWithoutSuffix());
 
-        $templateBaseTwig = '@GALesMaker/base.html.twig';
+        $templateBaseTwig = 'bundles/GALesMaker/base.html.twig';
         $templatesBasePath = $this->appKernel->getProjectDir() . '/vendor/gales/maker-bundle/src/Resources/skeleton/';
+        $twigFiles = $this->appKernel->getProjectDir() . '/vendor/gales/maker-bundle/src/Resources/views/';
 
         $this->crudServiceRenderer->generateClass(
             $crudServiceClassDetails->getFullName(),
@@ -282,15 +291,21 @@ final class MakeCrud extends AbstractMaker
             );
         }
 
+
+        $twigFiles = $this->appKernel->getProjectDir() . '/templates/';
+        $finder = new Finder();
+        $finder->name('*.twig');
+        $templatesList = [];
+        /** @var SplFileInfo $file */
+        foreach ($finder->in($twigFiles) as $file) {
+            $templatesList[] = $file->getRelativePathname();
+        }
         $io->writeln([
             'By default, the created views extends the <comment>@GALesMaker/base.html.twig</comment>',
             'You can also set your template which the views to extend, for example <comment>base.html.twig</comment>',
         ]);
-        $question = new Question('Base template for the views', '@GALesMaker/base.html.twig');
-        $question->setAutocompleterValues([
-            '@GALesMaker/base.html.twig',
-            'base.html.twig',
-        ]);
+        $question = new Question('Base template for the views', 'bundles/GALesMaker/base.html.twig');
+        $question->setAutocompleterValues($templatesList);
         if ($answer = $io->askQuestion($question)) {
             $templateBaseTwig = $answer;
         }
@@ -342,6 +357,12 @@ final class MakeCrud extends AbstractMaker
         }
 
         $generator->writeChanges();
+        $this->filesystem->mirror(
+            $twigFiles,
+            $this->appKernel->getProjectDir() . '/templates/bundles/GALesMaker',
+            null,
+            [ 'override' => true, ]
+        );
 
         $this->writeSuccessMessage($io);
 

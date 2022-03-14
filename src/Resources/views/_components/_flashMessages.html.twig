@@ -1,0 +1,11 @@
+<div id="alert-container" class="col-md-12 single-feature">
+    {% for type, flashMessages in app.session.flashbag.all() %}
+        {% set i = 0 %}
+        {% for flashMessage in flashMessages %}
+            <div class="alert alert-{{ type }} wow fadeInUp" data-wow-delay=".{{ 2 * i }}s">
+                {{ flashMessage|raw }}
+            </div>
+            {% set i = i + 1 %}
+        {% endfor %}
+    {% endfor %}
+</div>
