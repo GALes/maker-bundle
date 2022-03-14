@@ -16,6 +16,7 @@
         "symfony/form": "^4.4|^5.1",
         "symfony/framework-bundle": "^4.4|^5.1",
         "symfony/filesystem": "^4.4|^5.1",
+        "symfony/finder": "^4.4|^5.1",
         "symfony/maker-bundle": "^1.21",
         "lexik/form-filter-bundle": "^7.0",
         "gales-petkopara/multi-search-bundle": "^2.0",
