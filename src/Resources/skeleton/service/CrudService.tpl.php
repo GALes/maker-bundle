@@ -245,6 +245,22 @@ class <?= $class_name ?>
         return "Mostrando $startRecord - $endRecord de $totalOfRecords Registros.";
     }
 
+    /**
+    * Creates a form to delete a <?= $entity_class_name; ?> entity.
+    *
+    * @param <?= $entity_class_name; ?> $<?= $entity_var_singular ?> The User entity
+    *
+    * @return Form The form
+    */
+    public function createDeleteForm(<?= $entity_class_name; ?> $<?= $entity_var_singular ?>)
+    {
+        return $this->formFactory->createBuilder()
+            ->setAction($this->urlGenerator->generate('<?= $entity_var_singular ?>_delete', array('id' => $<?= $entity_var_singular ?>->getId())))
+            ->setMethod('DELETE')
+            ->getForm()
+        ;
+    }
+
 
 
 }

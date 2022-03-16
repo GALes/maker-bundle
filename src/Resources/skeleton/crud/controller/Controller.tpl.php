@@ -15,15 +15,25 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Form\Form;
 use Doctrine\ORM\QueryBuilder;
+use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Persistence\ObjectManager;
 
 
 /**
  * <?= $entity_class_name ?> Controller
- *
- * @Route("<?= $route_path ?>")
  */
+ #[Route("<?= $route_path ?>")]
 class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
 {
+    private ObjectManager $entityManager;
+
+    private <?= $entity_class_name ?>CrudService $<?= $entity_var_singular ?>CrudService;
+
+    public function __construct(ManagerRegistry $managerRegistry, <?= $entity_class_name ?>CrudService $<?= $entity_var_singular ?>CrudService)
+    {
+        $this->entityManager = $managerRegistry->getManager();
+        $this-><?= $entity_var_singular ?>CrudService = $<?= $entity_var_singular ?>CrudService;
+    }
 
 <?php include 'actions/index.tpl.php' ?>
 

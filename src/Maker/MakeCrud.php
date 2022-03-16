@@ -218,7 +218,7 @@ final class MakeCrud extends AbstractMaker
         $entityTwigVarPlural = Str::asTwigVariable($entityVarPlural);
         $entityTwigVarSingular = Str::asTwigVariable($entityVarSingular);
 
-        $routeName = Str::asRouteName($controllerClassDetails->getRelativeNameWithoutSuffix());
+        $routeName = Str::asTwigVariable($controllerClassDetails->getRelativeNameWithoutSuffix());
         $templatesPath = Str::asFilePath($controllerClassDetails->getRelativeNameWithoutSuffix());
 
         $templateBaseTwig = 'bundles/GALesMaker/base.html.twig';
