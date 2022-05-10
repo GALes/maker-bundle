@@ -12,7 +12,7 @@
 
 <div class="">
 
-    {{ form_start(form) }}
+    {{ form_start(form, { 'action': path('<?= $route_name; ?>_new') }) }}
     {{ form_widget(form) }}
     <p>
         <button type="submit" name="submit" value="save" class="btn btn-primary">

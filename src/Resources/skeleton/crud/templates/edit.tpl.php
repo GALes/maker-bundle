@@ -9,7 +9,7 @@
 </div>
 
 <div class="">
-    {{ form_start(form) }}
+    {{ form_start( form, { 'action': path('<?= $route_name; ?>_edit', {'id': <?= $entity_twig_var_singular ?>.id }) } ) }}
 
     {{ form_widget(form) }}
     <p>
