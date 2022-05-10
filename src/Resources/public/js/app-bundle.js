@@ -12,7 +12,7 @@ import '../css/app-bundle.scss';
 
 import { toggleAll, bulkSubmitBtnManage } from './petkopara-crud-generator-webpack';
 
-$( () => {
+function InitAppBundle() {
     $('#check-all-thead').on('click', ($e) => toggleAll($e.target) );
     $('.check-all-row').on('click', () => bulkSubmitBtnManage() );
 
@@ -110,4 +110,12 @@ $( () => {
         time_24hr:  true,
         locale: 'es',
     });
+}
+
+$( () => {
+    InitAppBundle();
+})
+
+document.addEventListener("turbo:frame-load", function (e) {
+    InitAppBundle();
 })
