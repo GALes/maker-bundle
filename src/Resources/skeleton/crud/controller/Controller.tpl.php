@@ -8,7 +8,7 @@ use <?= $form_full_class_name ?>;
 use <?= $repository_full_class_name ?>;
 <?php endif ?>
 use <?= $crud_service_full_class_name ?>;
-use Symfony\Bundle\FrameworkBundle\Controller\<?= $parent_class_name ?>;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -23,7 +23,7 @@ use Doctrine\Persistence\ObjectManager;
  * <?= $entity_class_name ?> Controller
  */
  #[Route("<?= $route_path ?>")]
-class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
+class <?= $class_name; ?> extends AbstractController
 {
     private ObjectManager $entityManager;
 
