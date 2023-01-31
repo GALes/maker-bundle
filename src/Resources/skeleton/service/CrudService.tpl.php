@@ -123,7 +123,11 @@ class <?= $class_name ?>
     */
     public function filter(QueryBuilder $queryBuilder, Request $request)
     {
+
         $session = $request->getSession();
+        $routeName = $request->attributes->get('_route');
+        $galesCRUDFilter = $session->has('galesCRUDFilter') ? $session->get('galesCRUDFilter') : [];
+
         $filterForm = $this->formFactory->create(<?= $form_filter_class_name ?>::class);
 
         // Para evitar error cuando se utilizan joins oneToMany y manyToMany:
@@ -132,14 +136,14 @@ class <?= $class_name ?>
         //Reset Filters
         if ($request->get('filter_action') == 'reset') {
             $request->query->remove('filter_action');
-            $session->remove('filterUrl');
+            unset($galesCRUDFilter[$routeName]);
         }
         else {
             // Filter action
             if ($request->get('filter_action') == 'filter' || $request->get('filter_action') == 'exportXlsx') {
                 // Bind values from the request
                 $filterForm->handleRequest($request);
-                $session->remove('filterUrl');
+                unset($galesCRUDFilter[$routeName]);
 
                 // Quito la accion de exportación para no guardarla en session
                 $exportXlsx = false;
@@ -159,7 +163,7 @@ class <?= $class_name ?>
 
                     // Save filter to session
                     $filterUrl = $request->query->all();
-                    $session->set('filterUrl', $filterUrl);
+                    $galesCRUDFilter[$routeName]['filterUrl'] = $filterUrl;
 
                     // Restituyo la acción para generar el excel en el index
                     if ($exportXlsx) {
@@ -170,17 +174,20 @@ class <?= $class_name ?>
             // Si entra por paginacion o por ordenamiento de columna
             else if ( $request->get('pcg_page') || $request->get('pcg_sort_col') || $request->get('pcg_sort_order') ) {
                 $filterUrl = $request->query->all();
-                $session->set('filterUrl', $filterUrl);
+                $galesCRUDFilter[$routeName]['filterUrl'] = $filterUrl;
             }
             // Sino si solo se abre la url base y se tienen filtros en session, los restituye y renderiza nuevamente
             else if ($session->has('filterUrl')) {
-                $filterUrl = $session->get('filterUrl');
-                $session->remove('filterUrl');
-                $url = $this->urlGenerator->generate('<?= $route_name ?>_index', $filterUrl);
+                $filterUrl = $galesCRUDFilter[$routeName]['filterUrl'];
+                unset($galesCRUDFilter[$routeName]);
+                $session->set('galesCRUDFilter', $galesCRUDFilter);
+
+                $url = $this->urlGenerator->generate($routeName, $filterUrl);
                 return new RedirectResponse($url);
             }
         }
-        
+
+        $session->set('galesCRUDFilter', $galesCRUDFilter);
         return array($filterForm, $queryBuilder);
     }
 
