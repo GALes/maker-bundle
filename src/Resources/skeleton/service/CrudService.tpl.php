@@ -177,7 +177,7 @@ class <?= $class_name ?>
                 $galesCRUDFilter[$routeName]['filterUrl'] = $filterUrl;
             }
             // Sino si solo se abre la url base y se tienen filtros en session, los restituye y renderiza nuevamente
-            else if ($session->has('filterUrl')) {
+            else if (isset($galesCRUDFilter[$routeName])) {
                 $filterUrl = $galesCRUDFilter[$routeName]['filterUrl'];
                 unset($galesCRUDFilter[$routeName]);
                 $session->set('galesCRUDFilter', $galesCRUDFilter);
