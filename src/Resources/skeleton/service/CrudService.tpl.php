@@ -239,7 +239,7 @@ class <?= $class_name ?>
     * Calculates the total of records string
     */
     public function getTotalOfRecordsString(QueryBuilder $queryBuilder, Request $request) {
-        $totalOfRecords = $queryBuilder->select('COUNT(zzz.<?=$entity_identifier; ?>)')->getQuery()->getSingleScalarResult();
+        $totalOfRecords = $queryBuilder->select('COUNT(zzz.<?=$entity_identifier; ?>) AS row_count')->orderBy('row_count')->getQuery()->getSingleScalarResult();
         $show = $request->get('pcg_show', 10);
         $page = $request->get('pcg_page', 1);
         
