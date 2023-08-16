@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 <?php if ( $filter_type === 'input' ): ?>
 use Petkopara\MultiSearchBundle\Service\MultiSearchBuilderService;
 <?php elseif ( $filter_type === 'form' ): ?>
-use Lexik\Bundle\FormFilterBundle\Filter\FilterBuilderUpdater;
+use Spiriit\Bundle\FormFilterBundle\Filter\FilterBuilderUpdater;
 <?php endif; ?>
 use Pagerfanta\Pagerfanta;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
@@ -48,7 +48,7 @@ class <?= $class_name ?>
 <?php if ( $filter_type === 'input' ): ?>
         MultiSearchBuilderService   $multiSearchBuilderService
 <?php elseif ( $filter_type === 'form' ): ?>
-        FilterBuilderUpdater $lexikQueryBuilderUpdater
+        FilterBuilderUpdater $spiriitQueryBuilderUpdater
 <?php endif; ?>
     )
     {
@@ -59,7 +59,7 @@ class <?= $class_name ?>
 <?php if ( $filter_type === 'input' ): ?>
         $this->multiSearchBuilderService = $multiSearchBuilderService;
 <?php elseif ( $filter_type === 'form' ): ?>
-        $this->lexikQueryBuilderUpdater = $lexikQueryBuilderUpdater;
+        $this->spiriitQueryBuilderUpdater = $spiriitQueryBuilderUpdater;
 <?php endif; ?>
     }
 
@@ -158,7 +158,7 @@ class <?= $class_name ?>
 <?php if ( $filter_type === 'input' ): ?>
                     $this->multiSearchBuilderService->searchForm($queryBuilder, $filterForm->get('search'));
 <?php elseif ( $filter_type === 'form' ): ?>
-                    $this->lexikQueryBuilderUpdater->addFilterConditions($filterForm, $queryBuilder);
+                    $this->spiriitQueryBuilderUpdater->addFilterConditions($filterForm, $queryBuilder);
 <?php endif; ?>
 
                     // Save filter to session

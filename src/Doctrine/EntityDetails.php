@@ -124,7 +124,7 @@ final class EntityDetails
         return $formFields;
     }
 
-    public function getLexikFormFields()
+    public function getSpiriitFormFields()
     {
         $fieldsWithTypes = [];
 
@@ -135,10 +135,10 @@ final class EntityDetails
             switch ($metadata['type']) {
                 case 'integer':
                 case 'float':
-                    $fieldsWithTypes[$fieldName]['type'] = "Lexik\\Bundle\\FormFilterBundle\\Filter\\Form\\Type\\NumberFilterType";
+                    $fieldsWithTypes[$fieldName]['type'] = "Spiriit\\Bundle\\FormFilterBundle\\Filter\\Form\\Type\\NumberFilterType";
                   break;
                 case 'boolean':
-                    $fieldsWithTypes[$fieldName]['type'] = "Lexik\\Bundle\\FormFilterBundle\\Filter\\Form\\Type\\ChoiceFilterType";
+                    $fieldsWithTypes[$fieldName]['type'] = "Spiriit\\Bundle\\FormFilterBundle\\Filter\\Form\\Type\\ChoiceFilterType";
                     $fieldsWithTypes[$fieldName]['options_code'] =
                         "                \n" .
                         "                'choices' => [\n" .
@@ -154,7 +154,7 @@ final class EntityDetails
                   break;
                 case 'datetime':
                 case 'date':
-                    $fieldsWithTypes[$fieldName]['type'] = "Lexik\\Bundle\\FormFilterBundle\\Filter\\Form\\Type\\DateTimeFilterType";
+                    $fieldsWithTypes[$fieldName]['type'] = "Spiriit\\Bundle\\FormFilterBundle\\Filter\\Form\\Type\\DateTimeFilterType";
                     $fieldsWithTypes[$fieldName]['options_code'] =
                         "                'apply_filter' => function (QueryInterface \$filterQuery, \$field, \$values) {\n" .
                         "                    if (empty(\$values['value'])) {\n" .
@@ -188,7 +188,7 @@ final class EntityDetails
                 case 'string':
                 case 'text':
                 default:
-                    $fieldsWithTypes[$fieldName]['type'] = "Lexik\\Bundle\\FormFilterBundle\\Filter\\Form\\Type\\TextFilterType";
+                    $fieldsWithTypes[$fieldName]['type'] = "Spiriit\\Bundle\\FormFilterBundle\\Filter\\Form\\Type\\TextFilterType";
                     $fieldsWithTypes[$fieldName]['options_code'] =
                         "                'condition_pattern'    => FilterOperands::STRING_CONTAINS,"
                     ;
@@ -220,7 +220,7 @@ final class EntityDetails
 //                  TODO: Implementar tipo Class (Joins)
             switch ($relation['type']) {
                 case 2: // ManyToOne Join
-                    $fieldsWithTypes[$fieldName]['type'] = "Lexik\\Bundle\\FormFilterBundle\\Filter\\Form\\Type\\EntityFilterType";
+                    $fieldsWithTypes[$fieldName]['type'] = "Spiriit\\Bundle\\FormFilterBundle\\Filter\\Form\\Type\\EntityFilterType";
                     $fieldsWithTypes[$fieldName]['options_code'] =
                         "                'class' => " . Str::getShortClassName($relation['targetEntity']) . "::class,\n" .
                         "                'placeholder'   => 'Seleccione',\n" .
