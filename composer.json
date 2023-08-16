@@ -13,12 +13,12 @@
     "prefer-stable": true,
     "require": {
         "php": "^7.4|^8.0",
-        "symfony/form": "^4.4|^5.1",
-        "symfony/framework-bundle": "^4.4|^5.1",
-        "symfony/filesystem": "^4.4|^5.1",
-        "symfony/finder": "^4.4|^5.1",
+        "symfony/form": "^4.4|^5.4|^6.3",
+        "symfony/framework-bundle": "^4.4|^5.4|^6.3",
+        "symfony/filesystem": "^4.4|^5.4|^6.3",
+        "symfony/finder": "^4.4|^5.4|^6.3",
         "symfony/maker-bundle": "^1.21",
-        "lexik/form-filter-bundle": "^7.0",
+        "spiriitlabs/form-filter-bundle": "^9.0",
         "gales-petkopara/multi-search-bundle": "^2.0",
         "pagerfanta/pagerfanta": "^3.0",
         "yectep/phpspreadsheet-bundle": "^1.0"

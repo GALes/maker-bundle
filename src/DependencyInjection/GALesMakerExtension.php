@@ -30,5 +30,4 @@ class GALesMakerExtension extends Extension
         return 'gales_maker';
     }
 
-
 }
