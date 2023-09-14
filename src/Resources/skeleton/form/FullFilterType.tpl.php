@@ -12,8 +12,8 @@ use <?= $className ?>;
 use <?= $className ?>;
 <?php endforeach; ?>
 use Symfony\Component\Form\AbstractType;
-use Lexik\Bundle\FormFilterBundle\Filter\FilterOperands;
-use Lexik\Bundle\FormFilterBundle\Filter\Query\QueryInterface;
+use Spiriit\Bundle\FormFilterBundle\Filter\FilterOperands;
+use Spiriit\Bundle\FormFilterBundle\Filter\Query\QueryInterface;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 <?php foreach ($field_type_use_statements as $className): ?>

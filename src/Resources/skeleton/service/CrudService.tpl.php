@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 <?php if ( $filter_type === 'input' ): ?>
 use Petkopara\MultiSearchBundle\Service\MultiSearchBuilderService;
 <?php elseif ( $filter_type === 'form' ): ?>
-use Lexik\Bundle\FormFilterBundle\Filter\FilterBuilderUpdater;
+use Spiriit\Bundle\FormFilterBundle\Filter\FilterBuilderUpdater;
 <?php endif; ?>
 use Pagerfanta\Pagerfanta;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
@@ -48,7 +48,7 @@ class <?= $class_name ?>
 <?php if ( $filter_type === 'input' ): ?>
         MultiSearchBuilderService   $multiSearchBuilderService
 <?php elseif ( $filter_type === 'form' ): ?>
-        FilterBuilderUpdater $lexikQueryBuilderUpdater
+        FilterBuilderUpdater $spiriitQueryBuilderUpdater
 <?php endif; ?>
     )
     {
@@ -59,7 +59,7 @@ class <?= $class_name ?>
 <?php if ( $filter_type === 'input' ): ?>
         $this->multiSearchBuilderService = $multiSearchBuilderService;
 <?php elseif ( $filter_type === 'form' ): ?>
-        $this->lexikQueryBuilderUpdater = $lexikQueryBuilderUpdater;
+        $this->spiriitQueryBuilderUpdater = $spiriitQueryBuilderUpdater;
 <?php endif; ?>
     }
 
@@ -123,7 +123,11 @@ class <?= $class_name ?>
     */
     public function filter(QueryBuilder $queryBuilder, Request $request)
     {
+
         $session = $request->getSession();
+        $routeName = $request->attributes->get('_route');
+        $galesCRUDFilter = $session->has('galesCRUDFilter') ? $session->get('galesCRUDFilter') : [];
+
         $filterForm = $this->formFactory->create(<?= $form_filter_class_name ?>::class);
 
         // Para evitar error cuando se utilizan joins oneToMany y manyToMany:
@@ -132,14 +136,14 @@ class <?= $class_name ?>
         //Reset Filters
         if ($request->get('filter_action') == 'reset') {
             $request->query->remove('filter_action');
-            $session->remove('filterUrl');
+            unset($galesCRUDFilter[$routeName]);
         }
         else {
             // Filter action
             if ($request->get('filter_action') == 'filter' || $request->get('filter_action') == 'exportXlsx') {
                 // Bind values from the request
                 $filterForm->handleRequest($request);
-                $session->remove('filterUrl');
+                unset($galesCRUDFilter[$routeName]);
 
                 // Quito la accion de exportación para no guardarla en session
                 $exportXlsx = false;
@@ -154,12 +158,12 @@ class <?= $class_name ?>
 <?php if ( $filter_type === 'input' ): ?>
                     $this->multiSearchBuilderService->searchForm($queryBuilder, $filterForm->get('search'));
 <?php elseif ( $filter_type === 'form' ): ?>
-                    $this->lexikQueryBuilderUpdater->addFilterConditions($filterForm, $queryBuilder);
+                    $this->spiriitQueryBuilderUpdater->addFilterConditions($filterForm, $queryBuilder);
 <?php endif; ?>
 
                     // Save filter to session
                     $filterUrl = $request->query->all();
-                    $session->set('filterUrl', $filterUrl);
+                    $galesCRUDFilter[$routeName]['filterUrl'] = $filterUrl;
 
                     // Restituyo la acción para generar el excel en el index
                     if ($exportXlsx) {
@@ -170,17 +174,20 @@ class <?= $class_name ?>
             // Si entra por paginacion o por ordenamiento de columna
             else if ( $request->get('pcg_page') || $request->get('pcg_sort_col') || $request->get('pcg_sort_order') ) {
                 $filterUrl = $request->query->all();
-                $session->set('filterUrl', $filterUrl);
+                $galesCRUDFilter[$routeName]['filterUrl'] = $filterUrl;
             }
             // Sino si solo se abre la url base y se tienen filtros en session, los restituye y renderiza nuevamente
-            else if ($session->has('filterUrl')) {
-                $filterUrl = $session->get('filterUrl');
-                $session->remove('filterUrl');
-                $url = $this->urlGenerator->generate('<?= $route_name ?>_index', $filterUrl);
+            else if (isset($galesCRUDFilter[$routeName])) {
+                $filterUrl = $galesCRUDFilter[$routeName]['filterUrl'];
+                unset($galesCRUDFilter[$routeName]);
+                $session->set('galesCRUDFilter', $galesCRUDFilter);
+
+                $url = $this->urlGenerator->generate($routeName, $filterUrl);
                 return new RedirectResponse($url);
             }
         }
-        
+
+        $session->set('galesCRUDFilter', $galesCRUDFilter);
         return array($filterForm, $queryBuilder);
     }
 
@@ -232,7 +239,7 @@ class <?= $class_name ?>
     * Calculates the total of records string
     */
     public function getTotalOfRecordsString(QueryBuilder $queryBuilder, Request $request) {
-        $totalOfRecords = $queryBuilder->select('COUNT(zzz.<?=$entity_identifier; ?>)')->getQuery()->getSingleScalarResult();
+        $totalOfRecords = $queryBuilder->select('COUNT(zzz.<?=$entity_identifier; ?>) AS row_count')->orderBy('row_count')->getQuery()->getSingleScalarResult();
         $show = $request->get('pcg_show', 10);
         $page = $request->get('pcg_page', 1);
         
@@ -255,7 +262,7 @@ class <?= $class_name ?>
     public function createDeleteForm(<?= $entity_class_name; ?> $<?= $entity_var_singular ?>)
     {
         return $this->formFactory->createBuilder()
-            ->setAction($this->urlGenerator->generate('<?= $entity_var_singular ?>_delete', array('id' => $<?= $entity_var_singular ?>->getId())))
+            ->setAction($this->urlGenerator->generate('<?= $route_name ?>_delete', array('id' => $<?= $entity_var_singular ?>->getId())))
             ->setMethod('DELETE')
             ->getForm()
         ;

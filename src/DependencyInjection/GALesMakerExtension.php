@@ -22,10 +22,12 @@ class GALesMakerExtension extends Extension
         $definition->setArgument(0, $config['nombre']);
     }
 
-    public function getAlias()
+    /**
+     * @return string
+     */
+    public function getAlias(): string
     {
         return 'gales_maker';
     }
-
 
 }

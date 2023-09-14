@@ -176,7 +176,7 @@ final class MakeCrud extends AbstractMaker
         $io->writeln(array(
             'By default, the generator generate filter code.',
             '<comment>input</comment> to use PetkoparaMultiSearchBundle to search only with one input in the entity.',
-            '<comment>form</comment> to use LexikFormFilterBundle to search in the entity. <comment>(beta)</comment>',
+            '<comment>form</comment> to use SpiriitFormFilterBundle to search in the entity. <comment>(beta)</comment>',
             '<comment>none</comment> use this to not generate any filter code. <comment>(beta)</comment>',
         ));
         $question = new Question('Filter Type (input, form, none)', 'input');
@@ -282,7 +282,7 @@ final class MakeCrud extends AbstractMaker
         if ($filterType !== 'none') {
             $this->formTypeRenderer->render(
                 $formFilterClassDetails,
-                $filterType === 'input' ? $entityDoctrineDetails->getFormFields() : $entityDoctrineDetails->getLexikFormFields(),
+                $filterType === 'input' ? $entityDoctrineDetails->getFormFields() : $entityDoctrineDetails->getSpiriitFormFields(),
                 $entityClassDetails,
                 [],
                 [],
