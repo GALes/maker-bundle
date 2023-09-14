@@ -6,10 +6,10 @@ export function toggleAll($event)
     const $aInputs = $('.check-all-row');
     let checkStatus = $checkHeader.prop('checked');
 
-    console.log('toggleAll');
+    // console.log('toggleAll');
 
     $aInputs.each((index, element) => {
-        console.log(element);
+        // console.log(element);
         $(element).prop('checked', checkStatus);
     });
 

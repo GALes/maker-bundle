@@ -30,7 +30,7 @@
                 </button>
             </div>
             <div class="input-group-append">
-                <button class="btn btn-secondary" type="submit" name="filter_action" id="button-export" value="exportXlsx">
+                <button class="btn btn-secondary" type="submit" name="filter_action" id="button-export" value="exportXlsx" data-turbo="false">
                     <span class="fa fa-download" aria-hidden="true"></span>
                 </button>
             </div>

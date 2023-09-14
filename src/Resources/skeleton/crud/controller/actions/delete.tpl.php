@@ -1,19 +1,16 @@
-    /**
-     * @Route("/{<?= $entity_identifier ?>}", name="<?= $route_name ?>_delete", methods={"DELETE"})
-     */
+    #[Route("/{<?= $entity_identifier ?>}", name: "<?= $route_name ?>_delete", methods: ["DELETE"])]
     public function delete(Request $request, <?= $entity_class_name ?> $<?= $entity_var_singular ?>): Response
     {
         $form = $this->createDeleteForm($<?= $entity_var_singular ?>);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->remove($<?= $entity_var_singular ?>);
-            $entityManager->flush();
-            $this->get('session')->getFlashBag()->add('success', 'El registro se ha eliminado exitosamente');
+            $this->entityManager->remove($<?= $entity_var_singular ?>);
+            $this->entityManager->flush();
+            $this->addFlash('success', 'El registro se ha eliminado exitosamente');
         }
         else {
-            $this->get('session')->getFlashBag()->add('error', 'No se ha podido eliminar el registro');
+            $this->addFlash('error', 'No se ha podido eliminar el registro');
         }
 
         return $this->redirectToRoute('<?= $route_name ?>_index');
@@ -37,20 +34,17 @@
     
     /**
     * Delete <?= $entity_class_name ?> by id
-    *
-    * @Route("/delete/{id}", name="<?= $route_name ?>_by_id_delete", methods={"GET"})
     */
+    #[Route("/delete/{<?= $entity_identifier ?>}", name: "<?= $route_name ?>_by_id_delete", methods: ["GET"])]
     public function deleteByIdAction(<?= $entity_class_name ?> $<?= $entity_var_singular ?>){
-        $em = $this->getDoctrine()->getManager();
-        
         try {
-            $em->remove($<?= $entity_var_singular ?>);
-            $em->flush();
-            $this->get('session')->getFlashBag()->add('success', 'El registro se ha eliminado exitosamente');
-        } catch (Exception $ex) {
-            $this->get('session')->getFlashBag()->add('error', 'No se ha podido eliminar el registro');
+            $this->entityManager->remove($<?= $entity_var_singular ?>);
+            $this->entityManager->flush();
+            $this->addFlash('success', 'El registro se ha eliminado exitosamente');
+        }
+        catch (Exception $ex) {
+            $this->addFlash('error', 'No se ha podido eliminar el registro');
         }
         
         return $this->redirect($this->generateUrl('<?= $route_name ?>_index'));
-    
     }

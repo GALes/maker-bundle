@@ -18,7 +18,7 @@ use Petkopara\MultiSearchBundle\Service\MultiSearchBuilderService;
 use Lexik\Bundle\FormFilterBundle\Filter\FilterBuilderUpdater;
 <?php endif; ?>
 use Pagerfanta\Pagerfanta;
-use Pagerfanta\Adapter\DoctrineORMAdapter;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Pagerfanta\View\TwitterBootstrap4View;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\HttpFoundation\Request;
@@ -196,7 +196,7 @@ class <?= $class_name ?>
         $queryBuilder = OrderByHelper::addOrderByToQuery($queryBuilder, $sortCol, $sortOrder);
 
         // Paginator
-        $adapter = new DoctrineORMAdapter($queryBuilder);
+        $adapter = new QueryAdapter($queryBuilder);
         $pagerfanta = new Pagerfanta($adapter);
         $pagerfanta->setMaxPerPage($request->get('pcg_show' , 10));
         
@@ -243,6 +243,22 @@ class <?= $class_name ?>
             $endRecord = $totalOfRecords;   
         }
         return "Mostrando $startRecord - $endRecord de $totalOfRecords Registros.";
+    }
+
+    /**
+    * Creates a form to delete a <?= $entity_class_name; ?> entity.
+    *
+    * @param <?= $entity_class_name; ?> $<?= $entity_var_singular ?> The User entity
+    *
+    * @return Form The form
+    */
+    public function createDeleteForm(<?= $entity_class_name; ?> $<?= $entity_var_singular ?>)
+    {
+        return $this->formFactory->createBuilder()
+            ->setAction($this->urlGenerator->generate('<?= $entity_var_singular ?>_delete', array('id' => $<?= $entity_var_singular ?>->getId())))
+            ->setMethod('DELETE')
+            ->getForm()
+        ;
     }
 
 
