@@ -262,7 +262,7 @@ class <?= $class_name ?>
     public function createDeleteForm(<?= $entity_class_name; ?> $<?= $entity_var_singular ?>)
     {
         return $this->formFactory->createBuilder()
-            ->setAction($this->urlGenerator->generate('<?= $entity_var_singular ?>_delete', array('id' => $<?= $entity_var_singular ?>->getId())))
+            ->setAction($this->urlGenerator->generate('<?= $route_name ?>_delete', array('id' => $<?= $entity_var_singular ?>->getId())))
             ->setMethod('DELETE')
             ->getForm()
         ;
