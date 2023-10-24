@@ -3,7 +3,7 @@
 
 {% block body %}
 
-<div class="row mt-3">
+<div class="row">
     {{ include('bundles/GALesMaker/_components/_flashMessages.html.twig') }}
     <div class="col-lg-12 mt-2">
         <h4>Alta de <?=$custom_helper->asHumanWords($entity_class_name) ;?> <span class="fa fa-file" aria-hidden="true"></span> </h4>
@@ -15,10 +15,10 @@
     {{ form_start(form, { 'action': path('<?= $route_name; ?>_new') }) }}
     {{ form_widget(form) }}
     <p>
-        <button type="submit" name="submit" value="save" class="btn btn-primary">
+        <button type="submit" name="submit" value="save" class="btn btn-outline-primary">
             Guardar <span class="fa fa-check-circle" aria-hidden="true"></span>
         </button>
-        <button type="submit" name="submit" value="saveAndAdd" class="btn btn-info">
+        <button type="submit" name="submit" value="saveAndAdd" class="btn btn-outline-info">
             Guardar y Cargar Nuevo <span class="fa fa-plus" aria-hidden="true"></span>
         </button>
     </p>
