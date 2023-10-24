@@ -1,7 +1,8 @@
 <?= $custom_helper->getHeadPrintCode('Edición de ' . $custom_helper->asHumanWords($entity_class_name), $template_base_twig ) ?>
 
 {% block body %}
-<div class="row mt-3">
+
+<div class="row">
     {{ include('bundles/GALesMaker/_components/_flashMessages.html.twig') }}
     <div class="col-lg-12 mt-2">
         <h4>Edici&oacute;n de <?= $custom_helper->asHumanWords($entity_class_name) ?> <span class="fa fa-pencil" aria-hidden="true"></span> </h4>
@@ -13,7 +14,7 @@
 
     {{ form_widget(form) }}
     <p>
-        <button type="submit" class="btn btn-primary">
+        <button type="submit" class="btn btn-outline-primary">
             <span class="fa fa-check" aria-hidden="true"></span> Guardar
         </button>
     </p>
@@ -21,7 +22,7 @@
 
     <hr/>
 
-    {% set hide_edit, hide_delete, hide_new = true, false, false %}
+    {% set hide_edit, hide_delete, hide_new = true, true, true %}
 <?php include 'others/record_actions.tpl.php' ?>
 </div>
 {% endblock %}

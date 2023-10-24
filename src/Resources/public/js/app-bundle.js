@@ -2,7 +2,6 @@ import $ from 'jquery';
 import 'popper.js';
 import 'bootstrap';
 
-import 'selectize';
 import bsCustomFileInput from 'bs-custom-file-input';
 import 'flatpickr';
 import 'flatpickr/dist/l10n/es.js';
@@ -87,11 +86,6 @@ function InitAppBundle() {
                 });
             }
         }
-    });
-
-    $("select:not('.not-selectized')").selectize({
-        create: true,
-        sortField: 'text'
     });
 
     /* Mostrar los datepicker con y sin selección de hora */
