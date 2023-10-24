@@ -2,7 +2,7 @@
 
 {% block body %}
 
-<div class="row mt-3">
+<div class="row">
     {{ include('bundles/GALesMaker/_components/_flashMessages.html.twig') }}
     <div class="col-lg-12 mt-2">
         <h4>Visualizaci&oacute;n de <?= $custom_helper->asHumanWords($entity_class_name) ?> <span class="fa fa-eye" aria-hidden="true"></span>  </h4>
@@ -25,7 +25,7 @@
 
 <hr/>
 
-{% set hide_edit, hide_delete, hide_new= false, false, false %}
+{% set hide_edit, hide_delete, hide_new = true, false, true %}
 <?php include 'others/record_actions.tpl.php' ?>
 
 {% endblock %}

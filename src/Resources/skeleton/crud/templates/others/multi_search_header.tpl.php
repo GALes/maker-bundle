@@ -1,6 +1,6 @@
     <div class="col-md-3 pull-left">
         <!-- PAGE SIZE -->
-        <div class="pagination form-inline ">
+        <div class="pagination form-inline" style="margin: 8px 0px 15px;">
             <select class = "form-control not-selectized"  onchange="window.location = this.value" >
                 <option value='{{ path('<?= $route_name ?>_index', app.request.query.all|merge({'pcg_show': '10'})) }}' {% if app.request.get('pcg_show') == 10 %} selected {% endif %}>10</option>
                 <option value='{{ path('<?= $route_name ?>_index', app.request.query.all|merge({'pcg_show': '20'})) }}' {% if app.request.get('pcg_show') == 20 %} selected {% endif %}>20</option>
@@ -11,7 +11,6 @@
         </div>
         <!-- END PAGE SIZE -->
     </div>
-
     <!-- FILTERING -->
     <div class="col-md-6">
         <form action={{ path('<?= $route_name ?>_index') }} method="get" id="filters" >
@@ -20,17 +19,17 @@
             {{ form_widget(filterForm.search, { 'attr': {'class': 'form-control'} }) }}
             {{ form_rest(filterForm) }}
             <div class="input-group-append">
-                <button class="btn btn-primary" type="submit" name="filter_action" value="filter">
+                <button class="btn btn-outline-primary" type="submit" name="filter_action" value="filter">
                     <span class="fa fa-search"></span>
                 </button>
             </div>
             <div class="input-group-append">
-                <button class="btn btn-info"  type="submit" name="filter_action" value="reset">
+                <button class="btn btn-outline-info"  type="submit" name="filter_action" value="reset">
                     <span class="fa fa-remove" aria-hidden="true"></span>
                 </button>
             </div>
             <div class="input-group-append">
-                <button class="btn btn-secondary" type="submit" name="filter_action" id="button-export" value="exportXlsx" data-turbo="false">
+                <button class="btn btn-outline-secondary" type="submit" name="filter_action" id="button-export" value="exportXlsx" data-turbo="false">
                     <span class="fa fa-download" aria-hidden="true"></span>
                 </button>
             </div>
