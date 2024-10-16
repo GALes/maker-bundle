@@ -15,18 +15,24 @@ function InitAppBundle() {
     $('#check-all-thead').on('click', ($e) => toggleAll($e.target) );
     $('.check-all-row').on('click', () => bulkSubmitBtnManage() );
 
-    bsCustomFileInput.init();
+    console.log('Hola desde el bundle: inicializando los file inputssss');
+    // bsCustomFileInput.init();
     /* Mostrar el boton de visualizacion en los fileInputs */
     let fileInputs = $(".custom-file");
     let i = 0;
     fileInputs.each(function () {
         $(this).before(`<div id="input-group-file${i}" class="input-group"></div>`)
+        console.log($(this)); // TODO:  borrar
         $(this).detach();
         $(this).appendTo("#input-group-file" + i++);
 
         const fileId        = $(this).find('input').data('fileid');
         const fileUrl       = $(this).find('input').data('fileurl');
         const fileDisabled  = $(this).find('input').attr('disabled') === 'disabled';
+        const fileCodigo    = $(this).find('input').data('filecodigo');
+
+        console.log('fileId: ', fileId, 'fileUrl: ', fileUrl, 'fileDisabled: ', fileDisabled, 'fileCodigo: ', fileCodigo); // TODO:  borrar
+
         if (fileUrl) {
             $(this).after(
                 `<div class="input-group-append download-file">
@@ -34,6 +40,8 @@ function InitAppBundle() {
                 </div>`
             );
             const formName = $(this).closest('form').attr('name');
+            console.log('fileUrl: ', fileUrl, fileUrl.split('/').pop())
+            $(this).find('.custom-file-label').html(fileId + '_' + fileCodigo);
             const deletedFilesInput = $(this).closest('form').find(`:hidden#${formName}_deletedFiles`);
             if ( deletedFilesInput.length > 0 && !fileDisabled ) {
                 $(this).after(
@@ -86,6 +94,9 @@ function InitAppBundle() {
                 });
             }
         }
+        else {
+            $(this).find('.custom-file-label').html('Sin archivo seleccionado');
+        }
     });
 
     /* Mostrar los datepicker con y sin selección de hora */
@@ -113,3 +124,23 @@ $( () => {
 document.addEventListener("turbo:frame-load", function (e) {
     InitAppBundle();
 })
+
+
+/***
+ <div class="input-group mb-3">
+     <label for="proyecto_constancias_constancia_iibbFile">
+        Constancia IIBB (documento .PDF, 8MB máximo)
+     </label>
+     <div id="input-group-file0" class="input-group">
+         <div class="custom-file">
+             {{ form_widget(form.constancia_iibbFile) }}
+             <label for="proyecto_constancias_constancia_iibbFile" class="custom-file-label">
+
+             </label>
+         </div>
+     </div>
+ </div>
+
+ NOTA: modificar input-group-file0 con el nro que corresponda, arrancando desde 0 y aumentando
+
+ */
