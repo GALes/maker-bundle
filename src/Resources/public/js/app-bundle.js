@@ -26,10 +26,10 @@ function InitAppBundle() {
         const fileDisabled  = $(this).find('input').attr('disabled') === 'disabled';
         const fileCodigo    = $(this).find('input').data('filecodigo');
 
-        console.log('fileId: ', fileId, 'fileUrl: ', fileUrl, 'fileDisabled: ', fileDisabled, 'fileCodigo: ', fileCodigo); // TODO:  borrar
+        // console.log('fileId: ', fileId, 'fileUrl: ', fileUrl, 'fileDisabled: ', fileDisabled, 'fileCodigo: ', fileCodigo); // TODO:  borrar
 
         $(this).before(`<div id="input-group-file${i}" class="input-group"></div>`)
-        console.log($(this)); // TODO:  borrar
+        // console.log($(this)); // TODO:  borrar
         $(this).detach();
         $(this).appendTo("#input-group-file" + i++);
 
