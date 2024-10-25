@@ -20,13 +20,19 @@ function InitAppBundle() {
     let fileInputs = $(".custom-file");
     let i = 0;
     fileInputs.each(function () {
-        $(this).before(`<div id="input-group-file${i}" class="input-group"></div>`)
-        $(this).detach();
-        $(this).appendTo("#input-group-file" + i++);
 
         const fileId        = $(this).find('input').data('fileid');
         const fileUrl       = $(this).find('input').data('fileurl');
         const fileDisabled  = $(this).find('input').attr('disabled') === 'disabled';
+        const fileCodigo    = $(this).find('input').data('filecodigo');
+
+        // console.log('fileId: ', fileId, 'fileUrl: ', fileUrl, 'fileDisabled: ', fileDisabled, 'fileCodigo: ', fileCodigo); // TODO:  borrar
+
+        $(this).before(`<div id="input-group-file${i}" class="input-group"></div>`)
+        // console.log($(this)); // TODO:  borrar
+        $(this).detach();
+        $(this).appendTo("#input-group-file" + i++);
+
         if (fileUrl) {
             $(this).after(
                 `<div class="input-group-append download-file">
@@ -34,6 +40,7 @@ function InitAppBundle() {
                 </div>`
             );
             const formName = $(this).closest('form').attr('name');
+            $(this).find('.custom-file-label').html($(this).find('input').attr('placeholder'));
             const deletedFilesInput = $(this).closest('form').find(`:hidden#${formName}_deletedFiles`);
             if ( deletedFilesInput.length > 0 && !fileDisabled ) {
                 $(this).after(
@@ -62,8 +69,8 @@ function InitAppBundle() {
                     }).then((result) => {
                         if (result.isConfirmed) {
                             $(this).find('.custom-file-input').val('');
-                            $(this).find('.custom-file-input').attr('placeholder', '');
-                            $(this).find('.custom-file-label').html('');
+                            // $(this).find('.custom-file-input').attr('placeholder', '');
+                            $(this).find('.custom-file-label').html('<b>El archivo será eliminado cuando guarde el formulario</b>');
                             $(this).parent().find('.download-file').hide();
                             $(this).parent().find('.delete-file').hide();
                             if (fileRequired) {
@@ -85,6 +92,9 @@ function InitAppBundle() {
                     });
                 });
             }
+        }
+        else {
+            $(this).find('.custom-file-label').html('Sin archivo seleccionado');
         }
     });
 
@@ -113,3 +123,20 @@ $( () => {
 document.addEventListener("turbo:frame-load", function (e) {
     InitAppBundle();
 })
+
+
+
+/***
+ <div class="input-group mb-3">
+     {{ form_label(form.certificado_mipymeFile) }}
+     <div id="input-group-file0" class="input-group">
+         <div class="custom-file">
+             {{ form_widget(form.certificado_mipymeFile) }}
+             <label for="" class="custom-file-label"></label>
+         </div>
+     </div>
+ </div>
+
+ NOTA: modificar input-group-file0 con el nro que corresponda, arrancando desde 0 y aumentando
+
+ */
