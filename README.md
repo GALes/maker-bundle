@@ -23,7 +23,10 @@ Agregar al composer.json del proyecto los siguientes repositorios:
     "repositories":[
         {
             "type": "path",
-            "url": "../bundles/maker-bundle"
+            "url": "../bundles/maker-bundle",
+            "options": {
+                "symlink": true
+            }
         }
     ],
     "minimum-stability": "dev",
@@ -31,7 +34,7 @@ Agregar al composer.json del proyecto los siguientes repositorios:
     
 Agregar con composer los siguientes Bundles:
 
-    composer require gales/maker-bundle:*@dev
+    composer require gales/maker-bundle:*
 
 Luego hacer un:
 
