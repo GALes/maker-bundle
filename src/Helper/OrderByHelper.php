@@ -26,25 +26,28 @@ class OrderByHelper
         return $retorno ? $retorno[0] : $retorno;
     }
 
+    private static function addOrderByToQueryRecursive(QueryBuilder $queryBuilder, array $elements, string $rootAlias, string $sortOrder)
+    {
+        $attribute = array_shift($elements);
+        if ( $attribute && $elements ) {
+            $queryBuilder
+                ->leftJoin($rootAlias . '.' . $attribute, $attribute)
+            ;
+            $queryBuilder = self::addOrderByToQueryRecursive($queryBuilder, $elements, $attribute, $sortOrder);
+        }
+        else {
+            $attribute = $rootAlias . '.' . $attribute;
+            $queryBuilder->orderBy($attribute, $sortOrder);
+        }
+
+        return $queryBuilder;
+    }
+    
     public static function addOrderByToQuery(QueryBuilder $queryBuilder, string $field, string $sortOrder): QueryBuilder
     {
         $elements = self::getElements($field);
-
         $rootAlias = $queryBuilder->getRootAlias();
-        $sortCol = array_pop($elements);
-
-        if ( $sortCol && $elements ) {
-            $joinTable = array_pop($elements);
-            $joinCol = $joinTable . '.' . $sortCol;
-            $queryBuilder
-                ->leftJoin($rootAlias . '.' . $joinTable, $joinTable)
-                ->orderBy($joinCol, $sortOrder)
-            ;
-        }
-        else {
-            $sortCol = $rootAlias . '.' . $sortCol;
-            $queryBuilder->orderBy($sortCol, $sortOrder);
-        }
+        $queryBuilder = self::addOrderByToQueryRecursive($queryBuilder, $elements, $rootAlias, $sortOrder);
 
         return $queryBuilder;
     }
