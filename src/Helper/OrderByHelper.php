@@ -30,9 +30,12 @@ class OrderByHelper
     {
         $attribute = array_shift($elements);
         if ( $attribute && $elements ) {
-            $queryBuilder
-                ->leftJoin($rootAlias . '.' . $attribute, $attribute)
-            ;
+            $joinElement = $rootAlias . '.' . $attribute;
+            if ( !str_contains($queryBuilder->getDQL(), $joinElement) ) {
+                $queryBuilder
+                    ->leftJoin($joinElement, $attribute)
+                ;
+            }
             $queryBuilder = self::addOrderByToQueryRecursive($queryBuilder, $elements, $attribute, $sortOrder);
         }
         else {
@@ -47,6 +50,7 @@ class OrderByHelper
     {
         $elements = self::getElements($field);
         $rootAlias = $queryBuilder->getRootAlias();
+//        dd($field, $elements, $queryBuilder->getDQL());
         $queryBuilder = self::addOrderByToQueryRecursive($queryBuilder, $elements, $rootAlias, $sortOrder);
 
         return $queryBuilder;
