@@ -31,7 +31,7 @@ class OrderByHelper
         $attribute = array_shift($elements);
         if ( $attribute && $elements ) {
             $joinElement = $rootAlias . '.' . $attribute;
-            if ( !str_contains($queryBuilder->getDQL(), $joinElement) ) {
+            if ( !str_contains($queryBuilder->getDQL(), 'JOIN ' . $joinElement) ) {
                 $queryBuilder
                     ->leftJoin($joinElement, $attribute)
                 ;
