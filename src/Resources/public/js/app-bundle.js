@@ -114,6 +114,33 @@ function InitAppBundle() {
         time_24hr:  true,
         locale: 'es',
     });
+
+    $("#reset-filters").on('click', function(e) {
+        e.preventDefault();
+        $("#filtros button[value=reset]").trigger('click');
+    });
+    $("#filters").on('show.bs.collapse', function() {
+        $("#filters-btn-mostrar").html('Ocultar filtros');
+    });
+    $("#filters").on('hide.bs.collapse', function() {
+        $('#filters-btn-mostrar').html('Mostrar filtros');
+    });
+    if ($("#filters").hasClass('show')) {
+        $("#filters-btn-mostrar").html('Ocultar filtros');
+    }
+    else {
+        $('#filters-btn-mostrar').html('Mostrar filtros');
+    }
+
+    $("#filtros").find('input, select, textarea').each(function() {
+        let valor = $(this).val().trim();
+
+        // Verifica si el campo tiene un valor no vacío y si no es un select con la opción vacía
+        if (valor !== '' && !(this.tagName === 'SELECT' && valor === '')) {
+            $(".navbarAlert").removeClass('d-none');
+            return false; // corta el loop si ya encontró un campo con valor
+        }
+    });
 }
 
 $( () => {

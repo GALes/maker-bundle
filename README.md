@@ -44,7 +44,7 @@ Agregar en la configuracion de Twig que use Bootstrap 4 Form Theme
 
     # config/packages/twig.yaml
     twig:
-        form_themes: ['bootstrap_4_layout.html.twig']
+        form_themes: ['bootstrap_5_layout.html.twig']
         
 ## Uso
 Ejecutar el comando 
