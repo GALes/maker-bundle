@@ -1,13 +1,7 @@
 <!-- FILTERING -->
 <div class="col-md-12">
     <div class="card mb-2">
-        <div class="card-header">
-            <a class="btn dropdown-toggle pull-left h3 ml-1" data-bs-toggle="collapse" data-bs-target="#filters"
-               style="background-color: white; color: #4570b4; border: 1px solid #4570b4">
-                Filtros
-                <span class="caret"></span>
-            </a>
-        </div>
+        {% include 'bundles/GALesMaker/_components/_filterHeader.html.twig' %}
         <div class="card-body">
             <div  id="filters" class="collapse">
                 <form class="well" id="filtros" action={{ path('<?= $route_name ?>_index') }} method="get" >
