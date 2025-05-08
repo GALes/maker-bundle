@@ -134,15 +134,9 @@ function InitAppBundle() {
 
     $("#filtros").find('input, select, textarea').each(function() {
         let valor = $(this).val().trim();
-        let hayValor = false;
 
-        console.log('Campo ' + $(this).attr('name'));
         // Verifica si el campo tiene un valor no vacío y si no es un select con la opción vacía
         if (valor !== '' && !(this.tagName === 'SELECT' && valor === '')) {
-
-            hayValor = true;
-            console.log('Hay valor en el campo ' + $(this).attr('name'));
-            // $("#filters").collapse('show');
             $(".navbarAlert").removeClass('d-none');
             return false; // corta el loop si ya encontró un campo con valor
         }
