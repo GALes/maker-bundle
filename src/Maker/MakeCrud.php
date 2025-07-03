@@ -109,8 +109,15 @@ final class MakeCrud extends AbstractMaker
         $command
             ->setDescription('Creates CRUD for Doctrine entity class')
             ->addArgument('entity-class', InputArgument::OPTIONAL, sprintf('The class name of the entity to create CRUD (e.g. <fg=yellow>%s</>)', Str::asClassName(Str::getRandomTerm())))
+            ->addArgument('filter-type', InputArgument::OPTIONAL, 'The filter type to use (input, form, none)')
+            ->addArgument('base-template', InputArgument::OPTIONAL, 'The base template for the views (e.g., base.html.twig)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeCrud.txt'))
         ;
+
+        // Example usage with arguments:
+        // php bin/console gales:make:crud <EntityClassName> [filter-type] [base-template]
+        // Example: php bin/console gales:make:crud Product input base.html.twig
+        // If arguments are not provided, the command will be interactive.
 
         $inputConfig->setArgumentAsNonInteractive('entity-class');
     }
@@ -129,6 +136,42 @@ final class MakeCrud extends AbstractMaker
 
             $input->setArgument('entity-class', $value);
             
+        }
+
+        if (null === $input->getArgument('filter-type')) {
+            $io->writeln(array(
+                'By default, the generator generate filter code.',
+                '<comment>input</comment> to use PetkoparaMultiSearchBundle to search only with one input in the entity.',
+                '<comment>form</comment> to use SpiriitFormFilterBundle to search in the entity. <comment>(beta)</comment>',
+                '<comment>none</comment> use this to not generate any filter code. <comment>(beta)</comment>',
+            ));
+            $question = new Question('Filter Type (input, form, none)', 'input');
+            $question->setAutocompleterValues([
+                'input',
+                'form',
+                'none',
+            ]);
+            $value = $io->askQuestion($question);
+            $input->setArgument('filter-type', $value);
+        }
+
+        if (null === $input->getArgument('base-template')) {
+            $twigFiles = $this->appKernel->getProjectDir() . '/templates/';
+            $finder = new Finder();
+            $finder->name('*.twig');
+            $templatesList = [];
+            /** @var SplFileInfo $file */
+            foreach ($finder->in($twigFiles) as $file) {
+                $templatesList[] = $file->getRelativePathname();
+            }
+            $io->writeln([
+                'By default, the created views extends the <comment>@GALesMaker/base.html.twig</comment>',
+                'You can also set your template which the views to extend, for example <comment>base.html.twig</comment>',
+            ]);
+            $question = new Question('Base template for the views', 'bundles/GALesMaker/base.html.twig');
+            $question->setAutocompleterValues($templatesList);
+            $value = $io->askQuestion($question);
+            $input->setArgument('base-template', $value);
         }
     }
 
@@ -173,19 +216,7 @@ final class MakeCrud extends AbstractMaker
             'Service'
         );
 
-        $io->writeln(array(
-            'By default, the generator generate filter code.',
-            '<comment>input</comment> to use PetkoparaMultiSearchBundle to search only with one input in the entity.',
-            '<comment>form</comment> to use SpiriitFormFilterBundle to search in the entity. <comment>(beta)</comment>',
-            '<comment>none</comment> use this to not generate any filter code. <comment>(beta)</comment>',
-        ));
-        $question = new Question('Filter Type (input, form, none)', 'input');
-        $question->setAutocompleterValues([
-            'input',
-            'form',
-            'none',
-        ]);
-        $filterType = $io->askQuestion($question);
+        $filterType = $input->getArgument('filter-type');
         if ($filterType !== 'none') {
             $iter = 0;
             do {
@@ -291,23 +322,7 @@ final class MakeCrud extends AbstractMaker
         }
 
 
-        $twigFiles = $this->appKernel->getProjectDir() . '/templates/';
-        $finder = new Finder();
-        $finder->name('*.twig');
-        $templatesList = [];
-        /** @var SplFileInfo $file */
-        foreach ($finder->in($twigFiles) as $file) {
-            $templatesList[] = $file->getRelativePathname();
-        }
-        $io->writeln([
-            'By default, the created views extends the <comment>@GALesMaker/base.html.twig</comment>',
-            'You can also set your template which the views to extend, for example <comment>base.html.twig</comment>',
-        ]);
-        $question = new Question('Base template for the views', 'bundles/GALesMaker/base.html.twig');
-        $question->setAutocompleterValues($templatesList);
-        if ($answer = $io->askQuestion($question)) {
-            $templateBaseTwig = $answer;
-        }
+        $templateBaseTwig = $input->getArgument('base-template');
         $templates = [
             'index' => [
                 'template_base_twig'        => $templateBaseTwig,
