@@ -47,9 +47,18 @@ Agregar en la configuracion de Twig que use Bootstrap 4 Form Theme
         form_themes: ['bootstrap_5_layout.html.twig']
         
 ## Uso
-Ejecutar el comando 
+Ejecutar el comando:
 
     php bin/console gales:make:crud
+
+Usando parametros:
+
+    php bin/console gales:make:crud <EntityClassName> [filter-type] [base-template]
+
+  Ejemplo:
+
+    php bin/console gales:make:crud Product input base.html.twig
+
 
 #### Notaciones:
 - Listado: para definir el campo a utilizarse en el ordenamiento de una columna asociada a una entidad relacionada, 
