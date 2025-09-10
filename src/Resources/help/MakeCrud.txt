@@ -1,5 +1,15 @@
-El comando <info>%command.name%</info> genera el CRUD Controller con los templates para la entidad seleccionada.
+The <info>%command.name%</info> command generates a CRUD Controller with templates for the selected entity.
 
 <info>php %command.full_name% BlogPost</info>
+<info>php %command.full_name% BlogPost input</info>
+<info>php %command.full_name% BlogPost form admin/base.html.twig</info>
 
-Si falta el argumento, el comando pedirá el nombre de la Entidad interactivamente.
+<comment>Arguments:</comment>
+  <info>entity-class</info>     Name of the entity class to create the CRUD for
+  <info>filter-type</info>      Type of filter to use (allowed values: input, form, none)
+    • <comment>input</comment> - Uses PetkoparaMultiSearchBundle for search with a single input
+    • <comment>form</comment>  - Uses SpiriitFormFilterBundle for advanced search (beta)
+    • <comment>none</comment>   - Does not generate filtering code (beta)
+  <info>base-template</info>    Base template for the views (e.g: admin/base.html.twig)
+
+If arguments are missing, the command will ask for them interactively.

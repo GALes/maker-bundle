@@ -116,42 +116,51 @@ php bin/console gales:make:crud <EntityClassName> [filter-type] [base-template]
 php bin/console gales:make:crud Product input base.html.twig
 ```
 
-## 📝 Annotations (deprecated)
+## 🏷️ Custom Ordering for Related Entities (Deprecated)
 
-### Custom Ordering for Related Entities
+To define the field to be used for sorting a column associated with a related entity, you can use PHP 8 attributes (recommended) or annotations (deprecated).
 
-To define the field to be used for sorting a column associated with a related entity, you can use the following annotation in that entity (`@GalesMaker(orderBy=property_name)`).
-
-**Example:** A request listing has a Status column that shows the description, and you want it to be sorted by this field:
+### Using PHP 8 Attributes (Recommended)
 
 ```php
 // src/Entity/Solicitud.php
 namespace App\Entity;
-...
+use Doctrine\ORM\Mapping as ORM;
+
 class SolicitudBanco
 {
-    ...
-    /**
-     * @ORM\ManyToOne(targetEntity=SolicitudEstado::class)
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $estado;
-    ...
+    #[ORM\ManyToOne(targetEntity: SolicitudEstado::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private SolicitudEstado $estado;
 }
 ```
 
 ```php
 // src/Entity/SolicitudEstado.php
 namespace App\Entity;
-...
+use GALes\MakerBundle\Attribute as GalesMaker;
+
+#[GalesMaker\OrderBy('descripcion')]
+class SolicitudEstado
+{
+    private string $descripcion;
+}
+```
+
+### Using Annotations (Deprecated)
+
+For backward compatibility, the old annotation syntax is still supported:
+
+```php
+// src/Entity/SolicitudEstado.php
+namespace App\Entity;
+
 /**
  * @GalesMaker(orderBy="descripcion")
  */
 class SolicitudEstado
 {
-    ...
     private $descripcion;
-    ...
 }
 ```
 

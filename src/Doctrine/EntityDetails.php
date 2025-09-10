@@ -55,7 +55,12 @@ final class EntityDetails
             // Solo se permite mostrar los campos si la relacion es del tipo 2: ManyToOne,
             // no se permiten 4: OneToMany ni 8: ManyToMany
             if ($relation['type'] === 2) {
-                $retorno[$fieldName] = $relation;
+                $relationData = $relation;
+                // Add orderBy information from customOrderBy if available
+                if (isset($this->metadata->customOrderBy[$fieldName])) {
+                    $relationData['orderBy'] = $this->metadata->customOrderBy[$fieldName];
+                }
+                $retorno[$fieldName] = $relationData;
             }
         }
 
@@ -102,7 +107,6 @@ final class EntityDetails
 
         foreach ($this->metadata->associationMappings as $fieldName => $relation) {
             $fieldsWithTypes[$fieldName] = ['metadata' => $relation];
-            $fieldsWithTypes[$fieldName]['metadata']['identifier'] = 'false';
         }
 
         return $fieldsWithTypes;
@@ -234,7 +238,6 @@ final class EntityDetails
                   break;
                 default:
                     $fieldsWithTypes[$fieldName] = ['metadata' => $relation];
-                    $fieldsWithTypes[$fieldName]['metadata']['identifier'] = 'false';
             }
         }
 

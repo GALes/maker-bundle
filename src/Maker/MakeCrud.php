@@ -20,7 +20,6 @@ use GALes\MakerBundle\Helper\GeneratorTwigHelper;
 use GALes\MakerBundle\Renderer\CrudServiceRenderer;
 use GALes\MakerBundle\Renderer\ExportServiceRenderer;
 use GALes\MakerBundle\Renderer\FormFilterTypeRenderer;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use GALes\MakerBundle\Doctrine\DoctrineHelper;
@@ -420,10 +419,6 @@ final class MakeCrud extends AbstractMaker
             'security-csrf'
         );
 
-        $dependencies->addClassDependency(
-            ParamConverter::class,
-            'annotations'
-        );
     }
 
     private function pluralize(string $word): string

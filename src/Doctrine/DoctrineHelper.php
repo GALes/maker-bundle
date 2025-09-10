@@ -6,6 +6,7 @@ namespace GALes\MakerBundle\Doctrine;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use GALes\MakerBundle\Annotations\GalesMaker;
+use GALes\MakerBundle\Attribute\OrderBy;
 use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
 use GALes\MakerBundle\Doctrine\DoctrineHelperInterface;
 
@@ -18,22 +19,45 @@ class DoctrineHelper extends DoctrineHelperDecorator
         /** @var ClassMetadata $metadata */
         $metadata = parent::getMetadata($classOrNamespace, $disconnected);
 
+        // Store custom orderBy information in a custom property
+        if (!isset($metadata->customOrderBy)) {
+            $metadata->customOrderBy = [];
+        }
+
         foreach ($metadata->associationMappings as $fieldName => $relation) {
             if ($relation['type'] === 2) {
-                $reader = new AnnotationReader;
                 $targetEntity = $relation['targetEntity'];
                 $reflClass = new \ReflectionClass($targetEntity);
-                $classAnnotations = $reader->getClassAnnotations($reflClass);
-                foreach ($classAnnotations as $annot) {
-                    if ($annot instanceof GalesMaker && $annot->getOrderBy() &&
-                        property_exists($targetEntity, $annot->getOrderBy())
-                    ) {
-                        $metadata->associationMappings[$fieldName]['orderBy'] = $annot->getOrderBy();
+                $orderByField = null;
+
+                // Try PHP 8 attributes first
+                $attributes = $reflClass->getAttributes(OrderBy::class);
+                if (!empty($attributes)) {
+                    $orderByAttribute = $attributes[0]->newInstance();
+                    if (property_exists($targetEntity, $orderByAttribute->field)) {
+                        $orderByField = $orderByAttribute->field;
                     }
                 }
-                if ( !isset($metadata->associationMappings[$fieldName]['orderBy']) ) {
-                    $metadata->associationMappings[$fieldName]['orderBy'] =
-                        $metadata->associationMappings[$fieldName]['joinColumns'][0]['referencedColumnName'];
+
+                // Fall back to annotations for backward compatibility
+                if (!$orderByField) {
+                    $reader = new AnnotationReader;
+                    $classAnnotations = $reader->getClassAnnotations($reflClass);
+                    foreach ($classAnnotations as $annot) {
+                        if ($annot instanceof GalesMaker && $annot->getOrderBy() &&
+                            property_exists($targetEntity, $annot->getOrderBy())
+                        ) {
+                            $orderByField = $annot->getOrderBy();
+                            break;
+                        }
+                    }
+                }
+
+                // Store the orderBy field information
+                if ($orderByField) {
+                    $metadata->customOrderBy[$fieldName] = $orderByField;
+                } else {
+                    $metadata->customOrderBy[$fieldName] = $relation['joinColumns'][0]['referencedColumnName'];
                 }
             }
         }
