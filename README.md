@@ -19,6 +19,43 @@ Add the Bundle with composer:
 composer require gales/maker-bundle:^0.1
 ```
 
+Configure Twig to use Bootstrap 5 Form Theme:
+
+```yaml
+# config/packages/twig.yaml
+twig:
+    form_themes: ['bootstrap_5_layout.html.twig']
+```
+
+## 📁 Generated Files
+
+After selecting the Entity for which to generate the CRUD, the following files are created:
+
+```
+created: src/Service/<entity_name>CrudService.php          (Auxiliary logic for CRUD functionality)
+created: src/Controller/<entity_name>Controller.php        (Controller with CRUD logic)
+created: src/Form/<entity_name>Type.php                    (Form for entity creation/editing)
+created: src/Form/<entity_name>(Full)FilterType.php        (Listing filter)
+created: templates/<entity_name>/edit.html.twig            (Entity editing view)
+created: templates/<entity_name>/index.html.twig           (Entity listing view)
+created: templates/<entity_name>/new.html.twig             (New entity creation view)
+created: templates/<entity_name>/show.html.twig            (Entity data visualization view)
+```
+
+## 🎯 Features
+
+- ✅ **Full CRUD Operations** (Create, Read, Update, Delete)
+- ✅ **Pagination** with configurable page size
+- ✅ **Advanced Filtering** (input, select, date filters)
+- ✅ **Bootstrap 5.2** responsive design
+- ✅ **Multi-column Sorting** with custom ordering
+- ✅ **Form Validation** with Symfony constraints
+- ✅ **Service Layer** for business logic separation
+- ✅ **Twig Templates** with inheritance support
+- ✅ **Symfony 7** compatible
+
+
+
 ## 🚀 Development and Local Testing Setup
 
 Clone the bundle repository outside your project, for example from your project root:
@@ -59,13 +96,6 @@ Then run:
 composer dump-autoload
 ```
 
-Configure Twig to use Bootstrap 5 Form Theme:
-
-```yaml
-# config/packages/twig.yaml
-twig:
-    form_themes: ['bootstrap_5_layout.html.twig']
-```
 ## ⚡ Usage
 
 Run the command:
@@ -86,11 +116,11 @@ php bin/console gales:make:crud <EntityClassName> [filter-type] [base-template]
 php bin/console gales:make:crud Product input base.html.twig
 ```
 
-## 📝 Annotations
+## 📝 Annotations (deprecated)
 
 ### Custom Ordering for Related Entities
 
-To define the field to be used for sorting a column associated with a related entity, you can use the following annotation in that entity (`@GalesMaker(orderBy=property_name)`). 
+To define the field to be used for sorting a column associated with a related entity, you can use the following annotation in that entity (`@GalesMaker(orderBy=property_name)`).
 
 **Example:** A request listing has a Status column that shows the description, and you want it to be sorted by this field:
 
@@ -124,33 +154,6 @@ class SolicitudEstado
     ...
 }
 ```
-
-## 📁 Generated Files
-
-After selecting the Entity for which to generate the CRUD, the following files are created:
-
-```
-created: src/Service/<entity_name>CrudService.php          (Auxiliary logic for CRUD functionality)
-created: src/Controller/<entity_name>Controller.php        (Controller with CRUD logic)
-created: src/Form/<entity_name>Type.php                    (Form for entity creation/editing)
-created: src/Form/<entity_name>(Full)FilterType.php        (Listing filter)
-created: templates/<entity_name>/edit.html.twig            (Entity editing view)
-created: templates/<entity_name>/index.html.twig           (Entity listing view)
-created: templates/<entity_name>/new.html.twig             (New entity creation view)
-created: templates/<entity_name>/show.html.twig            (Entity data visualization view)
-```
-
-## 🎯 Features
-
-- ✅ **Full CRUD Operations** (Create, Read, Update, Delete)
-- ✅ **Pagination** with configurable page size
-- ✅ **Advanced Filtering** (input, select, date filters)
-- ✅ **Bootstrap 5.2** responsive design
-- ✅ **Multi-column Sorting** with custom ordering
-- ✅ **Form Validation** with Symfony constraints
-- ✅ **Service Layer** for business logic separation
-- ✅ **Twig Templates** with inheritance support
-- ✅ **Symfony 7** compatible
 
 ## 🤝 Contributing
 
