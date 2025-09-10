@@ -27,6 +27,26 @@ twig:
     form_themes: ['bootstrap_5_layout.html.twig']
 ```
 
+## ⚡ Usage
+
+Run the command:
+
+```bash
+php bin/console gales:make:crud
+```
+
+Using parameters:
+
+```bash
+php bin/console gales:make:crud <EntityClassName> [filter-type] [base-template]
+```
+
+**Example:**
+
+```bash
+php bin/console gales:make:crud Product input base.html.twig
+```
+
 ## 📁 Generated Files
 
 After selecting the Entity for which to generate the CRUD, the following files are created:
@@ -94,26 +114,6 @@ Then run:
 
 ```bash
 composer dump-autoload
-```
-
-## ⚡ Usage
-
-Run the command:
-
-```bash
-php bin/console gales:make:crud
-```
-
-Using parameters:
-
-```bash
-php bin/console gales:make:crud <EntityClassName> [filter-type] [base-template]
-```
-
-**Example:**
-
-```bash
-php bin/console gales:make:crud Product input base.html.twig
 ```
 
 ## 🏷️ Custom Ordering for Related Entities (Deprecated)
