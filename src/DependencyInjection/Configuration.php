@@ -7,7 +7,7 @@ use Symfony\Component\Config\Definition\NodeInterface;
 
 class Configuration implements ConfigurationInterface
 {
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('gales_maker');
         $rootNode = $treeBuilder->getRootNode('gales_maker');

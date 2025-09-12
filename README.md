@@ -1,29 +1,99 @@
 # GALes Maker Bundle for CRUD Creation
 
-Symfony4 / 5 CRUD generator bundle with pagination, filtering, Twitter bootstrap v4.6 markup and many other features. 
-It's Simple to use and fully customizable.
+A powerful Symfony CRUD generator bundle with pagination, filtering, Bootstrap v5.2 markup and many advanced features. 
+It's simple to use and fully customizable.
 
 Designed to bring back the functionality of PetkoparaCrudGeneratorBundle, but reusing the logic from Symfony's Maker Bundle.
 
-## Pasos para la instalación
+## 📋 Requirements
 
-Agregar el Bundle con composer:
+- **PHP:** 8.1+
+- **Symfony:** 4.4, 5.4, 6.3, 7.0+
+- **Doctrine ORM:** 2.5+ or 3.0+
 
-    composer require gales/maker-bundle:^0.1
+## 📦 Installation
 
-## Pasos para desarrollo y pruebas locales
-Clonar el repositorio del bundle fuera del proyecto al que se quiera agregar, ej estando dentro de la raiz del proyecto:
+Add the Bundle with composer:
 
-    mkdir ../bundles
-    cd ../bundles
-    git clone https://github.com/GALes/maker-bundle.git
+```bash
+composer require gales/maker-bundle:^0.1
+```
 
-Agregar al composer.json del proyecto los siguientes repositorios:
+Configure Twig to use Bootstrap 5 Form Theme:
 
+```yaml
+# config/packages/twig.yaml
+twig:
+    form_themes: ['bootstrap_5_layout.html.twig']
+```
+
+## ⚡ Usage
+
+Run the command:
+
+```bash
+php bin/console gales:make:crud
+```
+
+Using parameters:
+
+```bash
+php bin/console gales:make:crud <EntityClassName> [filter-type] [base-template]
+```
+
+**Example:**
+
+```bash
+php bin/console gales:make:crud Product input base.html.twig
+```
+
+## 📁 Generated Files
+
+After selecting the Entity for which to generate the CRUD, the following files are created:
+
+```
+created: src/Service/<entity_name>CrudService.php          (Auxiliary logic for CRUD functionality)
+created: src/Controller/<entity_name>Controller.php        (Controller with CRUD logic)
+created: src/Form/<entity_name>Type.php                    (Form for entity creation/editing)
+created: src/Form/<entity_name>(Full)FilterType.php        (Listing filter)
+created: templates/<entity_name>/edit.html.twig            (Entity editing view)
+created: templates/<entity_name>/index.html.twig           (Entity listing view)
+created: templates/<entity_name>/new.html.twig             (New entity creation view)
+created: templates/<entity_name>/show.html.twig            (Entity data visualization view)
+```
+
+## 🎯 Features
+
+- ✅ **Full CRUD Operations** (Create, Read, Update, Delete)
+- ✅ **Pagination** with configurable page size
+- ✅ **Advanced Filtering** (input, select, date filters)
+- ✅ **Bootstrap 5.2** responsive design
+- ✅ **Multi-column Sorting** with custom ordering
+- ✅ **Form Validation** with Symfony constraints
+- ✅ **Service Layer** for business logic separation
+- ✅ **Twig Templates** with inheritance support
+- ✅ **Symfony 7** compatible
+
+
+
+## 🚀 Development and Local Testing Setup
+
+Clone the bundle repository outside your project, for example from your project root:
+
+```bash
+mkdir ../00_Bundles
+cd ../00_Bundles
+git clone https://github.com/GALes/maker-bundle.git
+```
+
+Add the following repositories to your project's `composer.json`:
+
+```json
+{
     "repositories":[
         {
             "type": "path",
-            "url": "../bundles/maker-bundle",
+            "url": "../00_Bundles/maker-bundle",
             "options": {
                 "symlink": true
             }
@@ -31,81 +101,73 @@ Agregar al composer.json del proyecto los siguientes repositorios:
     ],
     "minimum-stability": "dev",
     "prefer-stable": true
-    
-Agregar con composer los siguientes Bundles:
+}
+```
 
-    composer require gales/maker-bundle:*
+Install the bundle with composer:
 
-Luego hacer un:
+```bash
+composer require gales/maker-bundle:*
+```
 
-    composer dump-autoload
+Then run:
 
-Agregar en la configuracion de Twig que use Bootstrap 4 Form Theme
+```bash
+composer dump-autoload
+```
 
-    # config/packages/twig.yaml
-    twig:
-        form_themes: ['bootstrap_5_layout.html.twig']
-        
-## Uso
-Ejecutar el comando:
+## 🏷️ Custom Ordering for Related Entities (Deprecated)
 
-    php bin/console gales:make:crud
+To define the field to be used for sorting a column associated with a related entity, you can use PHP 8 attributes (recommended) or annotations (deprecated).
 
-Usando parametros:
-
-    php bin/console gales:make:crud <EntityClassName> [filter-type] [base-template]
-
-  Ejemplo:
-
-    php bin/console gales:make:crud Product input base.html.twig
-
-
-#### Notaciones:
-- Listado: para definir el campo a utilizarse en el ordenamiento de una columna asociada a una entidad relacionada, 
-  se puede utilizar la siguiente notación en dicha entidad (`@GalesMaker(orderBy=nombre_propiedad)`). Ej: El listado de 
-  solicitudes posee la columna Estado la cual muestra la descripción del mismo, y se desea que se ordene por esta:
+### Using PHP 8 Attributes (Recommended)
 
 ```php
 // src/Entity/Solicitud.php
 namespace App\Entity;
-...
+use Doctrine\ORM\Mapping as ORM;
+
 class SolicitudBanco
 {
-    ...
-    /**
-     * @ORM\ManyToOne(targetEntity=SolicitudEstado::class)
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $estado;
-    ...
+    #[ORM\ManyToOne(targetEntity: SolicitudEstado::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private SolicitudEstado $estado;
+}
 ```
 
 ```php
 // src/Entity/SolicitudEstado.php
 namespace App\Entity;
-...
+use GALes\MakerBundle\Attribute as GalesMaker;
+
+#[GalesMaker\OrderBy('descripcion')]
+class SolicitudEstado
+{
+    private string $descripcion;
+}
+```
+
+### Using Annotations (Deprecated)
+
+For backward compatibility, the old annotation syntax is still supported:
+
+```php
+// src/Entity/SolicitudEstado.php
+namespace App\Entity;
+
 /**
- ...
  * @GalesMaker(orderBy="descripcion")
  */
 class SolicitudEstado
 {
-    ...
     private $descripcion;
-    ...
-
+}
 ```
-  
 
-#### Archivos generados por el bundle:
+## 🤝 Contributing
 
-Luego seleccionar la Entidad a la cual generar el ABM. Archivos que se generan
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-    created: src/Service/<entity_name>CrudService.php (Logica auxiliar para el funcionamiento del ABM)
-    created: src/Controller/<entity_name>Controller.php (Controlador con la logica del ABM)
-    created: src/Form/<entity_name>Type.php (Formulario para el alta/edicion de la entidad)
-    created: src/Form/<entity_name>(Full)FilterType.php (Filtro del listado)
-    created: templates/<entity_name>/edit.html.twig (Vista de edicion de la entidad)
-    created: templates/<entity_name>/index.html.twig  (Vista para el listado de entidades)
-    created: templates/<entity_name>/new.html.twig  (Vista de creacion de nueva entidad)
-    created: templates/<entity_name>/show.html.twig (Vista de visualizacion de los datos de la entidad)
+## 📄 License
+
+This project is licensed under the MIT License.
