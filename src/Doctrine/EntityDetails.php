@@ -56,10 +56,6 @@ final class EntityDetails
             // no se permiten 4: OneToMany ni 8: ManyToMany
             if ($relation['type'] === 2) {
                 $relationData = $relation;
-                // Add orderBy information from customOrderBy if available
-                if (isset($this->metadata->customOrderBy[$fieldName])) {
-                    $relationData['orderBy'] = $this->metadata->customOrderBy[$fieldName];
-                }
                 $retorno[$fieldName] = $relationData;
             }
         }
