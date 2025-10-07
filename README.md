@@ -8,7 +8,7 @@ Designed to bring back the functionality of PetkoparaCrudGeneratorBundle, but re
 ## 📋 Requirements
 
 - **PHP:** 8.1+
-- **Symfony:** 4.4, 5.4, 6.3, 7.0+
+- **Symfony:** 6.3, 7.0+
 - **Doctrine ORM:** 2.5+ or 3.0+
 
 ## 📦 Installation
@@ -114,54 +114,6 @@ Then run:
 
 ```bash
 composer dump-autoload
-```
-
-## 🏷️ Custom Ordering for Related Entities (Deprecated)
-
-To define the field to be used for sorting a column associated with a related entity, you can use PHP 8 attributes (recommended) or annotations (deprecated).
-
-### Using PHP 8 Attributes (Recommended)
-
-```php
-// src/Entity/Solicitud.php
-namespace App\Entity;
-use Doctrine\ORM\Mapping as ORM;
-
-class SolicitudBanco
-{
-    #[ORM\ManyToOne(targetEntity: SolicitudEstado::class)]
-    #[ORM\JoinColumn(nullable: false)]
-    private SolicitudEstado $estado;
-}
-```
-
-```php
-// src/Entity/SolicitudEstado.php
-namespace App\Entity;
-use GALes\MakerBundle\Attribute as GalesMaker;
-
-#[GalesMaker\OrderBy('descripcion')]
-class SolicitudEstado
-{
-    private string $descripcion;
-}
-```
-
-### Using Annotations (Deprecated)
-
-For backward compatibility, the old annotation syntax is still supported:
-
-```php
-// src/Entity/SolicitudEstado.php
-namespace App\Entity;
-
-/**
- * @GalesMaker(orderBy="descripcion")
- */
-class SolicitudEstado
-{
-    private $descripcion;
-}
 ```
 
 ## 🤝 Contributing

@@ -239,7 +239,7 @@ final class MakeCrud extends AbstractMaker
                     );
                 }
                 ++$iter;
-            } while (class_exists($formClassDetails->getFullName()));
+            } while (class_exists($formClassDetails->getFullName(), false));
         }
 
         $entityVarPlural = lcfirst($this->pluralize($entityClassDetails->getShortName()));
@@ -254,6 +254,33 @@ final class MakeCrud extends AbstractMaker
         $templateBaseTwig = 'bundles/GALesMaker/base.html.twig';
         $templatesBasePath = $this->appKernel->getProjectDir() . '/vendor/gales/maker-bundle/src/Resources/skeleton/';
 
+//        dd($entityDoctrineDetails->getFormFields());
+        // PASO 1: Generar FormType primero (antes de que sea referenciado)
+        $this->formTypeRenderer->render(
+            $formClassDetails,
+            $entityDoctrineDetails->getFormFields(),
+            $entityClassDetails,
+            [],
+            [],
+            $templatesBasePath . 'form/Type.tpl.php',
+            [
+                'entity_var_singular'           => $entityVarSingular,
+            ]
+        );
+
+        // PASO 2: Generar FormFilterType (antes de que sea referenciado)
+        if ($filterType !== 'none') {
+            $this->formTypeRenderer->render(
+                $formFilterClassDetails,
+                $filterType === 'input' ? $entityDoctrineDetails->getFormFields() : $entityDoctrineDetails->getSpiriitFormFields(),
+                $entityClassDetails,
+                [],
+                [],
+                $templatesBasePath . ($filterType === 'input' ? 'form/FilterType.tpl.php' : 'form/FullFilterType.tpl.php')
+            );
+        }
+
+        // PASO 3: Generar CrudService (ahora puede referenciar los formularios existentes)
         $this->crudServiceRenderer->generateClass(
             $crudServiceClassDetails->getFullName(),
             $templatesBasePath . 'service/CrudService.tpl.php',
@@ -274,6 +301,7 @@ final class MakeCrud extends AbstractMaker
             ]
         );
 
+        // PASO 4: Generar Controller al final
         $generator->generateController(
             $controllerClassDetails->getFullName(),
             $templatesBasePath . 'crud/controller/Controller.tpl.php',
@@ -289,36 +317,12 @@ final class MakeCrud extends AbstractMaker
                     'entity_twig_var_singular'          => $entityTwigVarSingular,
                     'entity_identifier'                 => $entityDoctrineDetails->getIdentifier(),
                     'form_full_class_name'              => $formClassDetails->getFullName(),
-                    'form_class_name'                   => $formClassDetails->getShortName(),   
+                    'form_class_name'                   => $formClassDetails->getShortName(),
                     'crud_service_full_class_name'      => $crudServiceClassDetails->getFullName(),
                 ],
                 $repositoryVars
             )
         );
-
-//        dd($entityDoctrineDetails->getFormFields());
-        $this->formTypeRenderer->render(
-            $formClassDetails,
-            $entityDoctrineDetails->getFormFields(),
-            $entityClassDetails,
-            [],
-            [],
-            $templatesBasePath . 'form/Type.tpl.php',
-            [
-                'entity_var_singular'           => $entityVarSingular,
-            ]
-        );
-
-        if ($filterType !== 'none') {
-            $this->formTypeRenderer->render(
-                $formFilterClassDetails,
-                $filterType === 'input' ? $entityDoctrineDetails->getFormFields() : $entityDoctrineDetails->getSpiriitFormFields(),
-                $entityClassDetails,
-                [],
-                [],
-                $templatesBasePath . ($filterType === 'input' ? 'form/FilterType.tpl.php' : 'form/FullFilterType.tpl.php')
-            );
-        }
 
 
         $templateBaseTwig = $input->getArgument('base-template');
