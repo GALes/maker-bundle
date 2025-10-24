@@ -10,12 +10,16 @@ import Swal from "sweetalert2";
 import '../css/app-bundle.scss';
 
 import { toggleAll, bulkSubmitBtnManage } from './petkopara-crud-generator-webpack';
+import { initCustomFileInputs } from './customFileInput';
 
 function InitAppBundle() {
     $('#check-all-thead').on('click', ($e) => toggleAll($e.target) );
     $('.check-all-row').on('click', () => bulkSubmitBtnManage() );
 
     bsCustomFileInput.init();
+
+    // Inicializar custom file inputs (Bootstrap 5)
+    initCustomFileInputs();
     /* Mostrar el boton de visualizacion en los fileInputs */
     let fileInputs = $(".custom-file");
     let i = 0;
