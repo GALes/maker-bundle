@@ -2,30 +2,30 @@
 
 {% block body %}
 
-<div class="row">
-    {{ include('bundles/GALesMaker/_components/_flashMessages.html.twig') }}
-    <div class="col-lg-12 mt-2">
-        <h4>Visualizaci&oacute;n de <?= $custom_helper->asHumanWords($entity_class_name) ?> <span class="fa fa-eye" aria-hidden="true"></span>  </h4>
-    </div>
+{{ include('bundles/GALesMaker/_components/_flashMessages.html.twig') }}
+
+<div class="mb-4">
+    <h1 class="mb-page-title">Visualizaci&oacute;n de <?= $custom_helper->asHumanWords($entity_class_name) ?> <span class="fa fa-eye" aria-hidden="true"></span></h1>
 </div>
 
-<div class="row">
-
+<div class="mb-card">
+    <div class="mb-card__body">
+        <div class="row g-4">
 <?php foreach ($entity_fields as $field): ?>
-    <div class="col-md-6">
-        <p><strong><?= $custom_helper->asHumanWords(ucfirst($field['fieldName'])) ?></strong></p>
-        <p>
-            {{ <?= $custom_helper->getEntityFieldPrintCode($entity_twig_var_singular, $field) ?> }}
-        </p>
-
-    </div>
+            <div class="col-md-6">
+                <div class="mb-form-label"><?= $custom_helper->asHumanWords(ucfirst($field['fieldName'])) ?></div>
+                <div>
+                    {{ <?= $custom_helper->getEntityFieldPrintCode($entity_twig_var_singular, $field) ?> }}
+                </div>
+            </div>
 <?php endforeach; ?>
+        </div>
 
-</div>
+        <hr class="my-4"/>
 
-<hr/>
-
-{% set hide_edit, hide_delete, hide_new = true, false, true %}
+        {% set hide_edit, hide_delete, hide_new = true, false, true %}
 <?php include 'others/record_actions.tpl.php' ?>
+    </div>
+</div>
 
 {% endblock %}
