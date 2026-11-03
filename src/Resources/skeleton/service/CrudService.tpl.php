@@ -38,6 +38,25 @@ class <?= $class_name ?>
     * @var EntityManagerInterface
     */
     private $em;
+    /**
+     * @var FormFactoryInterface
+     */
+    private $formFactory;
+    /**
+     * @var UrlGeneratorInterface
+     */
+    private $urlGenerator;
+<?php if ( $filter_type === 'input' ): ?>
+    /**
+     * @var MultiSearchBuilderService
+     */
+    private $multiSearchBuilderService;
+<?php elseif ( $filter_type === 'form' ): ?>
+    /**
+     * @var FilterBuilderUpdater
+     */
+    private $spiriitQueryBuilderUpdater;
+<?php endif; ?>
 
     public function __construct(
         Factory                     $phpExcelFactory,
