@@ -19,7 +19,7 @@
         "symfony/finder": "^6.3|^7.0",
         "symfony/maker-bundle": "^1.21",
         "spiriitlabs/form-filter-bundle": "^12.0",
-        "gales-petkopara/multi-search-bundle": "^2.0",
+        "gales-petkopara/multi-search-bundle": "^2.7.2",
         "pagerfanta/pagerfanta": "^3.0|^4.0",
         "phpoffice/phpspreadsheet": "^1.30.7 || ^5.10"
     },
