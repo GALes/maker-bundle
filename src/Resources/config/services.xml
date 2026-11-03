@@ -43,5 +43,8 @@
             <argument type="service" id="maker.doctrine_helper" />
         </service>
 
+        <service id="gales.maker.spreadsheet_factory" class="GALes\MakerBundle\Spreadsheet\Factory" />
+        <service id="GALes\MakerBundle\Spreadsheet\Factory" alias="gales.maker.spreadsheet_factory" public="false"/>
+
     </services>
 </container>

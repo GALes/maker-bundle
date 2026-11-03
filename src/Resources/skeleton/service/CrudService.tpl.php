@@ -6,10 +6,9 @@ use <?= $entity_full_class_name ?>;
 use <?= $form_full_class_name ?>;
 use <?= $form_filter_full_class_name ?>;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Internal\Hydration\IterableResult;
+use GALes\MakerBundle\Spreadsheet\Factory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
-use Yectep\PhpSpreadsheetBundle\Factory;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 <?php if ( $filter_type === 'input' ): ?>
