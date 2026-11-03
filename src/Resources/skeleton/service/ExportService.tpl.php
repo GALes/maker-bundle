@@ -4,10 +4,9 @@ namespace <?= $namespace ?>;
 
 use <?= $entity_full_class_name ?>;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Internal\Hydration\IterableResult;
+use GALes\MakerBundle\Spreadsheet\Factory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
-use Yectep\PhpSpreadsheetBundle\Factory;
 
 /**
  * Servicio de exportación de registros del CRUD
@@ -29,7 +28,7 @@ class <?= $class_name ?>
         $this->em = $em;
     }
 
-    public function exportXlsx(IterableResult $iterableResult)
+    public function exportXlsx(iterable $iterableResult)
     {
         ini_set('memory_limit', -1);
         ini_set('max_execution_time', 600);
@@ -57,7 +56,7 @@ class <?= $class_name ?>
 
         foreach ($iterableResult as $key => $row) {
             /** @var <?= $entity_class_name; ?> $<?= $entity_var_singular ?> */
-            $<?= $entity_var_singular ?> = $row[0];
+            $<?= $entity_var_singular ?> = $row;
             $rowNumber = $key + 2; // Los datos comienzan desde la fila 2
             $sheet
 <?php $columna = 'A'; ?>
@@ -66,7 +65,7 @@ class <?= $class_name ?>
 <?php $columna++ ?>
 <?php endforeach; ?>
             ;
-            $this->em->detach($row[0]);
+            $this->em->detach($row);
         }
 
         $dispositionHeader = $response->headers->makeDisposition(

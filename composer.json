@@ -21,7 +21,7 @@
         "spiriitlabs/form-filter-bundle": "^12.0",
         "gales-petkopara/multi-search-bundle": "^2.0",
         "pagerfanta/pagerfanta": "^3.0|^4.0",
-        "yectep/phpspreadsheet-bundle": "^1.0"
+        "phpoffice/phpspreadsheet": "^1.30.7 || ^5.10"
     },
     "autoload": {
         "psr-4": {
