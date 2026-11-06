@@ -152,20 +152,20 @@ class <?= $class_name ?>
         // Iterate with fetch join in using association not allowed.
 //        $queryBuilder->distinct();
         //Reset Filters
-        if ($request->get('filter_action') == 'reset') {
+        if ($request->query->get('filter_action') == 'reset') {
             $request->query->remove('filter_action');
             unset($galesCRUDFilter[$routeName]);
         }
         else {
             // Filter action
-            if ($request->get('filter_action') == 'filter' || $request->get('filter_action') == 'exportXlsx') {
+            if ($request->query->get('filter_action') == 'filter' || $request->query->get('filter_action') == 'exportXlsx') {
                 // Bind values from the request
                 $filterForm->handleRequest($request);
                 unset($galesCRUDFilter[$routeName]);
 
                 // Quito la accion de exportación para no guardarla en session
                 $exportXlsx = false;
-                if ( $request->get('filter_action') == 'exportXlsx' ) {
+                if ( $request->query->get('filter_action') == 'exportXlsx' ) {
                     $request->query->set('filter_action', 'filter');
                     $exportXlsx = true;
                 }
@@ -190,7 +190,7 @@ class <?= $class_name ?>
                 }
             }
             // Si entra por paginacion o por ordenamiento de columna
-            else if ( $request->get('pcg_page') || $request->get('pcg_sort_col') || $request->get('pcg_sort_order') ) {
+            else if ( $request->query->get('pcg_page') || $request->query->get('pcg_sort_col') || $request->query->get('pcg_sort_order') ) {
                 $filterUrl = $request->query->all();
                 $galesCRUDFilter[$routeName]['filterUrl'] = $filterUrl;
             }
@@ -216,17 +216,17 @@ class <?= $class_name ?>
     public function paginator(QueryBuilder $queryBuilder, Request $request)
     {
         //sorting
-        $sortCol    = $request->get('pcg_sort_col', 'id');
-        $sortOrder  = $request->get('pcg_sort_order', 'desc');
+        $sortCol    = $request->query->get('pcg_sort_col', 'id');
+        $sortOrder  = $request->query->get('pcg_sort_order', 'desc');
         $queryBuilder = OrderByHelper::addOrderByToQuery($queryBuilder, $sortCol, $sortOrder);
 
         // Paginator
         $adapter = new QueryAdapter($queryBuilder);
         $pagerfanta = new Pagerfanta($adapter);
-        $pagerfanta->setMaxPerPage($request->get('pcg_show' , 10));
+        $pagerfanta->setMaxPerPage($request->query->getInt('pcg_show', 10));
         
         try {
-            $pagerfanta->setCurrentPage($request->get('pcg_page', 1));
+            $pagerfanta->setCurrentPage($request->query->getInt('pcg_page', 1));
         } catch (\Pagerfanta\Exception\OutOfRangeCurrentPageException $ex) {
             $pagerfanta->setCurrentPage(1);
         }
@@ -258,8 +258,8 @@ class <?= $class_name ?>
     */
     public function getTotalOfRecordsString(QueryBuilder $queryBuilder, Request $request) {
         $totalOfRecords = $queryBuilder->select('COUNT(zzz.<?=$entity_identifier; ?>) AS row_count')->orderBy('row_count')->getQuery()->getSingleScalarResult();
-        $show = $request->get('pcg_show', 10);
-        $page = $request->get('pcg_page', 1);
+        $show = $request->query->getInt('pcg_show', 10);
+        $page = $request->query->getInt('pcg_page', 1);
         
         $startRecord = ($show * ($page - 1)) + 1;
         $endRecord = $show * $page;

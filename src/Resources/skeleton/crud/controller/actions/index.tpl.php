@@ -24,7 +24,7 @@
             $isValid = false;
         }
 
-        if ($isValid == true && $request->get('filter_action') == 'exportXlsx') {
+        if ($isValid == true && $request->query->get('filter_action') == 'exportXlsx') {
             $iterableResult = $querryExport->toIterable();
             return $this-><?= $entity_var_singular ?>CrudService->exportXlsx($iterableResult);
         }
