@@ -1,6 +1,8 @@
-    #[Route("/{<?= $entity_identifier ?>}/edit", name: "<?= $route_name ?>_edit", methods: ["GET","POST"])]
+    #[Route("/{<?= $entity_identifier ?>}/edit", name: "<?= $route_name ?>_edit"<?php if ($entity_identifier_numeric): ?>, requirements: ["<?= $entity_identifier ?>" => "\d+"]<?php endif ?>, methods: ["GET","POST"])]
     public function edit(Request $request, <?= $entity_class_name ?> $<?= $entity_var_singular ?>): Response
     {
+        $this->denyAccessUnlessGranted(<?= $voter_class_name ?>::EDITAR, $<?= $entity_var_singular ?>);
+
         $deleteForm = $this-><?= $entity_var_singular ?>CrudService->createDeleteForm($<?= $entity_var_singular ?>);
         $form = $this->createForm(<?= $form_class_name ?>::class, $<?= $entity_var_singular ?>);
         $form->handleRequest($request);
