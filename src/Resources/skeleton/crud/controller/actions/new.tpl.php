@@ -12,7 +12,7 @@
             $editLink = $this->generateUrl('<?= $route_name ?>_edit', array('id' => $<?= $entity_var_singular ?>->getId()));
             $this->addFlash('success', "<a href='$editLink'>El nuevo registro se ha creado exitosamente.</a>" );
             
-            $nextAction=  $request->get('submit') == 'save' ? '<?= $route_name ?>_index' : '<?= $route_name ?>_new';
+            $nextAction=  $request->request->get('submit') == 'save' ? '<?= $route_name ?>_index' : '<?= $route_name ?>_new';
             return $this->redirectToRoute($nextAction);
         }
 

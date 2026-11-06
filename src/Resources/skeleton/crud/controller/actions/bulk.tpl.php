@@ -4,8 +4,8 @@
     #[Route("/bulk-action/", name: "<?= $route_name ?>_bulk_action", methods: ["POST"])]
     public function bulkAction(Request $request)
     {
-        $ids = $request->get("ids", array());
-        $action = $request->get("bulk_action", "delete");
+        $ids = $request->request->all("ids");
+        $action = $request->request->get("bulk_action", "delete");
         
         if ($action == "delete") {
             try {
