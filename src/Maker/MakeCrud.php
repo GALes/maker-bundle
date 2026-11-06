@@ -121,7 +121,7 @@ final class MakeCrud extends AbstractMaker
         $inputConfig->setArgumentAsNonInteractive('entity-class');
     }
 
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
         if (null === $input->getArgument('entity-class')) {
             $argument = $command->getDefinition()->getArgument('entity-class');
