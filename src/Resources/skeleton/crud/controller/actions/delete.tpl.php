@@ -1,6 +1,8 @@
-    #[Route("/{<?= $entity_identifier ?>}", name: "<?= $route_name ?>_delete", methods: ["DELETE"])]
+    #[Route("/{<?= $entity_identifier ?>}", name: "<?= $route_name ?>_delete"<?php if ($entity_identifier_numeric): ?>, requirements: ["<?= $entity_identifier ?>" => "\d+"]<?php endif ?>, methods: ["DELETE"])]
     public function delete(Request $request, <?= $entity_class_name ?> $<?= $entity_var_singular ?>): Response
     {
+        $this->denyAccessUnlessGranted(<?= $voter_class_name ?>::ELIMINAR, $<?= $entity_var_singular ?>);
+
         $form = $this->createDeleteForm($<?= $entity_var_singular ?>);
         $form->handleRequest($request);
 
@@ -35,14 +37,16 @@
     /**
     * Delete <?= $entity_class_name ?> by id
     */
-    #[Route("/delete/{<?= $entity_identifier ?>}", name: "<?= $route_name ?>_by_id_delete", methods: ["GET"])]
+    #[Route("/delete/{<?= $entity_identifier ?>}", name: "<?= $route_name ?>_by_id_delete"<?php if ($entity_identifier_numeric): ?>, requirements: ["<?= $entity_identifier ?>" => "\d+"]<?php endif ?>, methods: ["GET"])]
     public function deleteByIdAction(<?= $entity_class_name ?> $<?= $entity_var_singular ?>){
+        $this->denyAccessUnlessGranted(<?= $voter_class_name ?>::ELIMINAR, $<?= $entity_var_singular ?>);
+
         try {
             $this->entityManager->remove($<?= $entity_var_singular ?>);
             $this->entityManager->flush();
             $this->addFlash('success', 'El registro se ha eliminado exitosamente');
         }
-        catch (Exception $ex) {
+        catch (DBALException $ex) {
             $this->addFlash('error', 'No se ha podido eliminar el registro');
         }
         

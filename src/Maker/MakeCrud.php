@@ -215,6 +215,14 @@ final class MakeCrud extends AbstractMaker
             'Service'
         );
 
+        $voterClassDetails = $generator->createClassNameDetails(
+            $entityClassDetails->getRelativeNameWithoutSuffix().'Voter',
+            'Security\\',
+            'Voter'
+        );
+
+        $bulkServiceClassDetails = $generator->createClassNameDetails('BulkDeleteService', 'Service\\');
+
         $filterType = $input->getArgument('filter-type');
         if ($filterType !== 'none') {
             $iter = 0;
@@ -301,6 +309,24 @@ final class MakeCrud extends AbstractMaker
             ]
         );
 
+        // PASO 3b: Voter de la entidad y servicio de borrado en lote (no se pisan si ya existen)
+        $this->generateIfMissing($generator, $io, $voterClassDetails->getFullName(), $templatesBasePath . 'security/Voter.tpl.php', [
+            'entity_full_class_name'    => $entityClassDetails->getFullName(),
+            'entity_class_name'         => $entityClassDetails->getShortName(),
+            'permission_prefix'         => Str::asSnakeCase($entityClassDetails->getShortName()),
+        ]);
+        $this->generateIfMissing($generator, $io, $generator->getRootNamespace().'\\Tests\\Security\\'.$voterClassDetails->getShortName().'Test', $templatesBasePath . 'security/VoterTest.tpl.php', [
+            'entity_full_class_name'    => $entityClassDetails->getFullName(),
+            'entity_class_name'         => $entityClassDetails->getShortName(),
+            'voter_full_class_name'     => $voterClassDetails->getFullName(),
+            'voter_class_name'          => $voterClassDetails->getShortName(),
+        ], 'tests/Security/'.$voterClassDetails->getShortName().'Test.php');
+        $this->generateIfMissing($generator, $io, $bulkServiceClassDetails->getFullName(), $templatesBasePath . 'service/BulkDeleteService.tpl.php');
+        $this->generateIfMissing($generator, $io, $generator->getRootNamespace().'\\Tests\\Service\\BulkDeleteServiceTest', $templatesBasePath . 'service/BulkDeleteServiceTest.tpl.php', [
+            'service_full_class_name'   => $bulkServiceClassDetails->getFullName(),
+            'service_class_name'        => $bulkServiceClassDetails->getShortName(),
+        ], 'tests/Service/BulkDeleteServiceTest.php');
+
         // PASO 4: Generar Controller al final
         $generator->generateController(
             $controllerClassDetails->getFullName(),
@@ -316,9 +342,14 @@ final class MakeCrud extends AbstractMaker
                     'entity_var_singular'               => $entityVarSingular,
                     'entity_twig_var_singular'          => $entityTwigVarSingular,
                     'entity_identifier'                 => $entityDoctrineDetails->getIdentifier(),
+                    'entity_identifier_numeric'         => $entityDoctrineDetails->isIdentifierNumeric(),
                     'form_full_class_name'              => $formClassDetails->getFullName(),
                     'form_class_name'                   => $formClassDetails->getShortName(),
                     'crud_service_full_class_name'      => $crudServiceClassDetails->getFullName(),
+                    'voter_full_class_name'             => $voterClassDetails->getFullName(),
+                    'voter_class_name'                  => $voterClassDetails->getShortName(),
+                    'bulk_service_full_class_name'      => $bulkServiceClassDetails->getFullName(),
+                    'bulk_service_class_name'           => $bulkServiceClassDetails->getShortName(),
                 ],
                 $repositoryVars
             )
@@ -423,6 +454,29 @@ final class MakeCrud extends AbstractMaker
             'security-csrf'
         );
 
+    }
+
+    /**
+     * Genera un archivo sólo si no existe: no pisa Voters ni servicios que el proyecto ya haya personalizado.
+     *
+     * @param string|null $targetPath Ruta relativa del archivo; si es null se deduce de la clase.
+     */
+    private function generateIfMissing(Generator $generator, ConsoleStyle $io, string $className, string $template, array $variables = [], ?string $targetPath = null): void
+    {
+        $targetPath ??= 'src/'.str_replace('\\', '/', substr($className, strlen($generator->getRootNamespace().'\\'))).'.php';
+
+        if (file_exists($generator->getRootDirectory().'/'.$targetPath)) {
+            $io->text(sprintf('<comment>Omitido:</comment> %s ya existe y no se sobrescribe.', $targetPath));
+
+            return;
+        }
+
+        $variables = array_merge($variables, [
+            'class_name' => Str::getShortClassName($className),
+            'namespace'  => Str::getNamespace($className),
+        ]);
+
+        $generator->generateFile($targetPath, $template, $variables);
     }
 
     private function pluralize(string $word): string
