@@ -42,6 +42,16 @@ final class EntityDetails
         return $this->metadata->identifier[0];
     }
 
+    /**
+     * Indica si el identificador es numérico (entero), para restringir las rutas con "\d+".
+     */
+    public function isIdentifierNumeric(): bool
+    {
+        $type = $this->metadata->getTypeOfField($this->getIdentifier());
+
+        return in_array($type, ['integer', 'smallint', 'bigint'], true);
+    }
+
     public function getDisplayFields()
     {
         return $this->metadata->fieldMappings;

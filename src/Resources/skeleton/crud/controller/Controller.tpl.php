@@ -8,6 +8,9 @@ use <?= $form_full_class_name ?>;
 use <?= $repository_full_class_name ?>;
 <?php endif ?>
 use <?= $crud_service_full_class_name ?>;
+use <?= $voter_full_class_name ?>;
+use <?= $bulk_service_full_class_name ?>;
+use Doctrine\DBAL\Exception as DBALException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
