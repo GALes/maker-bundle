@@ -201,8 +201,8 @@ final class MakeCrud extends AbstractMaker
 
         if ($this->force) {
             $io->warning([
-                'Modo --force: los archivos que ya existan (controlador, formularios, servicios, vistas, Voter, BulkDeleteService y sus tests) se reemplazan sin preguntar.',
-                'Se pierde cualquier lógica o personalización que tuvieran. BulkDeleteService lo comparten todos los CRUD del proyecto. Revisá git diff antes de confirmar los cambios.',
+                'Modo --force: los archivos que ya existan (controlador, formularios, servicios, vistas, Voter y sus tests) se reemplazan sin preguntar.',
+                'Se pierde cualquier lógica o personalización que tuvieran. Esto incluye el mapa BULK_ACTIONS del controlador (las clases de acciones masivas propias no se tocan). Revisá git diff antes de confirmar los cambios.',
             ]);
         }
 
@@ -261,8 +261,6 @@ final class MakeCrud extends AbstractMaker
             'Security\\',
             'Voter'
         );
-
-        $bulkServiceClassDetails = $generator->createClassNameDetails('BulkDeleteService', 'Service\\');
 
         $filterType = $input->getArgument('filter-type');
         if ($filterType !== 'none') {
@@ -343,7 +341,7 @@ final class MakeCrud extends AbstractMaker
             );
         }
 
-        // PASO 3b: Voter de la entidad y servicio de borrado en lote (no se pisan si ya existen)
+        // PASO 3b: Voter de la entidad (no se pisa si existe)
         $this->generateSupportFile($generator, $io, $voterClassDetails->getFullName(), $templatesBasePath . 'security/Voter.tpl.php', [
             'entity_full_class_name'    => $entityClassDetails->getFullName(),
             'entity_class_name'         => $entityClassDetails->getShortName(),
@@ -355,11 +353,6 @@ final class MakeCrud extends AbstractMaker
             'voter_full_class_name'     => $voterClassDetails->getFullName(),
             'voter_class_name'          => $voterClassDetails->getShortName(),
         ], 'tests/Security/'.$voterClassDetails->getShortName().'Test.php');
-        $this->generateSupportFile($generator, $io, $bulkServiceClassDetails->getFullName(), $templatesBasePath . 'service/BulkDeleteService.tpl.php');
-        $this->generateSupportFile($generator, $io, $generator->getRootNamespace().'\\Tests\\Service\\BulkDeleteServiceTest', $templatesBasePath . 'service/BulkDeleteServiceTest.tpl.php', [
-            'service_full_class_name'   => $bulkServiceClassDetails->getFullName(),
-            'service_class_name'        => $bulkServiceClassDetails->getShortName(),
-        ], 'tests/Service/BulkDeleteServiceTest.php');
 
         // PASO 4: Generar Controller al final
         if (!$this->skipIfExists($generator, $io, $this->classTargetPath($generator, $controllerClassDetails->getFullName()))) {
@@ -383,8 +376,6 @@ final class MakeCrud extends AbstractMaker
                         'crud_service_full_class_name'      => $crudServiceClassDetails->getFullName(),
                         'voter_full_class_name'             => $voterClassDetails->getFullName(),
                         'voter_class_name'                  => $voterClassDetails->getShortName(),
-                        'bulk_service_full_class_name'      => $bulkServiceClassDetails->getFullName(),
-                        'bulk_service_class_name'           => $bulkServiceClassDetails->getShortName(),
                     ],
                     $repositoryVars
                 )
@@ -509,7 +500,7 @@ final class MakeCrud extends AbstractMaker
     }
 
     /**
-     * Genera un archivo de apoyo (Voter, BulkDeleteService y sus tests) con la misma regla que el resto: si existe, solo se reemplaza con confirmación o --force.
+     * Genera un archivo de apoyo (Voter y sus tests) con la misma regla que el resto: si existe, solo se reemplaza con confirmación o --force.
      *
      * @param string|null $targetPath Ruta relativa del archivo; si es null se deduce de la clase.
      */
