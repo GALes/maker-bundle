@@ -32,6 +32,33 @@ final class EntityDetails
         $this->metadata = $metadata;
     }
 
+    /**
+     * Mapeo de campos como arreglos: con ORM 3 son objetos FieldMapping y leerlos como arreglo (ArrayAccess) está deprecado.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    private function fieldMappings(): array
+    {
+        return array_map([self::class, 'mappingToArray'], $this->metadata->fieldMappings);
+    }
+
+    /**
+     * @return array<string, array<string, mixed>>
+     */
+    private function associationMappings(): array
+    {
+        return array_map([self::class, 'mappingToArray'], $this->metadata->associationMappings);
+    }
+
+    private static function mappingToArray($mapping): array
+    {
+        if (is_array($mapping)) {
+            return $mapping;
+        }
+
+        return method_exists($mapping, 'toArray') ? $mapping->toArray() : (array) $mapping;
+    }
+
     public function getRepositoryClass()
     {
         return $this->metadata->customRepositoryClassName;
@@ -54,14 +81,14 @@ final class EntityDetails
 
     public function getDisplayFields()
     {
-        return $this->metadata->fieldMappings;
+        return $this->fieldMappings();
     }
 
     public function getFullDisplayFields()
     {
-        $retorno = $this->metadata->fieldMappings;
-//        dd($this->metadata->associationMappings);
-        foreach ($this->metadata->associationMappings as $fieldName => $relation) {
+        $retorno = $this->fieldMappings();
+//        dd($this->associationMappings());
+        foreach ($this->associationMappings() as $fieldName => $relation) {
             // Solo se permite mostrar los campos si la relacion es del tipo 2: ManyToOne,
             // no se permiten 4: OneToMany ni 8: ManyToMany
             if ($relation['type'] === 2) {
@@ -77,7 +104,7 @@ final class EntityDetails
     {
         $fieldsWithTypes = [];
         
-        foreach ($this->metadata->fieldMappings as $fieldName => $metadata) {
+        foreach ($this->fieldMappings() as $fieldName => $metadata) {
             // agrego la metadata de cada campo
             $fieldsWithTypes[$fieldName] = ['metadata' => $metadata];
 
@@ -103,7 +130,7 @@ final class EntityDetails
 //            }
         }
 
-        foreach ($this->metadata->associationMappings as $fieldName => $relation) {
+        foreach ($this->associationMappings() as $fieldName => $relation) {
             $fieldsWithTypes[$fieldName] = ['metadata' => $relation];
         }
 
@@ -130,7 +157,7 @@ final class EntityDetails
     {
         $fieldsWithTypes = [];
 
-        foreach ($this->metadata->fieldMappings as $fieldName => $metadata) {
+        foreach ($this->fieldMappings() as $fieldName => $metadata) {
             // agrego la metadata de cada campo
             $fieldsWithTypes[$fieldName] = ['metadata' => $metadata];
 
@@ -209,8 +236,8 @@ final class EntityDetails
         }
 
 //        dump($fieldsWithTypes);
-//        dd($this->metadata->associationMappings);
-        foreach ($this->metadata->associationMappings as $fieldName => $relation) {
+//        dd($this->associationMappings());
+        foreach ($this->associationMappings() as $fieldName => $relation) {
 //                  TODO: Implementar tipo Class (Joins)
             switch ($relation['type']) {
                 case 2: // ManyToOne Join
