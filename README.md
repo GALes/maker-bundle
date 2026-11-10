@@ -63,6 +63,21 @@ created: templates/<entity_name>/new.html.twig             (New entity creation 
 created: templates/<entity_name>/show.html.twig            (Entity data visualization view)
 ```
 
+### Running the command again on an existing CRUD
+
+When a file the command is about to generate already exists (controller, form types, `<entity_name>CrudService`, views, Voter,
+`BulkDeleteService` and their tests), the command shows a yellow warning (`<path> ya existe. Si lo reemplazás se pierde cualquier lógica previa…`) and asks `¿Reemplazarlo?` for each one. Answering yes replaces the file,
+**losing any logic it had**; the default answer is no, which skips it (`Omitido: <path> ya existe y no se sobrescribe.`).
+Missing files are always created and the command exits with status 0. With `--no-interaction` every existing file is skipped.
+
+```bash
+php bin/console gales:make:crud Product input base.html.twig --force
+```
+
+`--force` replaces every existing file without asking, after a yellow warning at the start. Use it only on a clean working tree
+and review `git diff` afterwards: `BulkDeleteService` is shared by all the CRUDs of the project.
+If the generation fails, the files that were about to be replaced are restored.
+
 ## 🎯 Features
 
 - ✅ **Full CRUD Operations** (Create, Read, Update, Delete)

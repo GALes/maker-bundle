@@ -13,3 +13,9 @@ The <info>%command.name%</info> command generates a CRUD Controller with templat
   <info>base-template</info>    Base template for the views (e.g: admin/base.html.twig)
 
 If arguments are missing, the command will ask for them interactively.
+
+<comment>Existing files:</comment> for each file that already exists the command asks whether to replace it (the default is no, which skips it).
+Replacing loses any logic the file had. Missing files are always created.
+
+<comment>Options:</comment>
+  <info>--force</info>   Replace every existing file without asking. Shows a warning first; review <comment>git diff</comment> afterwards.
