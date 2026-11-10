@@ -93,14 +93,6 @@ final class EntityDetails
             }
         }
         
-        // Remove the primary key field if it's not managed manually
-        // MOD: Agrego el campo como campo del tipo identifier
-        if (!$this->metadata->isIdentifierNatural()) {
-            foreach ($this->metadata->identifier as $identifier) {
-                $fieldsWithTypes[$identifier]['metadata']['identifier'] = true;
-            }
-        }
-
         // TODO: Por el momento no se soportan declaraciones Doctrine Embeddables dentro del objeto
         if (!empty($this->metadata->embeddedClasses)) {
             dump('No se soportan declaraciones Doctrine Embeddables dentro del objeto, serán omitidas');
@@ -203,14 +195,6 @@ final class EntityDetails
                         "                'condition_pattern'    => FilterOperands::STRING_CONTAINS,"
                     ;
                   break;
-            }
-        }
-
-        // Remove the primary key field if it's not managed manually
-        // MOD: Agrego el campo como campo del tipo identifier
-        if (!$this->metadata->isIdentifierNatural()) {
-            foreach ($this->metadata->identifier as $identifier) {
-                $fieldsWithTypes[$identifier]['metadata']['identifier'] = true;
             }
         }
 

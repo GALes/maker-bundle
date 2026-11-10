@@ -27,5 +27,14 @@
         "psr-4": {
             "GALes\\MakerBundle\\": "src/"
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "GALes\\MakerBundle\\Tests\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "doctrine/orm": "^3.0",
+        "phpunit/phpunit": "^10.5"
     }
 }

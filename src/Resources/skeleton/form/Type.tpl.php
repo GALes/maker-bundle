@@ -32,7 +32,7 @@ class <?= $class_name ?> extends AbstractType
         /* TODO: a los combos de relaciones inversed (not owner) se los debe definir explicitamente como EntityType y se les debe agregar 'by_reference' => false para forzar la persistencia de la entidad relacionada */ ?>
 /* TODO: a los campos numericos se les debe agregar 'grouping' => true para evitar que el punto sea tomado como separador decimal */
 /* TODO: a los combos de relaciones inversed (not owner) se los debe definir explicitamente como EntityType y se les debe agregar 'by_reference' => false para forzar la persistencia de la entidad relacionada */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $<?= $entity_var_singular ?> = $builder->getData();
         $builder
@@ -51,7 +51,7 @@ class <?= $class_name ?> extends AbstractType
 //        $this->archivoAdjuntoService->addDeleteAction($builder);
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
 <?php if ($bounded_full_class_name): ?>
