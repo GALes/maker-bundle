@@ -1,5 +1,8 @@
 <?php
 
+use GALes\MakerBundle\Bulk\BulkActionRegistry;
+use GALes\MakerBundle\Bulk\BulkActionRunner;
+use GALes\MakerBundle\Bulk\DeleteBulkAction;
 use GALes\MakerBundle\Doctrine\DoctrineHelper;
 use GALes\MakerBundle\GALesMaker;
 use GALes\MakerBundle\Helper\GeneratorTwigHelper;
@@ -11,6 +14,7 @@ use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_iterator;
 
 return static function (ContainerConfigurator $container): void {
     $services = $container->services();
@@ -54,6 +58,20 @@ return static function (ContainerConfigurator $container): void {
 
     $services->set('gales.maker.doctrine_helper', DoctrineHelper::class)
         ->args([service('maker.doctrine_helper')]);
+
+    $services->set(BulkActionRegistry::class)
+        ->args([tagged_iterator('gales_maker.bulk_action')]);
+
+    $services->set(BulkActionRunner::class)
+        ->args([
+            service('doctrine'),
+            service('security.helper'),
+            service(BulkActionRegistry::class),
+        ]);
+
+    $services->set(DeleteBulkAction::class)
+        ->args([service('doctrine')])
+        ->tag('gales_maker.bulk_action');
 
     $services->set('gales.maker.spreadsheet_factory', Factory::class);
     $services->alias(Factory::class, 'gales.maker.spreadsheet_factory')
