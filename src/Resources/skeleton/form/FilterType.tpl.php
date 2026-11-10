@@ -12,7 +12,7 @@ use Petkopara\MultiSearchBundle\Form\Type\MultiSearchType;
 
 class <?= $class_name ?> extends AbstractType
 {
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('search', MultiSearchType::class, [
             'class' => <?= $bounded_class_name ?>::class,
@@ -29,7 +29,7 @@ class <?= $class_name ?> extends AbstractType
         $builder->setMethod('GET');
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'csrf_protection' => false,

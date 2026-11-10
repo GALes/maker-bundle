@@ -23,7 +23,7 @@ use <?= $className ?>;
 class <?= $class_name ?> extends AbstractType
 {
 /* TODO: a los campos numericos se les debe agregar 'grouping' => true para evitar que el punto sea tomado como separador decimal */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
 <?php foreach ($form_fields as $form_field => $typeOptions): ?>
@@ -41,7 +41,7 @@ class <?= $class_name ?> extends AbstractType
         $builder->setMethod("GET");
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'allow_extra_fields' => true,
