@@ -266,29 +266,18 @@ final class MakeCrud extends AbstractMaker
 
         $filterType = $input->getArgument('filter-type');
         if ($filterType !== 'none') {
-            $iter = 0;
-            do {
-                $formClassDetails = $generator->createClassNameDetails(
-                    $entityClassDetails->getRelativeNameWithoutSuffix().($iter ?: '').'Type',
-                    'Form\\',
-                    'Type'
-                );
-                if ($filterType === 'input') {
-                    $formFilterClassDetails = $generator->createClassNameDetails(
-                        $entityClassDetails->getRelativeNameWithoutSuffix().($iter ?: '').'FilterType',
-                        'Form\\',
-                        'FilterType'
-                    );
-                }
-                else {
-                    $formFilterClassDetails = $generator->createClassNameDetails(
-                        $entityClassDetails->getRelativeNameWithoutSuffix().($iter ?: '').'FullFilterType',
-                        'Form\\',
-                        'FullFilterType'
-                    );
-                }
-                ++$iter;
-            } while (class_exists($formClassDetails->getFullName(), false));
+            // Nombres fijos (sin sufijo numérico): un destino existente se omite o se reemplaza, nunca se esquiva con otro nombre.
+            $formClassDetails = $generator->createClassNameDetails(
+                $entityClassDetails->getRelativeNameWithoutSuffix().'Type',
+                'Form\\',
+                'Type'
+            );
+            $filterSuffix = $filterType === 'input' ? 'FilterType' : 'FullFilterType';
+            $formFilterClassDetails = $generator->createClassNameDetails(
+                $entityClassDetails->getRelativeNameWithoutSuffix().$filterSuffix,
+                'Form\\',
+                $filterSuffix
+            );
         }
 
         $entityVarPlural = lcfirst($this->pluralize($entityClassDetails->getShortName()));
