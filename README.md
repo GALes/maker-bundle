@@ -46,6 +46,7 @@ php bin/console gales:make:crud <EntityClassName> [filter-type] [base-template]
 
 ```bash
 php bin/console gales:make:crud Product input base.html.twig
+php bin/console gales:make:crud Product input base.html.twig --roles=ROLE_REPORTE
 ```
 
 ## 📁 Generated Files
@@ -77,6 +78,47 @@ php bin/console gales:make:crud Product input base.html.twig --force
 `--force` replaces every existing file without asking, after a yellow warning at the start. Use it only on a clean working tree
 and review `git diff` afterwards: it also overwrites the controller's `BULK_ACTIONS` map (your own bulk action classes are not touched).
 If the generation fails, the files that were about to be replaced are restored.
+
+## 🔒 Access roles
+
+A generated CRUD is only accessible to `ROLE_ADMIN` unless you choose other roles when generating it:
+
+- **Interactive:** after the base template, the command asks for extra roles one at a time, with autocompletion. Press Enter on an empty answer to finish.
+- **Non interactive:** `--roles=ROLE_REPORTE,ROLE_CONSULTA` (or `--roles` repeated). With `-n` and no `--roles`, only `ROLE_ADMIN`.
+  `--roles=` (empty) skips the question.
+
+Every role must start with `ROLE_` and use only uppercase letters, digits and `_`. A role that the project does not define is
+accepted with a warning.
+
+The chosen roles are written in the generated Voter, which is the single place to change them later:
+
+```php
+// src/Security/ProductVoter.php
+public const ROLES = [
+    'ROLE_ADMIN',
+    'ROLE_REPORTE',
+];
+```
+
+- The controller requires `ProductVoter::ACCEDER` on the whole class (`#[IsGranted]`): listing, export, bulk actions and any action you add.
+- `new` requires `ProductVoter::CREAR`; `show`, `edit` and `delete` keep `VER`, `EDITAR` and `ELIMINAR` on the entity; bulk actions keep their attribute (`ELIMINAR` for delete).
+- By default every attribute grants access to any role in `ROLES` (role hierarchy included). Change `voteOnAttribute()` for finer rules, for example a role that can list but not delete.
+- If the route ends up under a prefix protected by `access_control`, that rule must also allow the chosen roles: the first matching rule wins.
+
+### Configuration
+
+```yaml
+# config/packages/gales_maker.yaml
+gales_maker:
+    crud:
+        # Static method or constant that returns the roles offered with autocompletion (the array values are used).
+        roles_source: 'App\Entity\User::getRolesDetalle'
+        # Roles that always have access. Default: [ROLE_ADMIN]
+        default_roles: [ROLE_ADMIN]
+```
+
+The suggestions are the roles from `roles_source` followed by the keys and values of `security.role_hierarchy`, without the
+default roles, `ROLE_USER` (any authenticated user) and the impersonation roles. If `roles_source` cannot be read, the command warns and goes on.
 
 ## 🎯 Features
 
@@ -220,3 +262,15 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## 📄 License
 
 This project is licensed under the MIT License.
+
+### Upgrading from v2.2
+
+CRUDs generated before v2.3 check nothing in `index` and `new`: they depend on `access_control`. To protect one without regenerating it:
+
+1. In the Voter, add `ROLES`, `ACCEDER` and `CREAR` as in the generated template (`src/Resources/skeleton/security/Voter.tpl.php`):
+   both attributes are supported only with a `null` subject and vote with the roles in `ROLES`.
+2. In the controller, add `use Symfony\Component\Security\Http\Attribute\IsGranted;` and `#[IsGranted(ProductVoter::ACCEDER)]` on the class.
+3. In `new()`, add `$this->denyAccessUnlessGranted(ProductVoter::CREAR);` as the first line.
+
+Regenerating only the controller while keeping an old Voter stops the command before writing anything, with a message that names the missing constants.
+

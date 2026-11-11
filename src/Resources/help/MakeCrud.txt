@@ -3,6 +3,7 @@ The <info>%command.name%</info> command generates a CRUD Controller with templat
 <info>php %command.full_name% BlogPost</info>
 <info>php %command.full_name% BlogPost input</info>
 <info>php %command.full_name% BlogPost form admin/base.html.twig</info>
+<info>php %command.full_name% BlogPost input admin/base.html.twig --roles=ROLE_REPORTE,ROLE_CONSULTA</info>
 
 <comment>Arguments:</comment>
   <info>entity-class</info>     Name of the entity class to create the CRUD for
@@ -17,5 +18,12 @@ If arguments are missing, the command will ask for them interactively.
 <comment>Existing files:</comment> for each file that already exists the command asks whether to replace it (the default is no, which skips it).
 Replacing loses any logic the file had. Missing files are always created.
 
+<comment>Access roles:</comment> the generated CRUD is only for the default roles (<comment>ROLE_ADMIN</comment>, see gales_maker.crud.default_roles)
+unless other roles are chosen. Without <info>--roles</info>, the command asks for them one by one with autocompletion
+(roles from gales_maker.crud.roles_source and security.role_hierarchy); an empty answer finishes.
+With <info>--no-interaction</info> and no <info>--roles</info>, only the default roles get access.
+
 <comment>Options:</comment>
   <info>--force</info>   Replace every existing file without asking. Shows a warning first; review <comment>git diff</comment> afterwards.
+  <info>--roles</info>   Extra roles with access, comma separated or repeated (<comment>--roles=ROLE_A --roles=ROLE_B</comment>).
+            Each one must start with ROLE_. <comment>--roles=</comment> (empty) skips the question and keeps only the default roles.

@@ -1,6 +1,8 @@
     #[Route("/new", name: "<?= $route_name ?>_new", methods: ["GET","POST"])]
     public function new(Request $request): Response
     {
+        $this->denyAccessUnlessGranted(<?= $voter_class_name ?>::CREAR);
+
         $<?= $entity_var_singular ?> = new <?= $entity_class_name ?>();
         $form = $this->createForm(<?= $form_class_name ?>::class, $<?= $entity_var_singular ?>);
         $form->handleRequest($request);
