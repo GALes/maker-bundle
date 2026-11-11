@@ -33,6 +33,7 @@ use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Finder\Finder;
@@ -65,6 +66,23 @@ final class MakeCrud extends AbstractMaker
     private $filesystem;
     
     protected $availableRoles = array();
+
+    /**
+     * Archivos que el CRUD omitió en esta ejecución porque ya existían y no se confirmó reemplazarlos.
+     *
+     * @var string[]
+     */
+    private array $omittedFiles = [];
+
+    /**
+     * Contenido original (ruta relativa => contenido) de los archivos que se reemplazan en esta ejecución,
+     * para restaurarlos si la generación falla antes de terminar.
+     *
+     * @var array<string, string>
+     */
+    private array $replacedFiles = [];
+
+    private bool $force = false;
 
     public function __construct(
         DoctrineHelper          $doctrineHelper, 
@@ -110,6 +128,7 @@ final class MakeCrud extends AbstractMaker
             ->addArgument('entity-class', InputArgument::OPTIONAL, sprintf('The class name of the entity to create CRUD (e.g. <fg=yellow>%s</>)', Str::asClassName(Str::getRandomTerm())))
             ->addArgument('filter-type', InputArgument::OPTIONAL, 'The filter type to use (input, form, none)')
             ->addArgument('base-template', InputArgument::OPTIONAL, 'The base template for the views (e.g., base.html.twig)')
+            ->addOption('force', null, InputOption::VALUE_NONE, 'Overwrite existing files without asking (any previous logic in them is lost)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeCrud.txt'))
         ;
 
@@ -118,7 +137,10 @@ final class MakeCrud extends AbstractMaker
         // Example: php bin/console gales:make:crud Product input base.html.twig
         // If arguments are not provided, the command will be interactive.
 
+        // Se preguntan en interact() con autocompletado: sin esto MakerCommand las pregunta antes, con un ask() común.
         $inputConfig->setArgumentAsNonInteractive('entity-class');
+        $inputConfig->setArgumentAsNonInteractive('filter-type');
+        $inputConfig->setArgumentAsNonInteractive('base-template');
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
@@ -164,7 +186,7 @@ final class MakeCrud extends AbstractMaker
                 $templatesList[] = $file->getRelativePathname();
             }
             $io->writeln([
-                'By default, the created views extends the <comment>@GALesMaker/base.html.twig</comment>',
+                'By default, the created views extends the <comment>bundles/GALesMaker/base.html.twig</comment>',
                 'You can also set your template which the views to extend, for example <comment>base.html.twig</comment>',
             ]);
             $question = new Question('Base template for the views', 'bundles/GALesMaker/base.html.twig');
@@ -175,6 +197,28 @@ final class MakeCrud extends AbstractMaker
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
+    {
+        $this->omittedFiles = [];
+        $this->replacedFiles = [];
+        $this->force = (bool) $input->getOption('force');
+
+        if ($this->force) {
+            $io->warning([
+                'Modo --force: los archivos que ya existan (controlador, formularios, servicios, vistas, Voter y sus tests) se reemplazan sin preguntar.',
+                'Se pierde cualquier lógica o personalización que tuvieran. Esto incluye el mapa BULK_ACTIONS del controlador (las clases de acciones masivas propias no se tocan). Revisá git diff antes de confirmar los cambios.',
+            ]);
+        }
+
+        try {
+            $this->generateCrud($input, $io, $generator);
+        } catch (\Throwable $e) {
+            $this->restoreReplacedFiles($generator);
+
+            throw $e;
+        }
+    }
+
+    private function generateCrud(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $entityClassDetails = $generator->createClassNameDetails(
             Validator::entityExists($input->getArgument('entity-class'), $this->doctrineHelper->getEntitiesForAutocomplete()),
@@ -221,33 +265,20 @@ final class MakeCrud extends AbstractMaker
             'Voter'
         );
 
-        $bulkServiceClassDetails = $generator->createClassNameDetails('BulkDeleteService', 'Service\\');
-
         $filterType = $input->getArgument('filter-type');
         if ($filterType !== 'none') {
-            $iter = 0;
-            do {
-                $formClassDetails = $generator->createClassNameDetails(
-                    $entityClassDetails->getRelativeNameWithoutSuffix().($iter ?: '').'Type',
-                    'Form\\',
-                    'Type'
-                );
-                if ($filterType === 'input') {
-                    $formFilterClassDetails = $generator->createClassNameDetails(
-                        $entityClassDetails->getRelativeNameWithoutSuffix().($iter ?: '').'FilterType',
-                        'Form\\',
-                        'FilterType'
-                    );
-                }
-                else {
-                    $formFilterClassDetails = $generator->createClassNameDetails(
-                        $entityClassDetails->getRelativeNameWithoutSuffix().($iter ?: '').'FullFilterType',
-                        'Form\\',
-                        'FullFilterType'
-                    );
-                }
-                ++$iter;
-            } while (class_exists($formClassDetails->getFullName(), false));
+            // Nombres fijos (sin sufijo numérico): un destino existente se omite o se reemplaza, nunca se esquiva con otro nombre.
+            $formClassDetails = $generator->createClassNameDetails(
+                $entityClassDetails->getRelativeNameWithoutSuffix().'Type',
+                'Form\\',
+                'Type'
+            );
+            $filterSuffix = $filterType === 'input' ? 'FilterType' : 'FullFilterType';
+            $formFilterClassDetails = $generator->createClassNameDetails(
+                $entityClassDetails->getRelativeNameWithoutSuffix().$filterSuffix,
+                'Form\\',
+                $filterSuffix
+            );
         }
 
         $entityVarPlural = lcfirst($this->pluralize($entityClassDetails->getShortName()));
@@ -264,20 +295,22 @@ final class MakeCrud extends AbstractMaker
 
 //        dd($entityDoctrineDetails->getFormFields());
         // PASO 1: Generar FormType primero (antes de que sea referenciado)
-        $this->formTypeRenderer->render(
-            $formClassDetails,
-            $entityDoctrineDetails->getFormFields(),
-            $entityClassDetails,
-            [],
-            [],
-            $templatesBasePath . 'form/Type.tpl.php',
-            [
-                'entity_var_singular'           => $entityVarSingular,
-            ]
-        );
+        if (!$this->skipIfExists($generator, $io, $this->classTargetPath($generator, $formClassDetails->getFullName()))) {
+            $this->formTypeRenderer->render(
+                $formClassDetails,
+                $entityDoctrineDetails->getFormFields(),
+                $entityClassDetails,
+                [],
+                [],
+                $templatesBasePath . 'form/Type.tpl.php',
+                [
+                    'entity_var_singular'           => $entityVarSingular,
+                ]
+            );
+        }
 
         // PASO 2: Generar FormFilterType (antes de que sea referenciado)
-        if ($filterType !== 'none') {
+        if ($filterType !== 'none' && !$this->skipIfExists($generator, $io, $this->classTargetPath($generator, $formFilterClassDetails->getFullName()))) {
             $this->formTypeRenderer->render(
                 $formFilterClassDetails,
                 $filterType === 'input' ? $entityDoctrineDetails->getFormFields() : $entityDoctrineDetails->getSpiriitFormFields(),
@@ -289,72 +322,68 @@ final class MakeCrud extends AbstractMaker
         }
 
         // PASO 3: Generar CrudService (ahora puede referenciar los formularios existentes)
-        $this->crudServiceRenderer->generateClass(
-            $crudServiceClassDetails->getFullName(),
-            $templatesBasePath . 'service/CrudService.tpl.php',
-            [
-                'entity_class_name'             => $entityClassDetails->getShortName(),
-                'entity_full_class_name'        => $entityClassDetails->getFullName(),
-                'entity_var_plural'             => $entityVarPlural,
-                'entity_var_singular'           => $entityVarSingular,
-                'entity_fields'                 => $entityDoctrineDetails->getFullDisplayFormFields(),
-                'entity_identifier'             => $entityDoctrineDetails->getIdentifier(),
-                'form_full_class_name'          => $formClassDetails->getFullName(),
-                'form_class_name'               => $formClassDetails->getShortName(),
-                'filter_type'                   => $filterType,
-                'form_filter_full_class_name'   => $formFilterClassDetails->getFullName(),
-                'form_filter_class_name'        => $formFilterClassDetails->getShortName(),
-                'route_name'                    => $routeName,
-                'custom_helper'                 => $this->generatorTwigHelper,
-            ]
-        );
+        if (!$this->skipIfExists($generator, $io, $this->classTargetPath($generator, $crudServiceClassDetails->getFullName()))) {
+            $this->crudServiceRenderer->generateClass(
+                $crudServiceClassDetails->getFullName(),
+                $templatesBasePath . 'service/CrudService.tpl.php',
+                [
+                    'entity_class_name'             => $entityClassDetails->getShortName(),
+                    'entity_full_class_name'        => $entityClassDetails->getFullName(),
+                    'entity_var_plural'             => $entityVarPlural,
+                    'entity_var_singular'           => $entityVarSingular,
+                    'entity_fields'                 => $entityDoctrineDetails->getFullDisplayFormFields(),
+                    'entity_identifier'             => $entityDoctrineDetails->getIdentifier(),
+                    'form_full_class_name'          => $formClassDetails->getFullName(),
+                    'form_class_name'               => $formClassDetails->getShortName(),
+                    'filter_type'                   => $filterType,
+                    'form_filter_full_class_name'   => $formFilterClassDetails->getFullName(),
+                    'form_filter_class_name'        => $formFilterClassDetails->getShortName(),
+                    'route_name'                    => $routeName,
+                    'custom_helper'                 => $this->generatorTwigHelper,
+                ]
+            );
+        }
 
-        // PASO 3b: Voter de la entidad y servicio de borrado en lote (no se pisan si ya existen)
-        $this->generateIfMissing($generator, $io, $voterClassDetails->getFullName(), $templatesBasePath . 'security/Voter.tpl.php', [
+        // PASO 3b: Voter de la entidad (no se pisa si existe)
+        $this->generateSupportFile($generator, $io, $voterClassDetails->getFullName(), $templatesBasePath . 'security/Voter.tpl.php', [
             'entity_full_class_name'    => $entityClassDetails->getFullName(),
             'entity_class_name'         => $entityClassDetails->getShortName(),
             'permission_prefix'         => Str::asSnakeCase($entityClassDetails->getShortName()),
         ]);
-        $this->generateIfMissing($generator, $io, $generator->getRootNamespace().'\\Tests\\Security\\'.$voterClassDetails->getShortName().'Test', $templatesBasePath . 'security/VoterTest.tpl.php', [
+        $this->generateSupportFile($generator, $io, $generator->getRootNamespace().'\\Tests\\Security\\'.$voterClassDetails->getShortName().'Test', $templatesBasePath . 'security/VoterTest.tpl.php', [
             'entity_full_class_name'    => $entityClassDetails->getFullName(),
             'entity_class_name'         => $entityClassDetails->getShortName(),
             'voter_full_class_name'     => $voterClassDetails->getFullName(),
             'voter_class_name'          => $voterClassDetails->getShortName(),
         ], 'tests/Security/'.$voterClassDetails->getShortName().'Test.php');
-        $this->generateIfMissing($generator, $io, $bulkServiceClassDetails->getFullName(), $templatesBasePath . 'service/BulkDeleteService.tpl.php');
-        $this->generateIfMissing($generator, $io, $generator->getRootNamespace().'\\Tests\\Service\\BulkDeleteServiceTest', $templatesBasePath . 'service/BulkDeleteServiceTest.tpl.php', [
-            'service_full_class_name'   => $bulkServiceClassDetails->getFullName(),
-            'service_class_name'        => $bulkServiceClassDetails->getShortName(),
-        ], 'tests/Service/BulkDeleteServiceTest.php');
 
         // PASO 4: Generar Controller al final
-        $generator->generateController(
-            $controllerClassDetails->getFullName(),
-            $templatesBasePath . 'crud/controller/Controller.tpl.php',
-            array_merge([
-                    'entity_full_class_name'            => $entityClassDetails->getFullName(),
-                    'entity_class_name'                 => $entityClassDetails->getShortName(),
-                    'route_path'                        => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
-                    'route_name'                        => $routeName,
-                    'templates_path'                    => $templatesPath,
-                    'entity_var_plural'                 => $entityVarPlural,
-                    'entity_twig_var_plural'            => $entityTwigVarPlural,
-                    'entity_var_singular'               => $entityVarSingular,
-                    'entity_twig_var_singular'          => $entityTwigVarSingular,
-                    'entity_identifier'                 => $entityDoctrineDetails->getIdentifier(),
-                    'entity_identifier_numeric'         => $entityDoctrineDetails->isIdentifierNumeric(),
-                    'form_full_class_name'              => $formClassDetails->getFullName(),
-                    'form_class_name'                   => $formClassDetails->getShortName(),
-                    'crud_service_full_class_name'      => $crudServiceClassDetails->getFullName(),
-                    'voter_full_class_name'             => $voterClassDetails->getFullName(),
-                    'voter_class_name'                  => $voterClassDetails->getShortName(),
-                    'bulk_service_full_class_name'      => $bulkServiceClassDetails->getFullName(),
-                    'bulk_service_class_name'           => $bulkServiceClassDetails->getShortName(),
-                ],
-                $repositoryVars
-            )
-        );
-
+        if (!$this->skipIfExists($generator, $io, $this->classTargetPath($generator, $controllerClassDetails->getFullName()))) {
+            $generator->generateController(
+                $controllerClassDetails->getFullName(),
+                $templatesBasePath . 'crud/controller/Controller.tpl.php',
+                array_merge([
+                        'entity_full_class_name'            => $entityClassDetails->getFullName(),
+                        'entity_class_name'                 => $entityClassDetails->getShortName(),
+                        'route_path'                        => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
+                        'route_name'                        => $routeName,
+                        'templates_path'                    => $templatesPath,
+                        'entity_var_plural'                 => $entityVarPlural,
+                        'entity_twig_var_plural'            => $entityTwigVarPlural,
+                        'entity_var_singular'               => $entityVarSingular,
+                        'entity_twig_var_singular'          => $entityTwigVarSingular,
+                        'entity_identifier'                 => $entityDoctrineDetails->getIdentifier(),
+                        'entity_identifier_numeric'         => $entityDoctrineDetails->isIdentifierNumeric(),
+                        'form_full_class_name'              => $formClassDetails->getFullName(),
+                        'form_class_name'                   => $formClassDetails->getShortName(),
+                        'crud_service_full_class_name'      => $crudServiceClassDetails->getFullName(),
+                        'voter_full_class_name'             => $voterClassDetails->getFullName(),
+                        'voter_class_name'                  => $voterClassDetails->getShortName(),
+                    ],
+                    $repositoryVars
+                )
+            );
+        }
 
         $templateBaseTwig = $input->getArgument('base-template');
         $templates = [
@@ -397,6 +426,10 @@ final class MakeCrud extends AbstractMaker
             ],
         ];
         foreach ($templates as $template => $variables) {
+            if ($this->skipIfExists($generator, $io, 'templates/'.$templatesPath.'/'.$template.'.html.twig')) {
+                continue;
+            }
+
             $generator->generateTemplate(
                 $templatesPath.'/'.$template.'.html.twig',
                 $templatesBasePath . 'crud/templates/'.$template.'.tpl.php',
@@ -415,6 +448,19 @@ final class MakeCrud extends AbstractMaker
         );
 
         $this->writeSuccessMessage($io);
+
+        if ([] !== $this->replacedFiles) {
+            $io->note(sprintf('%d archivo(s) existente(s) reemplazado(s).', count($this->replacedFiles)));
+        }
+
+        if ([] !== $this->omittedFiles) {
+            $io->note(sprintf(
+                '%d archivo(s) omitido(s) porque ya existían. Para reemplazarlos, confirmá la pregunta al ejecutar el comando o usá --force.',
+                count($this->omittedFiles)
+            ));
+        }
+
+        $this->replacedFiles = [];
 
         $io->text(sprintf('Next: Check your new CRUD by going to <fg=yellow>%s/</>', Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix())));
     }
@@ -457,17 +503,15 @@ final class MakeCrud extends AbstractMaker
     }
 
     /**
-     * Genera un archivo sólo si no existe: no pisa Voters ni servicios que el proyecto ya haya personalizado.
+     * Genera un archivo de apoyo (Voter y sus tests) con la misma regla que el resto: si existe, solo se reemplaza con confirmación o --force.
      *
      * @param string|null $targetPath Ruta relativa del archivo; si es null se deduce de la clase.
      */
-    private function generateIfMissing(Generator $generator, ConsoleStyle $io, string $className, string $template, array $variables = [], ?string $targetPath = null): void
+    private function generateSupportFile(Generator $generator, ConsoleStyle $io, string $className, string $template, array $variables = [], ?string $targetPath = null): void
     {
-        $targetPath ??= 'src/'.str_replace('\\', '/', substr($className, strlen($generator->getRootNamespace().'\\'))).'.php';
+        $targetPath ??= $this->classTargetPath($generator, $className);
 
-        if (file_exists($generator->getRootDirectory().'/'.$targetPath)) {
-            $io->text(sprintf('<comment>Omitido:</comment> %s ya existe y no se sobrescribe.', $targetPath));
-
+        if ($this->skipIfExists($generator, $io, $targetPath)) {
             return;
         }
 
@@ -477,6 +521,71 @@ final class MakeCrud extends AbstractMaker
         ]);
 
         $generator->generateFile($targetPath, $template, $variables);
+    }
+
+    /**
+     * Resuelve qué hacer con un archivo que el CRUD va a generar. Devuelve true si hay que omitirlo.
+     *
+     * Si no existe, devuelve false. Si existe, lo reemplaza (devuelve false) solo con --force o si el usuario lo confirma;
+     * en modo no interactivo la confirmación toma su valor por defecto (no) y el archivo se omite. Para reemplazar,
+     * guarda el contenido original y borra el archivo, porque el generador de MakerBundle se niega a escribir sobre uno existente.
+     *
+     * @param string $targetPath Ruta relativa a la raíz del proyecto.
+     */
+    private function skipIfExists(Generator $generator, ConsoleStyle $io, string $targetPath): bool
+    {
+        $absolutePath = $generator->getRootDirectory().'/'.$targetPath;
+
+        if (!file_exists($absolutePath)) {
+            return false;
+        }
+
+        if (!$this->force && !$this->confirmReplace($io, $targetPath)) {
+            $io->text(sprintf('<comment>Omitido:</comment> %s ya existe y no se sobrescribe.', $targetPath));
+            $this->omittedFiles[] = $targetPath;
+
+            return true;
+        }
+
+        $this->replacedFiles[$targetPath] = (string) file_get_contents($absolutePath);
+        $this->filesystem->remove($absolutePath);
+        $io->text(sprintf('<comment>Reemplazado:</comment> %s', $targetPath));
+
+        return false;
+    }
+
+    /**
+     * Advierte en amarillo que el archivo existe y que reemplazarlo pierde su lógica previa, y pregunta (por defecto no).
+     */
+    private function confirmReplace(ConsoleStyle $io, string $targetPath): bool
+    {
+        $io->warning(sprintf('%s ya existe. Si lo reemplazás se pierde cualquier lógica previa del archivo: se sustituye por el nuevo.', $targetPath));
+
+        return $io->confirm('¿Reemplazarlo?', false);
+    }
+
+    /**
+     * Devuelve a su lugar los archivos que se iban a reemplazar si la generación falló antes de escribir los nuevos.
+     */
+    private function restoreReplacedFiles(Generator $generator): void
+    {
+        foreach ($this->replacedFiles as $targetPath => $contents) {
+            $absolutePath = $generator->getRootDirectory().'/'.$targetPath;
+
+            if (!file_exists($absolutePath)) {
+                $this->filesystem->dumpFile($absolutePath, $contents);
+            }
+        }
+
+        $this->replacedFiles = [];
+    }
+
+    /**
+     * Ruta relativa de la clase según la convención PSR-4 del proyecto (App => src/).
+     */
+    private function classTargetPath(Generator $generator, string $className): string
+    {
+        return 'src/'.str_replace('\\', '/', substr($className, strlen($generator->getRootNamespace().'\\'))).'.php';
     }
 
     private function pluralize(string $word): string

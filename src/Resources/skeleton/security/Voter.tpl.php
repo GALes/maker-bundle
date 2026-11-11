@@ -11,6 +11,7 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 class <?= $class_name ?> extends Voter
 {
     // Permisos funcionalidades
+    // Para una acción masiva propia: agregar la constante, incluirla en supports() y en voteOnAttribute(), y registrarla en BULK_ACTIONS del controlador.
     const VER       = '<?= $permission_prefix ?>_ver';
     const EDITAR    = '<?= $permission_prefix ?>_editar';
     const ELIMINAR  = '<?= $permission_prefix ?>_eliminar';
