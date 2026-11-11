@@ -47,6 +47,7 @@ php bin/console gales:make:crud <EntityClassName> [filter-type] [base-template]
 ```bash
 php bin/console gales:make:crud Product input base.html.twig
 php bin/console gales:make:crud Product input base.html.twig --roles=ROLE_REPORTE
+php bin/console gales:make:crud Product input base.html.twig --route-prefix=/admin
 ```
 
 ## 📁 Generated Files
@@ -119,6 +120,34 @@ gales_maker:
 
 The suggestions are the roles from `roles_source` followed by the keys and values of `security.role_hierarchy`, without the
 default roles, `ROLE_USER` (any authenticated user) and the impersonation roles. If `roles_source` cannot be read, the command warns and goes on.
+
+## 🛣️ Route prefix
+
+By default the controller route comes from the entity name: `Solicitud` -> `/solicitud`, `NotaPedido` -> `/nota/pedido`.
+If the back office is protected by route prefix (for example `access_control` with `^/admin`), generate the CRUD under it:
+
+```bash
+php bin/console gales:make:crud Solicitud input base.html.twig --route-prefix=/admin -n
+# #[Route("/admin/solicitud")]
+```
+
+- The leading `/` is optional and a trailing one is ignored: `admin`, `/admin` and `/admin/` are the same. Nested prefixes work (`/backoffice/admin`).
+- Allowed characters: letters, digits, `-`, `_`, `.`, `/` and `{}` (for parameters such as `/{_locale}/admin`). Anything else stops the command before writing files.
+- The route **name** (`solicitud_index`, ...) does not change, only the path.
+- The final route is shown in the last line of the command (`Next: Check your new CRUD by going to /admin/solicitud/`).
+- `--route-prefix=` (empty) forces no prefix, even if a default is configured.
+
+To avoid passing it every time, set a default in the bundle configuration (`--route-prefix` overrides it):
+
+```yaml
+# config/packages/gales_maker.yaml
+gales_maker:
+    crud:
+        # Default route prefix of generated CRUDs. Default: none
+        route_prefix: '/admin'
+```
+
+Regenerating an existing CRUD with a different prefix replaces its controller only if you confirm (or use `--force`); the other files do not depend on the path.
 
 ## 🎯 Features
 

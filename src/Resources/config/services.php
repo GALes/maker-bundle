@@ -42,6 +42,7 @@ return static function (ContainerConfigurator $container): void {
             service('kernel'),
             service('gales.maker.generator_twig_helper'),
             service('gales.maker.crud_roles_provider'),
+            '', // gales_maker.crud.route_prefix: lo completa GALesMakerExtension con la configuración.
         ])
         ->tag('maker.command');
 

@@ -44,6 +44,32 @@ final class BulkSkeletonsTest extends TestCase
         ]);
     }
 
+    public function testControladorEscribeLaRutaConPrefijo(): void
+    {
+        $codigo = self::render('crud/controller/Controller.tpl.php', [
+            'namespace' => 'App\\Controller',
+            'class_name' => 'SolicitudController',
+            'entity_full_class_name' => 'App\\Entity\\Solicitud',
+            'entity_class_name' => 'Solicitud',
+            'form_full_class_name' => 'App\\Form\\SolicitudType',
+            'form_class_name' => 'SolicitudType',
+            'crud_service_full_class_name' => 'App\\Service\\SolicitudCrudService',
+            'voter_full_class_name' => 'App\\Security\\SolicitudVoter',
+            'voter_class_name' => 'SolicitudVoter',
+            'route_path' => '/admin/solicitud',
+            'route_name' => 'solicitud',
+            'templates_path' => 'solicitud',
+            'entity_var_plural' => 'solicituds',
+            'entity_twig_var_plural' => 'solicituds',
+            'entity_var_singular' => 'solicitud',
+            'entity_twig_var_singular' => 'solicitud',
+            'entity_identifier' => 'id',
+            'entity_identifier_numeric' => true,
+        ]);
+
+        self::assertStringContainsString('#[Route("/admin/solicitud")]', $codigo);
+    }
+
     public function testControladorRenderizaPhpValido(): void
     {
         $codigo = self::controller();

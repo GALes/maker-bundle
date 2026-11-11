@@ -19,6 +19,7 @@ use GALes\MakerBundle\Doctrine\EntityDetails;
 use GALes\MakerBundle\Helper\GeneratorTwigHelper;
 use GALes\MakerBundle\Maker\Roles\AvailableRolesProvider;
 use GALes\MakerBundle\Maker\Roles\RoleNormalizer;
+use GALes\MakerBundle\Maker\Routing\RoutePrefixNormalizer;
 use GALes\MakerBundle\Renderer\CrudServiceRenderer;
 use GALes\MakerBundle\Renderer\ExportServiceRenderer;
 use GALes\MakerBundle\Renderer\FormFilterTypeRenderer;
@@ -71,6 +72,11 @@ final class MakeCrud extends AbstractMaker
     private AvailableRolesProvider $rolesProvider;
 
     /**
+     * Prefijo de ruta por defecto (gales_maker.crud.route_prefix) cuando no se pasa --route-prefix.
+     */
+    private string $defaultRoutePrefix = '';
+
+    /**
      * Archivos que el CRUD omitió en esta ejecución porque ya existían y no se confirmó reemplazarlos.
      *
      * @var string[]
@@ -93,7 +99,8 @@ final class MakeCrud extends AbstractMaker
         CrudServiceRenderer     $crudServiceRenderer,
         Kernel                  $appKernel, 
         GeneratorTwigHelper     $generatorTwigHelper,
-        AvailableRolesProvider  $rolesProvider)
+        AvailableRolesProvider  $rolesProvider,
+        string                  $defaultRoutePrefix = '')
     {
         $this->doctrineHelper           = $doctrineHelper;
         $this->formTypeRenderer         = $formTypeRenderer;
@@ -104,6 +111,7 @@ final class MakeCrud extends AbstractMaker
         $this->filesystem = new Filesystem();
 
         $this->rolesProvider            = $rolesProvider;
+        $this->defaultRoutePrefix       = $defaultRoutePrefix;
 
         if (class_exists(InflectorFactory::class)) {
             $this->inflector = InflectorFactory::createForLanguage(Language::SPANISH)->build();
@@ -133,6 +141,7 @@ final class MakeCrud extends AbstractMaker
             ->addArgument('base-template', InputArgument::OPTIONAL, 'The base template for the views (e.g., base.html.twig)')
             ->addOption('force', null, InputOption::VALUE_NONE, 'Overwrite existing files without asking (any previous logic in them is lost)')
             ->addOption('roles', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Extra roles with access to the CRUD, besides the default ones (e.g. --roles=ROLE_REPORTE,ROLE_CONSULTA)')
+            ->addOption('route-prefix', null, InputOption::VALUE_REQUIRED, 'Route prefix for the generated controller (e.g. --route-prefix=/admin). Overrides gales_maker.crud.route_prefix; an empty value means no prefix')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeCrud.txt'))
         ;
 
@@ -267,6 +276,18 @@ final class MakeCrud extends AbstractMaker
         );
     }
 
+    /**
+     * Prefijo de ruta del CRUD: --route-prefix si se pasó (vacío = sin prefijo); si no, gales_maker.crud.route_prefix.
+     *
+     * @throws \InvalidArgumentException si --route-prefix trae caracteres no válidos
+     */
+    private function resolveRoutePrefix(InputInterface $input): string
+    {
+        $option = $input->getOption('route-prefix');
+
+        return RoutePrefixNormalizer::normalize(null === $option ? $this->defaultRoutePrefix : (string) $option);
+    }
+
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
         $this->omittedFiles = [];
@@ -274,6 +295,7 @@ final class MakeCrud extends AbstractMaker
         $this->force = (bool) $input->getOption('force');
         // Antes de tocar archivos: un rol inválido en --roles corta la ejecución sin cambios.
         $roles = $this->resolveRoles($input);
+        $routePrefix = $this->resolveRoutePrefix($input);
 
         if ($this->force) {
             $io->warning([
@@ -283,7 +305,7 @@ final class MakeCrud extends AbstractMaker
         }
 
         try {
-            $this->generateCrud($input, $io, $generator, $roles);
+            $this->generateCrud($input, $io, $generator, $roles, $routePrefix);
         } catch (\Throwable $e) {
             $this->restoreReplacedFiles($generator);
 
@@ -292,9 +314,10 @@ final class MakeCrud extends AbstractMaker
     }
 
     /**
-     * @param list<string> $roles Roles con acceso al CRUD
+     * @param list<string> $roles       Roles con acceso al CRUD
+     * @param string       $routePrefix Prefijo de ruta normalizado ('' si no hay)
      */
-    private function generateCrud(InputInterface $input, ConsoleStyle $io, Generator $generator, array $roles): void
+    private function generateCrud(InputInterface $input, ConsoleStyle $io, Generator $generator, array $roles, string $routePrefix): void
     {
         $io->text(sprintf('Roles con acceso al CRUD: <info>%s</info>', implode(', ', $roles)));
 
@@ -330,6 +353,9 @@ final class MakeCrud extends AbstractMaker
             'Controller\\',
             'Controller'
         );
+
+        // Ruta pública del CRUD: prefijo (--route-prefix o configuración) + ruta de la entidad.
+        $routePath = RoutePrefixNormalizer::apply($routePrefix, Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()));
 
         $crudServiceClassDetails = $generator->createClassNameDetails(
             $entityClassDetails->getRelativeNameWithoutSuffix().'CrudService',
@@ -452,7 +478,7 @@ final class MakeCrud extends AbstractMaker
                 array_merge([
                         'entity_full_class_name'            => $entityClassDetails->getFullName(),
                         'entity_class_name'                 => $entityClassDetails->getShortName(),
-                        'route_path'                        => Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix()),
+                        'route_path'                        => $routePath,
                         'route_name'                        => $routeName,
                         'templates_path'                    => $templatesPath,
                         'entity_var_plural'                 => $entityVarPlural,
@@ -549,7 +575,7 @@ final class MakeCrud extends AbstractMaker
 
         $this->replacedFiles = [];
 
-        $io->text(sprintf('Next: Check your new CRUD by going to <fg=yellow>%s/</>', Str::asRoutePath($controllerClassDetails->getRelativeNameWithoutSuffix())));
+        $io->text(sprintf('Next: Check your new CRUD by going to <fg=yellow>%s/</>', $routePath));
     }
 
     /**
