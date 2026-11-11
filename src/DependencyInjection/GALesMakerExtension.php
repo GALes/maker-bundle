@@ -23,6 +23,10 @@ class GALesMakerExtension extends Extension
 
         $definition = $container->getDefinition('gales.maker.gales_maker');
         $definition->setArgument(0, $config['nombre']);
+
+        $container->getDefinition('gales.maker.crud_roles_provider')
+            ->setArgument(1, $config['crud']['roles_source'])
+            ->setArgument(2, $config['crud']['default_roles']);
     }
 
     /**

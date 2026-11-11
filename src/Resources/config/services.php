@@ -7,6 +7,7 @@ use GALes\MakerBundle\Doctrine\DoctrineHelper;
 use GALes\MakerBundle\GALesMaker;
 use GALes\MakerBundle\Helper\GeneratorTwigHelper;
 use GALes\MakerBundle\Maker\MakeCrud;
+use GALes\MakerBundle\Maker\Roles\AvailableRolesProvider;
 use GALes\MakerBundle\Renderer\CrudServiceRenderer;
 use GALes\MakerBundle\Renderer\FormTypeRenderer;
 use GALes\MakerBundle\Spreadsheet\Factory;
@@ -40,9 +41,17 @@ return static function (ContainerConfigurator $container): void {
             service('gales.maker.renderer.crud_service_renderer'),
             service('kernel'),
             service('gales.maker.generator_twig_helper'),
-            '%security.role_hierarchy.roles%',
+            service('gales.maker.crud_roles_provider'),
         ])
         ->tag('maker.command');
+
+    // Los argumentos 1 (roles_source) y 2 (default_roles) los completa GALesMakerExtension con la configuración.
+    $services->set('gales.maker.crud_roles_provider', AvailableRolesProvider::class)
+        ->args([
+            '%security.role_hierarchy.roles%',
+            null,
+            ['ROLE_ADMIN'],
+        ]);
 
     $services->set('gales.maker.renderer.form_type_renderer', FormTypeRenderer::class)
         ->args([service('maker.generator')]);
