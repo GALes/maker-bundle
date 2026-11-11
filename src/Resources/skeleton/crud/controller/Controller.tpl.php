@@ -19,6 +19,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Form\Form;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
@@ -29,6 +30,7 @@ use Doctrine\Persistence\ObjectManager;
  * <?= $entity_class_name ?> Controller
  */
  #[Route("<?= $route_path ?>")]
+ #[IsGranted(<?= $voter_class_name ?>::ACCEDER)]
 class <?= $class_name; ?> extends AbstractController
 {
     /** Acciones masivas de este CRUD: nombre de la acción => atributo del Voter que la autoriza. */
