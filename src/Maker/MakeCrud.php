@@ -137,7 +137,10 @@ final class MakeCrud extends AbstractMaker
         // Example: php bin/console gales:make:crud Product input base.html.twig
         // If arguments are not provided, the command will be interactive.
 
+        // Se preguntan en interact() con autocompletado: sin esto MakerCommand las pregunta antes, con un ask() común.
         $inputConfig->setArgumentAsNonInteractive('entity-class');
+        $inputConfig->setArgumentAsNonInteractive('filter-type');
+        $inputConfig->setArgumentAsNonInteractive('base-template');
     }
 
     public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
@@ -183,7 +186,7 @@ final class MakeCrud extends AbstractMaker
                 $templatesList[] = $file->getRelativePathname();
             }
             $io->writeln([
-                'By default, the created views extends the <comment>@GALesMaker/base.html.twig</comment>',
+                'By default, the created views extends the <comment>bundles/GALesMaker/base.html.twig</comment>',
                 'You can also set your template which the views to extend, for example <comment>base.html.twig</comment>',
             ]);
             $question = new Question('Base template for the views', 'bundles/GALesMaker/base.html.twig');
