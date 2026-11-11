@@ -2,6 +2,7 @@
 
 namespace GALes\MakerBundle\DependencyInjection;
 
+use GALes\MakerBundle\Bulk\BulkActionInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
@@ -13,6 +14,9 @@ class GALesMakerExtension extends Extension
     {
         $loader = new PhpFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.php');
+
+        // Toda clase que implemente BulkActionInterface se registra sola como acción masiva.
+        $container->registerForAutoconfiguration(BulkActionInterface::class)->addTag('gales_maker.bulk_action');
 
         $configuration = $this->getConfiguration($configs, $container);
         $config = $this->processConfiguration($configuration, $configs);

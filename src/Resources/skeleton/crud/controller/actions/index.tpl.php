@@ -1,5 +1,5 @@
     #[Route("/", name: "<?= $route_name ?>_index", methods: ["GET"])]
-    public function index(Request $request)
+    public function index(Request $request, BulkActionRegistry $bulkActions)
     {
         $isValid = true;
         /** @var QueryBuilder $queryBuilder */
@@ -34,6 +34,7 @@
                 'pagerHtml' => $pagerHtml,
                 'filterForm' => $filterForm->createView(),
                 'totalOfRecordsString' => $totalOfRecordsString,
+                'bulkActions' => $bulkActions->describe(array_keys(self::BULK_ACTIONS), <?= $entity_class_name ?>::class),
             ]);
         }
     }

@@ -25,6 +25,7 @@ else if ( $filter_type === 'form' )
 
 <div class="table-responsive">
     <form method="POST" id="bulk_form" action="{{ path('<?=$route_name ?>_bulk_action') }}">
+    <input type="hidden" name="_token" value="{{ csrf_token('bulk_<?= $route_name ?>') }}">
     <table class="mb-table">
         <thead>
             <tr>
@@ -54,13 +55,19 @@ else if ( $filter_type === 'form' )
 </div>
 
 <div class="d-flex align-items-center flex-wrap gap-3 mt-3">
-    <div class="d-flex align-items-center gap-2">
-        <select class="form-select form-select-sm w-auto not-selectized" name="bulk_action" aria-label="Acción masiva">
-            <option value="delete">ELIMINAR</option>
-        </select>
-        <input type="submit" id='bulkSubmitBtn' onclick="return confirm('¿Está seguro?')" form="bulk_form"
-               class="btn btn-sm btn-outline-danger" disabled value="APLICAR">
-    </div>
+    {% if bulkActions is not empty %}
+        <div class="d-flex align-items-center gap-2">
+            <select class="form-select form-select-sm w-auto not-selectized" name="bulk_action" form="bulk_form" aria-label="Acción masiva">
+                <option value="" selected disabled>Acción masiva…</option>
+                {% for bulkAction in bulkActions %}
+                    <option value="{{ bulkAction.name }}" data-confirm="{{ bulkAction.confirm }}">{{ bulkAction.label }}</option>
+                {% endfor %}
+            </select>
+            <input type="submit" id='bulkSubmitBtn' form="bulk_form"
+                   onclick="var o = document.querySelector('select[name=bulk_action]').selectedOptions[0]; return !!o.value && confirm(o.dataset.confirm || '¿Está seguro?')"
+                   class="btn btn-sm btn-outline-danger" disabled value="APLICAR">
+        </div>
+    {% endif %}
     <span class="totalOfRecordsString mb-form-hint">{{ totalOfRecordsString }}</span>
     <div class="ms-auto">
         {{ pagerHtml|raw }}
