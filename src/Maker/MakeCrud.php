@@ -17,11 +17,14 @@ use Doctrine\Inflector\InflectorFactory;
 use Doctrine\Inflector\Language;
 use GALes\MakerBundle\Doctrine\EntityDetails;
 use GALes\MakerBundle\Helper\GeneratorTwigHelper;
+use GALes\MakerBundle\Maker\Roles\AvailableRolesProvider;
+use GALes\MakerBundle\Maker\Roles\RoleNormalizer;
 use GALes\MakerBundle\Renderer\CrudServiceRenderer;
 use GALes\MakerBundle\Renderer\ExportServiceRenderer;
 use GALes\MakerBundle\Renderer\FormFilterTypeRenderer;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
+use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use GALes\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
@@ -64,8 +67,8 @@ final class MakeCrud extends AbstractMaker
     private $generatorTwigHelper;
 
     private $filesystem;
-    
-    protected $availableRoles = array();
+
+    private AvailableRolesProvider $rolesProvider;
 
     /**
      * Archivos que el CRUD omitió en esta ejecución porque ya existían y no se confirmó reemplazarlos.
@@ -89,8 +92,8 @@ final class MakeCrud extends AbstractMaker
         FormTypeRenderer        $formTypeRenderer,
         CrudServiceRenderer     $crudServiceRenderer,
         Kernel                  $appKernel, 
-        GeneratorTwigHelper     $generatorTwigHelper, 
-        $roleHierarchy)
+        GeneratorTwigHelper     $generatorTwigHelper,
+        AvailableRolesProvider  $rolesProvider)
     {
         $this->doctrineHelper           = $doctrineHelper;
         $this->formTypeRenderer         = $formTypeRenderer;
@@ -99,8 +102,8 @@ final class MakeCrud extends AbstractMaker
         $this->generatorTwigHelper      = $generatorTwigHelper;
 
         $this->filesystem = new Filesystem();
-        
-        $this->availableRoles           = $this->extractAvailableRoles($roleHierarchy);
+
+        $this->rolesProvider            = $rolesProvider;
 
         if (class_exists(InflectorFactory::class)) {
             $this->inflector = InflectorFactory::createForLanguage(Language::SPANISH)->build();
@@ -129,6 +132,7 @@ final class MakeCrud extends AbstractMaker
             ->addArgument('filter-type', InputArgument::OPTIONAL, 'The filter type to use (input, form, none)')
             ->addArgument('base-template', InputArgument::OPTIONAL, 'The base template for the views (e.g., base.html.twig)')
             ->addOption('force', null, InputOption::VALUE_NONE, 'Overwrite existing files without asking (any previous logic in them is lost)')
+            ->addOption('roles', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Extra roles with access to the CRUD, besides the default ones (e.g. --roles=ROLE_REPORTE,ROLE_CONSULTA)')
             ->setHelp(file_get_contents(__DIR__.'/../Resources/help/MakeCrud.txt'))
         ;
 
@@ -194,6 +198,73 @@ final class MakeCrud extends AbstractMaker
             $value = $io->askQuestion($question);
             $input->setArgument('base-template', $value);
         }
+
+        if ([] === $input->getOption('roles')) {
+            $input->setOption('roles', $this->askRoles($io));
+        }
+    }
+
+    /**
+     * Pregunta, uno por vez y con autocompletado, los roles que se suman a los fijos. Enter vacío termina.
+     *
+     * @return list<string>
+     */
+    private function askRoles(ConsoleStyle $io): array
+    {
+        $defaultRoles = $this->rolesProvider->getDefaultRoles();
+        $suggested = $this->rolesProvider->getSuggestedRoles();
+
+        if (null !== $this->rolesProvider->getSourceError()) {
+            $io->warning($this->rolesProvider->getSourceError());
+        }
+
+        $io->writeln([
+            '',
+            sprintf('Roles con acceso al CRUD. Siempre tienen acceso: <comment>%s</comment>.', implode(', ', $defaultRoles)),
+            [] === $suggested
+                ? 'No hay otros roles definidos en el proyecto; podés escribir uno igual.'
+                : sprintf('Roles definidos en el proyecto: <comment>%s</comment>', implode(', ', $suggested)),
+            'Escribí un rol por vez (Tab autocompleta). Enter vacío para terminar.',
+        ]);
+
+        $chosen = [];
+        while (true) {
+            $question = new Question('Rol adicional (Enter para terminar)');
+            $question->setAutocompleterValues(array_values(array_diff($suggested, $chosen)));
+            $question->setValidator(static fn (?string $value): array => RoleNormalizer::normalize($value));
+
+            $roles = $io->askQuestion($question);
+            if ([] === $roles) {
+                break;
+            }
+
+            foreach ($roles as $role) {
+                if (in_array($role, $defaultRoles, true) || in_array($role, $chosen, true)) {
+                    continue;
+                }
+                if (!in_array($role, $suggested, true)) {
+                    $io->warning(sprintf('%s no está definido en el proyecto (ni en %s ni en security.role_hierarchy). Se agrega igual: asignalo a los usuarios que deban acceder.', $role, 'gales_maker.crud.roles_source'));
+                }
+                $chosen[] = $role;
+            }
+        }
+
+        return $chosen;
+    }
+
+    /**
+     * Roles con acceso al CRUD: los fijos de la configuración más los de --roles (o los elegidos en interact()).
+     *
+     * @return list<string>
+     *
+     * @throws \InvalidArgumentException si --roles trae un rol inválido
+     */
+    private function resolveRoles(InputInterface $input): array
+    {
+        return RoleNormalizer::merge(
+            $this->rolesProvider->getDefaultRoles(),
+            RoleNormalizer::normalize($input->getOption('roles'))
+        );
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
@@ -201,6 +272,8 @@ final class MakeCrud extends AbstractMaker
         $this->omittedFiles = [];
         $this->replacedFiles = [];
         $this->force = (bool) $input->getOption('force');
+        // Antes de tocar archivos: un rol inválido en --roles corta la ejecución sin cambios.
+        $roles = $this->resolveRoles($input);
 
         if ($this->force) {
             $io->warning([
@@ -210,7 +283,7 @@ final class MakeCrud extends AbstractMaker
         }
 
         try {
-            $this->generateCrud($input, $io, $generator);
+            $this->generateCrud($input, $io, $generator, $roles);
         } catch (\Throwable $e) {
             $this->restoreReplacedFiles($generator);
 
@@ -218,8 +291,13 @@ final class MakeCrud extends AbstractMaker
         }
     }
 
-    private function generateCrud(InputInterface $input, ConsoleStyle $io, Generator $generator): void
+    /**
+     * @param list<string> $roles Roles con acceso al CRUD
+     */
+    private function generateCrud(InputInterface $input, ConsoleStyle $io, Generator $generator, array $roles): void
     {
+        $io->text(sprintf('Roles con acceso al CRUD: <info>%s</info>', implode(', ', $roles)));
+
         $entityClassDetails = $generator->createClassNameDetails(
             Validator::entityExists($input->getArgument('entity-class'), $this->doctrineHelper->getEntitiesForAutocomplete()),
             'Entity\\'
@@ -344,12 +422,17 @@ final class MakeCrud extends AbstractMaker
             );
         }
 
-        // PASO 3b: Voter de la entidad (no se pisa si existe)
-        $this->generateSupportFile($generator, $io, $voterClassDetails->getFullName(), $templatesBasePath . 'security/Voter.tpl.php', [
+        // PASO 3b: Voter de la entidad (no se pisa si existe). Los roles elegidos sólo se escriben si se genera.
+        $voterPath = $this->classTargetPath($generator, $voterClassDetails->getFullName());
+        $voterGenerated = $this->generateSupportFile($generator, $io, $voterClassDetails->getFullName(), $templatesBasePath . 'security/Voter.tpl.php', [
             'entity_full_class_name'    => $entityClassDetails->getFullName(),
             'entity_class_name'         => $entityClassDetails->getShortName(),
             'permission_prefix'         => Str::asSnakeCase($entityClassDetails->getShortName()),
-        ]);
+            'roles'                     => $roles,
+        ], $voterPath);
+        if (!$voterGenerated) {
+            $io->warning(sprintf('Se conserva el %s existente: los roles elegidos no se aplican. Para cambiarlos, editá su constante ROLES.', $voterClassDetails->getShortName()));
+        }
         $this->generateSupportFile($generator, $io, $generator->getRootNamespace().'\\Tests\\Security\\'.$voterClassDetails->getShortName().'Test', $templatesBasePath . 'security/VoterTest.tpl.php', [
             'entity_full_class_name'    => $entityClassDetails->getFullName(),
             'entity_class_name'         => $entityClassDetails->getShortName(),
@@ -359,6 +442,10 @@ final class MakeCrud extends AbstractMaker
 
         // PASO 4: Generar Controller al final
         if (!$this->skipIfExists($generator, $io, $this->classTargetPath($generator, $controllerClassDetails->getFullName()))) {
+            if (!$voterGenerated) {
+                $this->assertVoterSupportsAccessAttributes($generator, $voterPath, $voterClassDetails->getShortName());
+            }
+
             $generator->generateController(
                 $controllerClassDetails->getFullName(),
                 $templatesBasePath . 'crud/controller/Controller.tpl.php',
@@ -506,13 +593,15 @@ final class MakeCrud extends AbstractMaker
      * Genera un archivo de apoyo (Voter y sus tests) con la misma regla que el resto: si existe, solo se reemplaza con confirmación o --force.
      *
      * @param string|null $targetPath Ruta relativa del archivo; si es null se deduce de la clase.
+     *
+     * @return bool true si el archivo se genera; false si se omitió porque ya existía
      */
-    private function generateSupportFile(Generator $generator, ConsoleStyle $io, string $className, string $template, array $variables = [], ?string $targetPath = null): void
+    private function generateSupportFile(Generator $generator, ConsoleStyle $io, string $className, string $template, array $variables = [], ?string $targetPath = null): bool
     {
         $targetPath ??= $this->classTargetPath($generator, $className);
 
         if ($this->skipIfExists($generator, $io, $targetPath)) {
-            return;
+            return false;
         }
 
         $variables = array_merge($variables, [
@@ -521,6 +610,36 @@ final class MakeCrud extends AbstractMaker
         ]);
 
         $generator->generateFile($targetPath, $template, $variables);
+
+        return true;
+    }
+
+    /**
+     * El controlador generado usa <Voter>::ACCEDER y <Voter>::CREAR. Si se conserva un Voter anterior a esos atributos,
+     * corta antes de escribir nada (los archivos que se iban a reemplazar se restauran) y explica cómo seguir.
+     *
+     * @param string $voterPath Ruta relativa del Voter.
+     */
+    private function assertVoterSupportsAccessAttributes(Generator $generator, string $voterPath, string $voterShortName): void
+    {
+        $contents = (string) file_get_contents($generator->getRootDirectory().'/'.$voterPath);
+        $missing = [];
+        foreach (['ACCEDER', 'CREAR'] as $constant) {
+            if (1 !== preg_match('/\bconst\s+'.$constant.'\b/', $contents)) {
+                $missing[] = $constant;
+            }
+        }
+
+        if ([] === $missing) {
+            return;
+        }
+
+        throw new RuntimeCommandException(sprintf(
+            '%s no define %s, que usa el controlador nuevo. No se escribió ningún archivo. Volvé a ejecutar el comando y respondé que sí al reemplazar %s, o agregale a mano esas constantes (con supports() y voteOnAttribute()) como indica la sección "Upgrading from v2.2" del README del bundle.',
+            $voterPath,
+            implode(' y ', $missing),
+            $voterPath
+        ));
     }
 
     /**
@@ -604,28 +723,5 @@ final class MakeCrud extends AbstractMaker
         }
 
         return LegacyInflector::singularize($word);
-    }
-
-    /**
-     * Extract unique roles from role hierarchy
-     *
-     * @param type $roleHierarchy
-     * @return array
-     */
-    protected function extractAvailableRoles($roleHierarchy)
-    {
-        // always add this roles first
-        $availableRoles = array(
-            'ROLE_USER',
-            'ROLE_ADMIN'
-        );
-
-        array_walk_recursive($roleHierarchy, function($role) use (&$availableRoles) {
-            if (array_search($role, $availableRoles) === FALSE) {
-                $availableRoles[] = $role;
-            }
-        });
-
-        return $availableRoles;
     }
 }
