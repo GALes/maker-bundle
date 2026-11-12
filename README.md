@@ -71,6 +71,12 @@ php bin/console gales:make:crud Product input base.html.twig --roles=ROLE_REPORT
 php bin/console gales:make:crud Product input base.html.twig --route-prefix=/admin
 ```
 
+### ⚠️ Base template: always pass your project's own
+
+The `base-template` argument should always be **your project's layout** (e.g. `base.html.twig`), which already loads Bootstrap 5, Font Awesome, flatpickr and jQuery through your build (for example Webpack Encore).
+
+The bundle's own layout (`bundles/GALesMaker/base.html.twig`, the default of the interactive prompt) is **only a reference**: it still points to `bundles/galesmaker/...` assets (Bootstrap, Font Awesome, flatpickr, jQuery, Popper) that the bundle no longer ships since the Bootstrap 5 migration, so those requests return 404 and the pages render unstyled. Do not use it as the base template of a real CRUD.
+
 ## 📁 Generated Files
 
 After selecting the Entity for which to generate the CRUD, the following files are created:
