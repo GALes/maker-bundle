@@ -109,6 +109,7 @@ final class SecuritySkeletonsTest extends TestCase
             'entity_full_class_name' => 'App\\Entity\\Product',
             'entity_class_name' => 'Product',
             'form_full_class_name' => 'App\\Form\\ProductType',
+            'filter_type' => 'input',
             'form_class_name' => 'ProductType',
             'crud_service_full_class_name' => 'App\\Service\\ProductCrudService',
             'voter_full_class_name' => 'App\\Security\\ProductVoter',

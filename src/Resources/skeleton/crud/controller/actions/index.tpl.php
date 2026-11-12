@@ -4,11 +4,13 @@
         $isValid = true;
         /** @var QueryBuilder $queryBuilder */
         $queryBuilder = $this->entityManager->getRepository(<?= $entity_class_name ?>::class)->createQueryBuilder('zzz');
+<?php if ($filter_type !== 'none'): ?>
         $filter_response = $this-><?= $entity_var_singular ?>CrudService->filter($queryBuilder, $request);
         if ($filter_response instanceof RedirectResponse) {
             return $filter_response;
         }
         list($filterForm, $queryBuilder) = $filter_response;
+<?php endif; ?>
 
         /*** Agregar condiciones de filtrado extra aquí, si se agregan antes del filter() se pierden ***/
         // $queryBuilder->innerJoin()->andWhere()->setParameters([]);
@@ -32,7 +34,9 @@
             return $this->render('<?= $templates_path ?>/index.html.twig', [
                 '<?= $entity_twig_var_plural ?>' => $<?=$entity_var_plural ?>,
                 'pagerHtml' => $pagerHtml,
+<?php if ($filter_type !== 'none'): ?>
                 'filterForm' => $filterForm->createView(),
+<?php endif; ?>
                 'totalOfRecordsString' => $totalOfRecordsString,
                 'bulkActions' => $bulkActions->describe(array_keys(self::BULK_ACTIONS), <?= $entity_class_name ?>::class),
             ]);

@@ -28,6 +28,27 @@ twig:
     form_themes: ['bootstrap_5_layout.html.twig']
 ```
 
+## 🔤 Font (Montserrat)
+
+The bundle's layout (`base.html.twig`) no longer loads Montserrat from Google Fonts, so it does not depend on an external CDN.
+`crud.css` declares `font-family: "Montserrat"`, so the project must provide the font itself. For example, with
+`@fontsource/montserrat` imported from the Webpack Encore entry point:
+
+```bash
+npm install @fontsource/montserrat
+```
+
+```js
+// assets/app.js
+import '@fontsource/montserrat/300.css';
+import '@fontsource/montserrat/400.css';
+import '@fontsource/montserrat/600.css';
+import '@fontsource/montserrat/700.css';
+import '@fontsource/montserrat/800.css';
+```
+
+Without it, the browser falls back to the system sans-serif font.
+
 ## ⚡ Usage
 
 Run the command:
@@ -47,7 +68,14 @@ php bin/console gales:make:crud <EntityClassName> [filter-type] [base-template]
 ```bash
 php bin/console gales:make:crud Product input base.html.twig
 php bin/console gales:make:crud Product input base.html.twig --roles=ROLE_REPORTE
+php bin/console gales:make:crud Product input base.html.twig --route-prefix=/admin
 ```
+
+### ⚠️ Base template: always pass your project's own
+
+The `base-template` argument should always be **your project's layout** (e.g. `base.html.twig`), which already loads Bootstrap 5, Font Awesome, flatpickr and jQuery through your build (for example Webpack Encore).
+
+The bundle's own layout (`bundles/GALesMaker/base.html.twig`, the default of the interactive prompt) is **only a reference**: it still points to `bundles/galesmaker/...` assets (Bootstrap, Font Awesome, flatpickr, jQuery, Popper) that the bundle no longer ships since the Bootstrap 5 migration, so those requests return 404 and the pages render unstyled. Do not use it as the base template of a real CRUD.
 
 ## 📁 Generated Files
 
@@ -119,6 +147,34 @@ gales_maker:
 
 The suggestions are the roles from `roles_source` followed by the keys and values of `security.role_hierarchy`, without the
 default roles, `ROLE_USER` (any authenticated user) and the impersonation roles. If `roles_source` cannot be read, the command warns and goes on.
+
+## 🛣️ Route prefix
+
+By default the controller route comes from the entity name: `Solicitud` -> `/solicitud`, `NotaPedido` -> `/nota/pedido`.
+If the back office is protected by route prefix (for example `access_control` with `^/admin`), generate the CRUD under it:
+
+```bash
+php bin/console gales:make:crud Solicitud input base.html.twig --route-prefix=/admin -n
+# #[Route("/admin/solicitud")]
+```
+
+- The leading `/` is optional and a trailing one is ignored: `admin`, `/admin` and `/admin/` are the same. Nested prefixes work (`/backoffice/admin`).
+- Allowed characters: letters, digits, `-`, `_`, `.`, `/` and `{}` (for parameters such as `/{_locale}/admin`). Anything else stops the command before writing files.
+- The route **name** (`solicitud_index`, ...) does not change, only the path.
+- The final route is shown in the last line of the command (`Next: Check your new CRUD by going to /admin/solicitud/`).
+- `--route-prefix=` (empty) forces no prefix, even if a default is configured.
+
+To avoid passing it every time, set a default in the bundle configuration (`--route-prefix` overrides it):
+
+```yaml
+# config/packages/gales_maker.yaml
+gales_maker:
+    crud:
+        # Default route prefix of generated CRUDs. Default: none
+        route_prefix: '/admin'
+```
+
+Regenerating an existing CRUD with a different prefix replaces its controller only if you confirm (or use `--force`); the other files do not depend on the path.
 
 ## 🎯 Features
 

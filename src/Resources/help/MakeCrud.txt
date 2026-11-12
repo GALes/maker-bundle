@@ -4,6 +4,7 @@ The <info>%command.name%</info> command generates a CRUD Controller with templat
 <info>php %command.full_name% BlogPost input</info>
 <info>php %command.full_name% BlogPost form admin/base.html.twig</info>
 <info>php %command.full_name% BlogPost input admin/base.html.twig --roles=ROLE_REPORTE,ROLE_CONSULTA</info>
+<info>php %command.full_name% BlogPost input admin/base.html.twig --route-prefix=/admin</info>
 
 <comment>Arguments:</comment>
   <info>entity-class</info>     Name of the entity class to create the CRUD for
@@ -11,7 +12,10 @@ The <info>%command.name%</info> command generates a CRUD Controller with templat
     • <comment>input</comment> - Uses PetkoparaMultiSearchBundle for search with a single input
     • <comment>form</comment>  - Uses SpiriitFormFilterBundle for advanced search (beta)
     • <comment>none</comment>   - Does not generate filtering code (beta)
-  <info>base-template</info>    Base template for the views (e.g: admin/base.html.twig)
+  <info>base-template</info>    Base template for the views (e.g: admin/base.html.twig).
+                     Always pass your project's own layout: the bundle's layout
+                     (bundles/GALesMaker/base.html.twig) is only a reference and
+                     its assets (Bootstrap, jQuery, etc.) are not included, so they return 404
 
 If arguments are missing, the command will ask for them interactively.
 
@@ -23,7 +27,12 @@ unless other roles are chosen. Without <info>--roles</info>, the command asks fo
 (roles from gales_maker.crud.roles_source and security.role_hierarchy); an empty answer finishes.
 With <info>--no-interaction</info> and no <info>--roles</info>, only the default roles get access.
 
+<comment>Route prefix:</comment> the controller route is built from the entity name (<comment>BlogPost</comment> -> <comment>/blog/post</comment>). With <info>--route-prefix=/admin</info>
+it becomes <comment>/admin/blog/post</comment>, so the CRUD falls under an <comment>access_control</comment> rule for <comment>^/admin</comment>. Without the option, the prefix comes from
+gales_maker.crud.route_prefix (none by default). <comment>--route-prefix=</comment> (empty) forces no prefix. The final route is shown at the end.
+
 <comment>Options:</comment>
   <info>--force</info>   Replace every existing file without asking. Shows a warning first; review <comment>git diff</comment> afterwards.
   <info>--roles</info>   Extra roles with access, comma separated or repeated (<comment>--roles=ROLE_A --roles=ROLE_B</comment>).
             Each one must start with ROLE_. <comment>--roles=</comment> (empty) skips the question and keeps only the default roles.
+  <info>--route-prefix</info>  Route prefix (e.g. /admin). Letters, digits, - _ . / and {braces}; the leading / is optional.

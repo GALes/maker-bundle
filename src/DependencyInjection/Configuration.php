@@ -3,7 +3,9 @@
 namespace GALes\MakerBundle\DependencyInjection;
 
 use GALes\MakerBundle\Maker\Roles\RoleNormalizer;
+use GALes\MakerBundle\Maker\Routing\RoutePrefixNormalizer;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\NodeInterface;
 
@@ -27,6 +29,20 @@ class Configuration implements ConfigurationInterface
                             ->validate()
                                 ->ifTrue(static fn ($value) => !str_contains((string) $value, '::'))
                                 ->thenInvalid('gales_maker.crud.roles_source debe tener la forma "Clase::metodo" o "Clase::CONSTANTE"; se recibió %s.')
+                            ->end()
+                        ->end()
+                        ->scalarNode('route_prefix')
+                            ->defaultNull()
+                            ->info('Prefijo de ruta por defecto del CRUD generado (por ejemplo /admin); --route-prefix lo reemplaza. Sin valor, la ruta no lleva prefijo.')
+                            ->example('/admin')
+                            ->validate()
+                                ->always(static function ($value) {
+                                    try {
+                                        return RoutePrefixNormalizer::normalize(null === $value ? null : (string) $value);
+                                    } catch (\InvalidArgumentException $e) {
+                                        throw new InvalidConfigurationException('gales_maker.crud.route_prefix: '.$e->getMessage(), 0, $e);
+                                    }
+                                })
                             ->end()
                         ->end()
                         ->arrayNode('default_roles')
