@@ -100,6 +100,32 @@ final class EntityDetails
         return $retorno;
     }
 
+    /**
+     * NotBlank si la columna no admite NULL (salvo id y booleanos, donde false es un valor válido) y
+     * Length(max) para las columnas string, según su length (255 por defecto, como Doctrine).
+     *
+     * @return string[] código PHP de cada restricción, usando el alias Assert
+     */
+    public static function constraintsFor(array $mapping): array
+    {
+        if (!empty($mapping['id'])) {
+            return [];
+        }
+
+        $constraints = [];
+        $type = $mapping['type'] ?? null;
+
+        if (empty($mapping['nullable']) && !in_array($type, ['boolean', 'bool'], true)) {
+            $constraints[] = 'new Assert\\NotBlank()';
+        }
+
+        if (in_array($type, ['string', 'ascii_string'], true)) {
+            $constraints[] = sprintf('new Assert\\Length(max: %d)', (int) ($mapping['length'] ?? 255));
+        }
+
+        return $constraints;
+    }
+
     public function getFormFields()
     {
         $fieldsWithTypes = [];
@@ -107,6 +133,12 @@ final class EntityDetails
         foreach ($this->fieldMappings() as $fieldName => $metadata) {
             // agrego la metadata de cada campo
             $fieldsWithTypes[$fieldName] = ['metadata' => $metadata];
+
+            // Restricciones de validación acordes a la columna (evita el 500 por NOT NULL / longitud en la base)
+            $constraints = self::constraintsFor($metadata);
+            if ($constraints) {
+                $fieldsWithTypes[$fieldName]['constraints_code'] = $constraints;
+            }
 
             // Si es del tipo datetime o date se agrega el arreglo de opciones para el datepicker
             if ($metadata['type'] == 'datetime' || $metadata['type'] == 'date') {
