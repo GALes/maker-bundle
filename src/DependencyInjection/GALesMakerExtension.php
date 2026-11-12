@@ -27,6 +27,9 @@ class GALesMakerExtension extends Extension
         $container->getDefinition('gales.maker.crud_roles_provider')
             ->setArgument(1, $config['crud']['roles_source'])
             ->setArgument(2, $config['crud']['default_roles']);
+
+        $container->getDefinition('gales.maker.make_crud')
+            ->setArgument(6, $config['crud']['route_prefix'] ?? '');
     }
 
     /**

@@ -22,7 +22,7 @@ final class ConfigurationTest extends TestCase
 
     public function testValoresPorDefecto(): void
     {
-        self::assertSame(['roles_source' => null, 'default_roles' => ['ROLE_ADMIN']], $this->procesar([])['crud']);
+        self::assertSame(['roles_source' => null, 'route_prefix' => null, 'default_roles' => ['ROLE_ADMIN']], $this->procesar([])['crud']);
     }
 
     public function testAceptaOrigenYRolesFijos(): void
@@ -34,6 +34,20 @@ final class ConfigurationTest extends TestCase
 
         self::assertSame('App\\Entity\\User::getRolesDetalle', $crud['roles_source']);
         self::assertSame(['ROLE_SUPERVISOR'], $crud['default_roles']);
+    }
+
+    public function testElPrefijoDeRutaSeNormaliza(): void
+    {
+        self::assertSame('/admin', $this->procesar(['crud' => ['route_prefix' => 'admin/']])['crud']['route_prefix']);
+        self::assertSame('', $this->procesar(['crud' => ['route_prefix' => '/']])['crud']['route_prefix']);
+    }
+
+    public function testPrefijoDeRutaInvalido(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('gales_maker.crud.route_prefix');
+
+        $this->procesar(['crud' => ['route_prefix' => '/ad"min']]);
     }
 
     public static function invalidasProvider(): array
@@ -62,5 +76,21 @@ final class ConfigurationTest extends TestCase
         self::assertSame('%security.role_hierarchy.roles%', $definicion->getArgument(0));
         self::assertSame('App\\Entity\\User::getRolesDetalle', $definicion->getArgument(1));
         self::assertSame(['ROLE_ADMIN'], $definicion->getArgument(2));
+    }
+
+    public function testLaExtensionPasaElPrefijoDeRutaAlMaker(): void
+    {
+        $container = new ContainerBuilder();
+        (new GALesMakerExtension())->load([['crud' => ['route_prefix' => 'admin']]], $container);
+
+        self::assertSame('/admin', $container->getDefinition('gales.maker.make_crud')->getArgument(6));
+    }
+
+    public function testSinConfiguracionElMakerNoUsaPrefijo(): void
+    {
+        $container = new ContainerBuilder();
+        (new GALesMakerExtension())->load([[]], $container);
+
+        self::assertSame('', $container->getDefinition('gales.maker.make_crud')->getArgument(6));
     }
 }
