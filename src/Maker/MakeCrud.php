@@ -199,8 +199,8 @@ final class MakeCrud extends AbstractMaker
                 $templatesList[] = $file->getRelativePathname();
             }
             $io->writeln([
-                'By default, the created views extends the <comment>bundles/GALesMaker/base.html.twig</comment>',
-                'You can also set your template which the views to extend, for example <comment>base.html.twig</comment>',
+                'The views extend the template you enter here. Use your project\'s own layout, for example <comment>base.html.twig</comment>.',
+                'The bundle\'s <comment>bundles/GALesMaker/base.html.twig</comment> is only a reference: its assets (Bootstrap, jQuery, etc.) are not included and return 404.',
             ]);
             $question = new Question('Base template for the views', 'bundles/GALesMaker/base.html.twig');
             $question->setAutocompleterValues($templatesList);

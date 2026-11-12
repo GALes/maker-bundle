@@ -12,7 +12,10 @@ The <info>%command.name%</info> command generates a CRUD Controller with templat
     • <comment>input</comment> - Uses PetkoparaMultiSearchBundle for search with a single input
     • <comment>form</comment>  - Uses SpiriitFormFilterBundle for advanced search (beta)
     • <comment>none</comment>   - Does not generate filtering code (beta)
-  <info>base-template</info>    Base template for the views (e.g: admin/base.html.twig)
+  <info>base-template</info>    Base template for the views (e.g: admin/base.html.twig).
+                     Always pass your project's own layout: the bundle's layout
+                     (bundles/GALesMaker/base.html.twig) is only a reference and
+                     its assets (Bootstrap, jQuery, etc.) are not included, so they return 404
 
 If arguments are missing, the command will ask for them interactively.
 
