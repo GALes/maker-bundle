@@ -28,6 +28,27 @@ twig:
     form_themes: ['bootstrap_5_layout.html.twig']
 ```
 
+## 🔤 Font (Montserrat)
+
+The bundle's layout (`base.html.twig`) no longer loads Montserrat from Google Fonts, so it does not depend on an external CDN.
+`crud.css` declares `font-family: "Montserrat"`, so the project must provide the font itself. For example, with
+`@fontsource/montserrat` imported from the Webpack Encore entry point:
+
+```bash
+npm install @fontsource/montserrat
+```
+
+```js
+// assets/app.js
+import '@fontsource/montserrat/300.css';
+import '@fontsource/montserrat/400.css';
+import '@fontsource/montserrat/600.css';
+import '@fontsource/montserrat/700.css';
+import '@fontsource/montserrat/800.css';
+```
+
+Without it, the browser falls back to the system sans-serif font.
+
 ## ⚡ Usage
 
 Run the command:
