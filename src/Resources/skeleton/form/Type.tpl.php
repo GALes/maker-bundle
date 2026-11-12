@@ -12,6 +12,10 @@ use <?= $className ?>;
 <?php endforeach; ?>
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+<?php $usaConstraints = false; foreach ($form_fields as $f) { if (!empty($f['constraints_code'])) { $usaConstraints = true; } } ?>
+<?php if ($usaConstraints): ?>
+use Symfony\Component\Validator\Constraints as Assert;
+<?php endif; ?>
 <?php foreach ($constraint_use_statements as $className): ?>
 use <?= $className ?>;
 <?php endforeach; ?>
@@ -37,13 +41,23 @@ class <?= $class_name ?> extends AbstractType
         $<?= $entity_var_singular ?> = $builder->getData();
         $builder
 <?php foreach ($form_fields as $form_field => $typeOptions): ?>
-<?php if ( !( isset($typeOptions['metadata']['id']) && $typeOptions['metadata']['id'] ) && null === $typeOptions['type'] && !$typeOptions['options_code'] ): ?>
+<?php $hasOptions = !empty($typeOptions['options_code']) || !empty($typeOptions['constraints_code']); ?>
+<?php if ( !( isset($typeOptions['metadata']['id']) && $typeOptions['metadata']['id'] ) && null === $typeOptions['type'] && !$hasOptions ): ?>
             ->add('<?= $form_field ?>')
-<?php elseif (null !== $typeOptions['type'] && !$typeOptions['options_code']): ?>
+<?php elseif (null !== $typeOptions['type'] && !$hasOptions): ?>
             ->add('<?= $form_field ?>', <?= $typeOptions['type'] ?>::class)
 <?php elseif ( !( isset($typeOptions['metadata']['id']) && $typeOptions['metadata']['id'] ) ): ?>
             ->add('<?= $form_field ?>', <?= $typeOptions['type'] ? ($typeOptions['type'].'::class') : 'null' ?>, [
+<?php if (!empty($typeOptions['options_code'])): ?>
 <?= $typeOptions['options_code']."\n" ?>
+<?php endif; ?>
+<?php if (!empty($typeOptions['constraints_code'])): ?>
+                'constraints' => [
+<?php foreach ($typeOptions['constraints_code'] as $constraint): ?>
+                    <?= $constraint ?>,
+<?php endforeach; ?>
+                ],
+<?php endif; ?>
             ])
 <?php endif; ?>
 <?php endforeach; ?>
