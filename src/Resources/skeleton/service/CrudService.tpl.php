@@ -4,7 +4,9 @@ namespace <?= $namespace ?>;
 
 use <?= $entity_full_class_name ?>;
 use <?= $form_full_class_name ?>;
+<?php if ( $filter_type !== 'none' ): ?>
 use <?= $form_filter_full_class_name ?>;
+<?php endif; ?>
 use Doctrine\ORM\EntityManagerInterface;
 use GALes\MakerBundle\Spreadsheet\Factory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -62,7 +64,7 @@ class <?= $class_name ?>
         Factory                     $phpExcelFactory,
         EntityManagerInterface      $em,
         FormFactoryInterface        $formFactory,
-        UrlGeneratorInterface       $urlGenerator,
+        UrlGeneratorInterface       $urlGenerator<?= $filter_type === 'none' ? '' : ',' ?>
 <?php if ( $filter_type === 'input' ): ?>
         MultiSearchBuilderService   $multiSearchBuilderService
 <?php elseif ( $filter_type === 'form' ): ?>
@@ -135,6 +137,7 @@ class <?= $class_name ?>
         return $response;
     }
 
+<?php if ( $filter_type !== 'none' ): ?>
     /**
     * Create filter form and process filter request (Input Type).
     *
@@ -209,6 +212,7 @@ class <?= $class_name ?>
         return array($filterForm, $queryBuilder);
     }
 
+<?php endif; ?>
     /**
     * Get results from paginator and get paginator view.
     *

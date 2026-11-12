@@ -370,13 +370,15 @@ final class MakeCrud extends AbstractMaker
         );
 
         $filterType = $input->getArgument('filter-type');
+        // Nombres fijos (sin sufijo numérico): un destino existente se omite o se reemplaza, nunca se esquiva con otro nombre.
+        // El FormType de alta y edición no depende del filtro: se define siempre.
+        $formClassDetails = $generator->createClassNameDetails(
+            $entityClassDetails->getRelativeNameWithoutSuffix().'Type',
+            'Form\\',
+            'Type'
+        );
+        $formFilterClassDetails = null;
         if ($filterType !== 'none') {
-            // Nombres fijos (sin sufijo numérico): un destino existente se omite o se reemplaza, nunca se esquiva con otro nombre.
-            $formClassDetails = $generator->createClassNameDetails(
-                $entityClassDetails->getRelativeNameWithoutSuffix().'Type',
-                'Form\\',
-                'Type'
-            );
             $filterSuffix = $filterType === 'input' ? 'FilterType' : 'FullFilterType';
             $formFilterClassDetails = $generator->createClassNameDetails(
                 $entityClassDetails->getRelativeNameWithoutSuffix().$filterSuffix,
@@ -414,7 +416,7 @@ final class MakeCrud extends AbstractMaker
         }
 
         // PASO 2: Generar FormFilterType (antes de que sea referenciado)
-        if ($filterType !== 'none' && !$this->skipIfExists($generator, $io, $this->classTargetPath($generator, $formFilterClassDetails->getFullName()))) {
+        if (null !== $formFilterClassDetails && !$this->skipIfExists($generator, $io, $this->classTargetPath($generator, $formFilterClassDetails->getFullName()))) {
             $this->formTypeRenderer->render(
                 $formFilterClassDetails,
                 $filterType === 'input' ? $entityDoctrineDetails->getFormFields() : $entityDoctrineDetails->getSpiriitFormFields(),
@@ -440,8 +442,8 @@ final class MakeCrud extends AbstractMaker
                     'form_full_class_name'          => $formClassDetails->getFullName(),
                     'form_class_name'               => $formClassDetails->getShortName(),
                     'filter_type'                   => $filterType,
-                    'form_filter_full_class_name'   => $formFilterClassDetails->getFullName(),
-                    'form_filter_class_name'        => $formFilterClassDetails->getShortName(),
+                    'form_filter_full_class_name'   => $formFilterClassDetails?->getFullName(),
+                    'form_filter_class_name'        => $formFilterClassDetails?->getShortName(),
                     'route_name'                    => $routeName,
                     'custom_helper'                 => $this->generatorTwigHelper,
                 ]
@@ -489,6 +491,7 @@ final class MakeCrud extends AbstractMaker
                         'entity_identifier_numeric'         => $entityDoctrineDetails->isIdentifierNumeric(),
                         'form_full_class_name'              => $formClassDetails->getFullName(),
                         'form_class_name'                   => $formClassDetails->getShortName(),
+                        'filter_type'                       => $filterType,
                         'crud_service_full_class_name'      => $crudServiceClassDetails->getFullName(),
                         'voter_full_class_name'             => $voterClassDetails->getFullName(),
                         'voter_class_name'                  => $voterClassDetails->getShortName(),

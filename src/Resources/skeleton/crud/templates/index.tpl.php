@@ -17,11 +17,13 @@ if ( $filter_type === 'input' )
 else if ( $filter_type === 'form' )
     include 'others/form_filter_header.tpl.php';
 ?>
+<?php if ( $filter_type !== 'none' ): ?>
 {%- if form_errors(filterForm) %}
 <div class="alert alert-danger form-errors">
     {{ form_errors(filterForm) }}
 </div>
 {% endif %}
+<?php endif; ?>
 
 <div class="table-responsive">
     <form method="POST" id="bulk_form" action="{{ path('<?=$route_name ?>_bulk_action') }}">
