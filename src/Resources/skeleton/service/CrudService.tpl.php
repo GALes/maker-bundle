@@ -154,9 +154,23 @@ class <?= $class_name ?>
         // Para evitar error cuando se utilizan joins oneToMany y manyToMany:
         // Iterate with fetch join in using association not allowed.
 //        $queryBuilder->distinct();
+
+        // Si se ordena o pagina con una URL que no trae el filtro (solo pcg_sort_*, pcg_page o pcg_show),
+        // se restituye el filtro guardado en sesión y se aplica como si se hubiera pulsado "Buscar".
+        $filterName = $filterForm->getName();
+        $isListNavigation = $request->query->get('pcg_page') || $request->query->get('pcg_sort_col')
+            || $request->query->get('pcg_sort_order') || $request->query->get('pcg_show');
+        if ($isListNavigation && !$request->query->get('filter_action') && !$request->query->has($filterName)
+            && isset($galesCRUDFilter[$routeName]['filterUrl'][$filterName])) {
+            $request->query->set($filterName, $galesCRUDFilter[$routeName]['filterUrl'][$filterName]);
+            $request->query->set('filter_action', 'filter');
+        }
+
         //Reset Filters
         if ($request->query->get('filter_action') == 'reset') {
             $request->query->remove('filter_action');
+            // Los valores del formulario quedan en la URL del reset: se quitan para que un orden posterior no los guarde.
+            $request->query->remove($filterName);
             unset($galesCRUDFilter[$routeName]);
         }
         else {
