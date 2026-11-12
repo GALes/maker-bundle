@@ -79,6 +79,46 @@ final class FilterTypeNoneSkeletonsTest extends TestCase
         self::assertMatchesRegularExpression("/<\\?php if \\(\\\$filter_type !== 'none'\\): \\?>\\s*'filterForm' =>/", $plantilla);
     }
 
+    public static function todosLosTipos(): iterable
+    {
+        yield 'none' => ['none'];
+        yield 'input' => ['input'];
+        yield 'form' => ['form'];
+    }
+
+    #[DataProvider('todosLosTipos')]
+    public function testElControladorSeRenderizaSinVariablesIndefinidas(string $tipo): void
+    {
+        $avisos = [];
+        set_error_handler(static function (int $nivel, string $mensaje) use (&$avisos): bool {
+            $avisos[] = $mensaje;
+
+            return true;
+        });
+
+        try {
+            $codigo = $this->render('crud/controller/Controller.tpl.php', [
+                'namespace' => 'App\\Controller', 'class_name' => 'SolicitudController',
+                'entity_full_class_name' => 'App\\Entity\\Solicitud', 'entity_class_name' => 'Solicitud',
+                'form_full_class_name' => 'App\\Form\\SolicitudType', 'form_class_name' => 'SolicitudType',
+                'filter_type' => $tipo,
+                'crud_service_full_class_name' => 'App\\Service\\SolicitudCrudService',
+                'voter_full_class_name' => 'App\\Security\\SolicitudVoter', 'voter_class_name' => 'SolicitudVoter',
+                'route_path' => '/solicitud', 'route_name' => 'solicitud', 'templates_path' => 'solicitud',
+                'entity_var_plural' => 'solicitudes', 'entity_twig_var_plural' => 'solicitudes',
+                'entity_var_singular' => 'solicitud', 'entity_twig_var_singular' => 'solicitud',
+                'entity_identifier' => 'id', 'entity_identifier_numeric' => true,
+            ]);
+        } finally {
+            restore_error_handler();
+        }
+
+        self::assertSame([], $avisos);
+        self::assertSame(0, $this->lint($codigo));
+        self::assertSame($tipo !== 'none', str_contains($codigo, '->filter($queryBuilder, $request)'));
+        self::assertSame($tipo !== 'none', str_contains($codigo, "'filterForm' =>"));
+    }
+
     private function lint(string $codigo): int
     {
         $archivo = tempnam(sys_get_temp_dir(), 'lint').'.php';
