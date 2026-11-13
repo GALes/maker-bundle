@@ -313,7 +313,17 @@ composer dump-autoload
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! External contributors: please open a Pull Request against `develop`.
+
+### Branches and integration (maintainers)
+
+- `master` is the default branch: the latest published stable version (the one Packagist serves). `develop` integrates ongoing work.
+- Every change starts from an issue. Work on a **local** branch `<n>_<slug>` created from `develop` (for a hotfix: `hotfix/<n>_<slug>` from `master`). Work branches are not pushed to origin.
+- To integrate: update the branch with `develop`, run the tests (`vendor/bin/phpunit`), then `git merge --no-ff <branch>` into `develop` with `Closes #N` in the message, and push. CI runs on `develop`, and the issue is closed automatically.
+- To publish: `git merge --no-ff develop` into `master` with the message `Merge branch 'develop' (release vX.Y.Z)`, create an annotated tag `vX.Y.Z` with the release notes, and `git push --atomic origin master vX.Y.Z`. The GitHub Release is created by a workflow and Packagist picks up the tag.
+- Versioning: `feat` bumps the minor version, `fix` the patch, and a breaking change (`!`) the major.
+- Never merge `master` into `develop`: a hotfix made on `master` is cherry-picked into `develop`.
+- Merged branches left on origin are deleted automatically.
 
 ## 📄 License
 
