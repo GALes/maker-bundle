@@ -1,0 +1,28 @@
+name: CI
+on:
+  push:
+    branches: [develop, master]
+  pull_request:
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.3']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: intl, zip, gd, xml, mbstring
+          coverage: none
+      - name: Dependencias PHP
+        run: composer update --no-interaction --no-progress --prefer-dist
+      - name: PHPUnit
+        run: vendor/bin/phpunit
