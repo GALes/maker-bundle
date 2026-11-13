@@ -7,7 +7,7 @@ Designed to bring back the functionality of PetkoparaCrudGeneratorBundle, but re
 
 ## 📋 Requirements
 
-- **PHP:** 8.1+
+- **PHP:** 8.2+
 - **Symfony:** 6.3, 7.0+
 - **Doctrine ORM:** 2.5+ or 3.0+
 - **PhpSpreadsheet:** `phpoffice/phpspreadsheet` 1.30.7+ or 5.10+ (the Excel export of the generated services)
